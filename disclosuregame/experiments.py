@@ -15,6 +15,8 @@ from disclosuregame.Measures.abstract import *
 
 from disclosuregame.experiments import *
 
+from disclosuregame.Util import random_expectations
+
 
 from multiprocessing import Pool, Queue
 import multiprocessing
@@ -46,7 +48,7 @@ def make_random_patients(signaller, num=1000, weights=[1/3., 1/3., 1/3.]):
 def make_random_weights(num=1000):
     weights = []
     for i in range(num):
-        weights.append((Model.random_expectations(), [Model.random_expectations(breadth=2) for x in range(3)]))
+        weights.append((random_expectations(), [random_expectations(breadth=2) for x in range(3)]))
     return weights
 
 
