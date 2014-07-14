@@ -194,13 +194,15 @@ def w_sharing_experiment(resolution=0.1, chunksize=None):
     return results
 
 def args_write(args, directory, name):
+    files = []
     for i in xrange(len(args)):
         target = "%s/%s_%d.args" % (directory, name, i)
+        files.append(target)
         print "Writing %s" % target
         f = open(target, "wb")
         cPickle.dump(args[i], f)
         f.close()
-    return i
+    return target
 
 
 
