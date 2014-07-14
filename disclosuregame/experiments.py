@@ -156,6 +156,18 @@ def synthetic_caseload():
         kwargs.append({'num_midwives':1, 'num_women':10, 'mw_weights':mw_weights})
     return kwargs
 
+def abstract_experiment(chunksize=None):
+    kwargs = []
+    results = []
+    for x in itertools.product((y*resolution for y in range(0, int(1/resolution) + 1) ), repeat=2):
+        kwarg = {'game_args': {'mw_share_prob':x[0]}, 'responder_args':{'share_weight':x[1]}}
+        kwargs.append(kwarg)
+        if chunksize is not None and len(kwargs) >= chunksize:
+            results.append(kwargs)
+            kwargs = []
+    results.append(kwargs)
+    return results
+
 def mw_sharing_experiment(resolution=0.1, chunksize=None):
     kwargs = []
     results = []
@@ -188,6 +200,7 @@ def args_write(args, directory, name):
         f = open(target, "wb")
         cPickle.dump(args[i], f)
         f.close()
+    return i
 
 
 
