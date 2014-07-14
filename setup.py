@@ -1,7 +1,9 @@
 from setuptools import setup
 
+__version__ = "0.1.7"
+
 setup(name='disclosuregame',
-        version='0.1.7',
+        version=__version__,
         description='Simulator for the disclosure game between midwives and women.',
         entry_points={'console_scripts': ['disclosure-game=disclosuregame.run:main']},
         url='https://github.com/greenape/disclosure-game',
@@ -12,3 +14,6 @@ setup(name='disclosuregame',
         include_package_data=True,
         zip_safe=False
 )
+
+with open("disclosuregame/_version.py", "w") as fp:
+        fp.write("__version__ = '%s'\n" % (__version__,))

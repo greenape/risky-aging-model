@@ -15,6 +15,8 @@ from disclosuregame.Measures.abstract import *
 
 from disclosuregame.experiments import *
 
+import disclosuregame
+
 import multiprocessing
 import itertools
 from collections import OrderedDict
@@ -32,7 +34,7 @@ import time
 
 logger = multiprocessing.log_to_stderr()
 
-version = 0.54
+version = disclosuregame.__version__
 
 def load_kwargs(file_name):
     
@@ -406,7 +408,7 @@ def kw_experiment(kwargs, file_name):
 
 def main():
     games, players, kwargs, runs, test, file_name = arguments()
-    logger.info("Version %f" % version)
+    logger.info("Version %s" % version)
     logger.info("Running %d game type%s, with %d player pair%s, and %d run%s of each." % (
         len(games), "s"[len(games)==1:], len(players), "s"[len(players)==1:], runs, "s"[runs==1:]))
     logger.info("Total simulations runs is %d" % (len(games) * len(players) * runs * len(kwargs)))
