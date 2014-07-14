@@ -15,6 +15,8 @@ from disclosuregame.Measures.abstract import *
 
 from disclosuregame.experiments import *
 
+from disclosuregame.Util import *
+
 import disclosuregame
 
 import multiprocessing
@@ -155,7 +157,7 @@ def arguments():
         except cPickle.UnpicklingError:
             logger.info("Not a valid pickle file.")
             raise
-    return games, players, kwargs, args.runs, args.test_only, file_name
+    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs
 
 
 def make_players(constructor, num=100, weights=[1/3., 1/3., 1/3.], nested=False,
@@ -407,7 +409,7 @@ def kw_experiment(kwargs, file_name):
 
 
 def main():
-    games, players, kwargs, runs, test, file_name = arguments()
+    games, players, kwargs, runs, test, file_name, args_path = arguments()
     logger.info("Version %s" % version)
     logger.info("Running %d game type%s, with %d player pair%s, and %d run%s of each." % (
         len(games), "s"[len(games)==1:], len(players), "s"[len(players)==1:], runs, "s"[runs==1:]))
