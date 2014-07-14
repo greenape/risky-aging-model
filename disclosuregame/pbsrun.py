@@ -1,10 +1,16 @@
-from disclosuregame.run import *
 from disclosuregame.Util import make_pbs_script
-from subprocess import call
+import disclosuregame
+
+from subprocess import check_output, CalledProcessError
 import tempfile
 import os
+import argparse
+from os.path import expanduser
+import logging
+import multiprocessing
 
 logger = multiprocessing.log_to_stderr()
+version = disclosuregame.__version__
 
 def arguments():
     parser = argparse.ArgumentParser(
@@ -67,6 +73,18 @@ def arguments():
 
     args = parser.parse_args()
 
+    numeric_level = getattr(logging, args.log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % log_level)
+
+    logger.setLevel(numeric_level)
+    if args.log_file != "":
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(numeric_level)
+        formatter = logging.Formatter('[%(levelname)s/%(processName)s] %(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+
     return args
 
 
@@ -78,7 +96,7 @@ def main():
     logger.info("Found %d pickled argument." % pbs_count)
     logger.info("Generated PBS script:\n%s" % pbs_job)
 
-    print("Writing PBS script to temporary file %s" % filename)
+    logger.info("Writing PBS script to temporary file %s" % filename)
     try:
         tfile = os.fdopen(fd, "w")
         tfile.write(pbs_job)
@@ -87,9 +105,15 @@ def main():
             logger.info("This is a test of the emergency broadcast system. This is only a test.")
         else:
             logger.info("Submitting to PBS.")
-            call(['qsub', '-t', '0-%d' % pbs_count, filename])
-    except:
+            response = check_output(['qsub', '-t', '0-%d' % pbs_count, filename])
+            logger.info("PBS response was: %s" % response)
+    except (CalledProcessError, OSError) as e:
+        logger.info("qsub failed with message: %s" % e.strerror)
+        logger.info("Removing temp file.")
+        os.remove(filename)
+    except Exception as e:
         logger.info("Failed to write PBS script.")
+        logger.info("Message was: %s" % e.strerror)
        
 
 if __name__ == "__main__":

@@ -63,10 +63,13 @@ def make_pbs_script(kwargs, hours=60, mins=0, ppn=16, script_name=None):
 
     run_script.append(run_call)
 
+    #Cleanup after all jobs have run
+
     if script_name is not None:
         run_script.append("if [$PBS_ARRAYID -eq %d]" % count)
         run_script.append("then")
         run_script.append("\trm %s" % script_name)
+        run_script.append("fi")
 
     return('\n'.join(run_script), count)
 
