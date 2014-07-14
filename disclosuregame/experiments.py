@@ -202,7 +202,7 @@ def args_write(args, directory, name):
         f = open(target, "wb")
         cPickle.dump(args[i], f)
         f.close()
-    return target
+    return files
 
 
 
