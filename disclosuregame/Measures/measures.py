@@ -9,6 +9,12 @@ class Measures(object):
         self.dump_after = dump_after
         self.dump_every = dump_every
 
+    def add(self, other):
+        """
+        Add the measures defined in the other measure object to this one.
+        """
+        self.measures.update(other.measures)
+
     def keys(self):
         return self.measures.keys()
 
