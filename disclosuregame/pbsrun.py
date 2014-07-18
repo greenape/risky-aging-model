@@ -108,12 +108,12 @@ def main():
             response = check_output(['qsub', '-t', '0-%d' % pbs_count, filename])
             logger.info("PBS response was: %s" % response)
     except (CalledProcessError, OSError) as e:
-        logger.info("qsub failed with message: %s" % e.strerror)
+        logger.error("qsub failed with message: %s" % e.strerror)
         logger.info("Removing temp file.")
         os.remove(filename)
     except Exception as e:
-        logger.info("Failed to write PBS script.")
-        logger.info("Message was: %s" % e.strerror)
+        logger.error("Failed to write PBS script.")
+        logger.error("Message was: %s" % e.strerror)
        
 
 if __name__ == "__main__":

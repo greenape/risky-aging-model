@@ -364,7 +364,12 @@ def experiment(file_name, game_fns=[Game, CaseloadGame],
         for game_fn in game_fns:
             for kwarg in kwargs:
                 arg = kwarg.copy()
-                game = game_fn(**arg.pop('game_args', {}))
+                try:
+                    game = game_fn(**arg.pop('game_args', {}))
+                except TypeError as e:
+                    logger.error("Wrong arguments for this game type.")
+                    logger.error("Exception was: %s" % e.strerror)
+                    raise
                 #kwarg.update({'measures_midwives': measures_midwives, 'measures_women': measures_women})
                 arg['game'] = game
                 arg['signaller_fn'] = pair[0]
