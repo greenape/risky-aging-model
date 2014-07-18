@@ -294,10 +294,12 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
     i = 1
     while len(kwargs) > 0:
         if not kill_queue.empty():
+            logger.info("Poison pill in the kill queue. Not making more jobs.")
             break
         exps = decision_fn_compare(**kwargs.pop())
         for exp in exps:
             if not kill_queue.empty():
+                logger.info("Poison pill in the kill queue. Not making more jobs.")
                 break
             logger.info("Enqueing experiment %d" %  i)
             queue.put((i, exp))
@@ -314,6 +316,7 @@ def do_work(queueIn, queueOut, kill_queue):
     while True:
         try:
             if not kill_queue.empty():
+                logger.info("Poison pill in the kill queue. Stopping.")
                 break
             number, config = queueIn.get()
             logger.info("Running game %d." % number)
@@ -346,7 +349,8 @@ def write(queue, db_name, kill_queue):
             del women_res
             del mw_res
         except sqlite3.OperationalError as e:
-            print e
+            logger.error("SQLite failure.")
+            logger.error(e)
             kill_queue.put(None)
             raise
             break
@@ -368,7 +372,7 @@ def experiment(file_name, game_fns=[Game, CaseloadGame],
                     game = game_fn(**arg.pop('game_args', {}))
                 except TypeError as e:
                     logger.error("Wrong arguments for this game type.")
-                    logger.error("Exception was: %s" % e.strerror)
+                    logger.error(e)
                     raise
                 #kwarg.update({'measures_midwives': measures_midwives, 'measures_women': measures_women})
                 arg['game'] = game
@@ -397,6 +401,9 @@ def kw_experiment(kwargs, file_name):
         p.start()
     for p in calcProc:
         try:
+            if not kill_queue.empty():
+                logger.info("Poison pill in the kill queue. Terminating.")
+                p.terminate()
             p.join()
         except KeyboardInterrupt:
             for p in calcProc:
@@ -409,7 +416,7 @@ def kw_experiment(kwargs, file_name):
     while True:
         if jobs.get() is None:
             break
-        print "waiting.."
+        logger.info("waiting..")
     producer.join()
 
 
