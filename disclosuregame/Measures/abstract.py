@@ -89,9 +89,13 @@ def abstract_measures_women():
         for j in range(1,12):
             measures["type_%d_round_%d_ref" % (i, j)] = CumulativeRefCount(player_type=i, signal=j)
             measures["type_%d_round_%d_honesty" % (i, j)] = CumulativeHonestyCount(player_type=i, signal=j)
-    return Measures(measures)
+    base = measures_women()
+    base.add(Measures(measures))
+    return base
 
 def abstract_measures_mw():
     measures = OrderedDict()
     measures['appointment'] = Appointment()
-    return Measures(measures)
+    base = measures_midwives()
+    base.add(Measures(measures))
+    return base
