@@ -113,6 +113,7 @@ class Result(object):
                     conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
                     conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
             except:
+                logger.info("Database is locked. Waiting.")
                 time.sleep(1)
                 pass
             finally:
@@ -141,6 +142,7 @@ class Result(object):
                     conn.executemany(insert_params, params)
                     conn.executemany(insert_results, results)
             except:
+                logger.info("Database is locked. Waiting.")
                 time.sleep(1)
                 pass
             finally:
