@@ -46,7 +46,7 @@ class Result(object):
         file.write("\n".join(result))
         file.close()
 
-    def write_db(self, db_name):
+    def write_db(self, db_name, timeout=10):
         """
         Write this result set to an sqlite db.
         Creates the db if it does not exist, and if it does
@@ -57,17 +57,7 @@ class Result(object):
         if not single_db:
             db_name = "%s_%s" % (db_name, scoop.worker[0])
 
-        conn = sqlite3.connect("%s.db" % db_name)
-        
-        fields = ",".join(self.fields)
-        #print fields
-        conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % fields)
-        
-        fields = list(self.param_fields)
-        fields.append("%s PRIMARY KEY" % fields.pop())
-        fields = ",".join(fields)
-        conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % fields)
-        conn.close()
+        self.make_tables(db_name, timeout)
 
         missing = self.check_columns(db_name, "results", self.fields)
         if len(missing) > 0:
@@ -76,27 +66,14 @@ class Result(object):
         if len(missing) > 0:
             self.add_columns(db_name, "parameters", missing)
 
-        conn = sqlite3.connect("%s.db" % db_name)
+        self.do_write(db_name, timeout)
 
-        params = map(tuple, self.parameters.values())
-        placeholders = ",".join(['?']*len(self.param_fields))
-        insert = "INSERT OR IGNORE INTO parameters VALUES(%s)" % placeholders
-        #print insert
-        conn.executemany(insert, params)
-
-        results = map(tuple, self.results)
-        placeholders = ",".join(['?']*len(self.fields))
-        insert = "INSERT INTO results VALUES(NULL, %s)" % placeholders
-        #print insert
-        conn.executemany(insert, results)
-        conn.commit()
-        conn.close()
 
     def check_columns(self, db_name, table, fields):
         """
         Return a list of columns missing from the target database table.
         """
-        conn = sqlite3.connect("%s.db" % db_name)
+        conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
         query = "PRAGMA table_info('%s');" % table
         result = [x[1] for x in conn.execute(query).fetchall()]
         conn.close()
@@ -107,7 +84,7 @@ class Result(object):
         """
         Add columns to the database table.
         """
-        conn = sqlite3.connect("%s.db" % db_name)
+        conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
         c = conn.cursor()
         for field in columns:
             try:
@@ -117,5 +94,69 @@ class Result(object):
                 pass # handle the error
         c.commit()
         c.close()
+
+    def make_tables(self, dbname, timeout):
+        """
+        Create or ignore the required fields.
+        """        
+        res_fields = ",".join(self.fields)
+        #print fields
+        
+        param_fields = list(self.param_fields)
+        param_fields.append("%s PRIMARY KEY" % fields.pop())
+        param_fields = ",".join(fields)
+
+        conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
+        for x in range(0, timeout*1000):
+            try:
+                with conn:
+                    conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
+                    conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
+                    conn.commit()
+                    conn.close()
+            except:
+                time.sleep(1)
+                pass
+            finally:
+                break
+        else:
+            with conn:
+                conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
+                conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
+                conn.commit()
+                conn.close()
+
+    def do_write(self, dbame, timeout):
+
+        params = map(tuple, self.parameters.values())
+        placeholders = ",".join(['?']*len(self.param_fields))
+        insert_params = "INSERT OR IGNORE INTO parameters VALUES(%s)" % placeholders
+        #print insert
+
+        results = map(tuple, self.results)
+        placeholders = ",".join(['?']*len(self.fields))
+        insert_results = "INSERT INTO results VALUES(NULL, %s)" % placeholders
+        #print insert
+        conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
+        for x in range(0, timeout*1000):
+            try:
+                with conn:
+                    conn.executemany(insert_params, params)
+                    conn.executemany(insert_results, results)
+                    conn.commit()
+                    conn.close()
+            except:
+                time.sleep(1)
+                pass
+            finally:
+                break
+        else:
+            with conn:
+                conn.executemany(insert_params, params)
+                conn.executemany(insert_results, results)
+                conn.commit()
+                conn.close()
+
+
 
 
