@@ -112,8 +112,6 @@ class Result(object):
                 with conn:
                     conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
                     conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
-                    conn.commit()
-                    conn.close()
             except:
                 time.sleep(1)
                 pass
@@ -123,8 +121,7 @@ class Result(object):
             with conn:
                 conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
                 conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
-                conn.commit()
-                conn.close()
+        conn.close()
 
     def do_write(self, dbame, timeout):
 
@@ -143,8 +140,6 @@ class Result(object):
                 with conn:
                     conn.executemany(insert_params, params)
                     conn.executemany(insert_results, results)
-                    conn.commit()
-                    conn.close()
             except:
                 time.sleep(1)
                 pass
@@ -154,8 +149,7 @@ class Result(object):
             with conn:
                 conn.executemany(insert_params, params)
                 conn.executemany(insert_results, results)
-                conn.commit()
-                conn.close()
+        conn.close()
 
 
 
