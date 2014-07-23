@@ -306,6 +306,7 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
             queue.put((i, exp))
             i += 1
     for i in range(num_consumers):
+        logger.info("Sending finished signal to queue.")
         queue.put(None)
     queue.put(None)
     logger.info("Ending make work process.")
