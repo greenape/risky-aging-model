@@ -422,7 +422,7 @@ def kw_experiment(kwargs, file_name):
     while True:
         if jobs.get() is None:
             break
-        logger.info("waiting..")
+        logger.info("Flushing jobs queue..")
     producer.join()
 
 
