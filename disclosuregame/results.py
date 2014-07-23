@@ -92,13 +92,9 @@ class Result(object):
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
         LOG.info("Adding columns %s to %s.%s" % (", ".join(columns), db_name, table))
         for field in columns:
-            try:
-                with conn:
-                    alter_query = 'ALTER TABLE %s ADD COLUMN %s;' % (table, field)
-                    conn.execute(alter_query)
-            except Exception as e:
-                LOG.debug(e)
-                raise # handle the error
+            with conn:
+                alter_query = 'ALTER TABLE %s ADD COLUMN %s;' % (table, field)
+                conn.execute(alter_query)
         conn.close()
 
     def make_tables(self, db_name, timeout):
@@ -113,22 +109,9 @@ class Result(object):
         param_fields = ",".join(param_fields)
 
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        for x in range(0, timeout*1000):
-            try:
-                with conn:
-                    conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
-                    conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
-            except Exception as e:
-                LOG.info("Database is locked. Waiting.")
-                debug.info(e)
-                time.sleep(1)
-                pass
-            finally:
-                break
-        else:
-            with conn:
-                conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
-                conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
+        with conn:
+            conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
+            conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
         conn.close()
 
     def do_write(self, db_name, timeout):
@@ -143,22 +126,10 @@ class Result(object):
         insert_results = "INSERT INTO results VALUES(NULL, %s)" % placeholders
         #print insert
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        for x in range(0, timeout*1000):
-            try:
-                with conn:
-                    conn.executemany(insert_params, params)
-                    conn.executemany(insert_results, results)
-            except Exception as e:
-                LOG.info("Database is locked. Waiting.")
-                LOG.debug(e)
-                time.sleep(1)
-                pass
-            finally:
-                break
-        else:
-            with conn:
-                conn.executemany(insert_params, params)
-                conn.executemany(insert_results, results)
+        with conn:
+            conn.executemany(insert_params, params)
+            conn.executemany(insert_results, results)
+            
         conn.close()
 
 
