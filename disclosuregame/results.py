@@ -59,17 +59,17 @@ class Result(object):
 
         self.make_tables(db_name, timeout)
 
-        missing = self.check_columns(db_name, "results", self.fields)
+        missing = self.check_columns(db_name, "results", self.fields, timeout)
         if len(missing) > 0:
-            self.add_columns(db_name, "results", missing)
-        missing = self.check_columns(db_name, "parameters", list(self.param_fields))
+            self.add_columns(db_name, "results", missing, timeout)
+        missing = self.check_columns(db_name, "parameters", list(self.param_fields), timeout)
         if len(missing) > 0:
-            self.add_columns(db_name, "parameters", missing)
+            self.add_columns(db_name, "parameters", missing, timeout)
 
         self.do_write(db_name, timeout)
 
 
-    def check_columns(self, db_name, table, fields):
+    def check_columns(self, db_name, table, fields, timeout):
         """
         Return a list of columns missing from the target database table.
         """
@@ -80,22 +80,22 @@ class Result(object):
         missing = filter(lambda x: x not in result, fields)
         return missing
 
-    def add_columns(self, db_name, table, columns):
+    def add_columns(self, db_name, table, columns, timeout):
         """
         Add columns to the database table.
         """
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        c = conn.cursor()
+        logger.info("Adding columns", columns, "to", db_name)
         for field in columns:
             try:
-                alter_query = 'ALTER TABLE %s ADD COLUMN %s;' % (table, field)
-                c.execute(alter_query)
+                with conn:
+                    alter_query = 'ALTER TABLE %s ADD COLUMN %s;' % (table, field)
+                    c.execute(alter_query)
             except:
                 pass # handle the error
-        c.commit()
         c.close()
 
-    def make_tables(self, dbname, timeout):
+    def make_tables(self, db_name, timeout):
         """
         Create or ignore the required fields.
         """        
@@ -103,8 +103,8 @@ class Result(object):
         #print fields
         
         param_fields = list(self.param_fields)
-        param_fields.append("%s PRIMARY KEY" % fields.pop())
-        param_fields = ",".join(fields)
+        param_fields.append("%s PRIMARY KEY" % param_fields.pop())
+        param_fields = ",".join(param_fields)
 
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
         for x in range(0, timeout*1000):
@@ -124,7 +124,7 @@ class Result(object):
                 conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
         conn.close()
 
-    def do_write(self, dbame, timeout):
+    def do_write(self, db_name, timeout):
 
         params = map(tuple, self.parameters.values())
         placeholders = ",".join(['?']*len(self.param_fields))
