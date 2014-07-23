@@ -291,6 +291,7 @@ def play_game(config):
 
 
 def make_work(queue, kwargs, num_consumers, kill_queue):
+    logger.info("Starting make work process.")
     i = 1
     while len(kwargs) > 0:
         if not kill_queue.empty():
@@ -307,12 +308,14 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
     for i in range(num_consumers):
         queue.put(None)
     queue.put(None)
+    logger.info("Ending make work process.")
 
 
 def do_work(queueIn, queueOut, kill_queue):
     """
     Consume games, play them, then put their results in the output queue.
     """
+    logger.info("Starting do work process.")
     while True:
         try:
             if not kill_queue.empty():
@@ -335,9 +338,10 @@ def do_work(queueIn, queueOut, kill_queue):
         except:
             raise
             break
-    logger.info("Done.")
+    logger.info("Ending do work process.")
 
 def write(queue, db_name, kill_queue):
+    logger.info("Starting write process.")
     while True:
         try:
             number, res = queue.get()
@@ -358,6 +362,7 @@ def write(queue, db_name, kill_queue):
             kill_queue.put(None)
             raise
             break
+    logger.info("Ending write process.")
 
 
 def experiment(file_name, game_fns=[Game, CaseloadGame], 
