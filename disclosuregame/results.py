@@ -4,8 +4,11 @@ try:
     import scoop
     scoop.worker
     single_db = False
+    LOG = scoop.logger
 except:
     single_db = True
+    import multiprocessing
+    LOG = multiprocessing.get_logger()
     pass
 
 class Result(object):
@@ -85,7 +88,7 @@ class Result(object):
         Add columns to the database table.
         """
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        logger.info("Adding columns", columns, "to", db_name)
+        LOG.info("Adding columns %s to %s.%s" % (", ".join(columns), db_name, table))
         for field in columns:
             try:
                 with conn:
@@ -93,7 +96,7 @@ class Result(object):
                     c.execute(alter_query)
             except:
                 pass # handle the error
-        c.close()
+        conn.close()
 
     def make_tables(self, db_name, timeout):
         """
@@ -113,7 +116,7 @@ class Result(object):
                     conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
                     conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
             except:
-                logger.info("Database is locked. Waiting.")
+                LOG.info("Database is locked. Waiting.")
                 time.sleep(1)
                 pass
             finally:
@@ -142,7 +145,7 @@ class Result(object):
                     conn.executemany(insert_params, params)
                     conn.executemany(insert_results, results)
             except:
-                logger.info("Database is locked. Waiting.")
+                LOG.info("Database is locked. Waiting.")
                 time.sleep(1)
                 pass
             finally:
