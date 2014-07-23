@@ -80,6 +80,8 @@ class Result(object):
         query = "PRAGMA table_info('%s');" % table
         result = [x[1] for x in conn.execute(query).fetchall()]
         conn.close()
+        LOG.debug("DB columns are %s" % ", ".join(result))
+        LOG.debug("Fields are %s" % ", ".join(fields))
         missing = filter(lambda x: x not in result, fields)
         return missing
 
@@ -93,9 +95,10 @@ class Result(object):
             try:
                 with conn:
                     alter_query = 'ALTER TABLE %s ADD COLUMN %s;' % (table, field)
-                    c.execute(alter_query)
-            except:
-                pass # handle the error
+                    conn.execute(alter_query)
+            except Exception as e:
+                LOG.debug(e)
+                raise # handle the error
         conn.close()
 
     def make_tables(self, db_name, timeout):
@@ -115,8 +118,9 @@ class Result(object):
                 with conn:
                     conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
                     conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
-            except:
+            except Exception as e:
                 LOG.info("Database is locked. Waiting.")
+                debug.info(e)
                 time.sleep(1)
                 pass
             finally:
@@ -144,8 +148,9 @@ class Result(object):
                 with conn:
                     conn.executemany(insert_params, params)
                     conn.executemany(insert_results, results)
-            except:
+            except Exception as e:
                 LOG.info("Database is locked. Waiting.")
+                LOG.debug(e)
                 time.sleep(1)
                 pass
             finally:
