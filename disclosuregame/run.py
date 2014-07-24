@@ -415,7 +415,7 @@ def kw_experiment(kwargs, file_name):
             for p in calcProc:
                 p.terminate()
             producer.terminate()
-            writProc.terminate()
+            kill_queue.put(None)
             sys.exit(1)
     results.put(None)
     writProc.join()
