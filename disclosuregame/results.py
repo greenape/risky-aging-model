@@ -120,14 +120,14 @@ class Result(object):
         param_fields = ", ".join(self.param_fields)
         placeholders = ",".join(['?']*len(self.param_fields))
         insert_params = "INSERT OR IGNORE INTO parameters (%s) VALUES(%s)" % (param_fields, placeholders)
-        LOG.info("Params insert query: %s", insert_params)
+        LOG.debug("Params insert query: %s", insert_params)
         #print insert
 
         res_fields = ", ".join(self.fields)
         results = map(tuple, self.results)
         placeholders = ",".join(['?']*len(self.fields))
         insert_results = "INSERT INTO results (id, %s) VALUES(NULL, %s)" % (res_fields, placeholders)
-        LOG.info("Results insert query: %s", insert_results)
+        LOG.debug("Results insert query: %s", insert_results)
         #print insert
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
         with conn:
