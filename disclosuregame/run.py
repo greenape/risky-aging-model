@@ -139,6 +139,7 @@ def arguments():
     #    kwargs['measures_midwives'] = indiv_measures_mw()
     #    kwargs['measures_women'] = indiv_measures_women()
     if args.abstract:
+        logger.debug("Using abstract measures.")
         kwargs['measures_midwives'] = abstract_measures_mw()
         kwargs['measures_women'] = abstract_measures_women()
     kwargs = [kwargs]
@@ -353,7 +354,7 @@ def write(queue, db_name, kill_queue):
             mw_res.write_db("%s_mw" % db_name)
             del women_res
             del mw_res
-        except sqlite3.OperationalError as e:
+        except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)
             kill_queue.put(None)
@@ -416,7 +417,6 @@ def kw_experiment(kwargs, file_name):
                 p.terminate()
             producer.terminate()
             kill_queue.put(None)
-            sys.exit(1)
     results.put(None)
     writProc.join()
     while True:

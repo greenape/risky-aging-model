@@ -59,6 +59,7 @@ class Result(object):
         """
         if not single_db:
             db_name = "%s_%s" % (db_name, scoop.worker[0])
+        LOG.debug("Working with database %s" % db_name)
 
         self.make_tables(db_name, timeout)
 
@@ -103,15 +104,21 @@ class Result(object):
         """        
         res_fields = ",".join(self.fields)
         #print fields
+        res_query = "CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields
         
         param_fields = list(self.param_fields)
         param_fields.append("%s PRIMARY KEY" % param_fields.pop())
         param_fields = ",".join(param_fields)
 
+        params_query = "CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields
+
+        LOG.info("Results table query: %s" % res_query)
+        LOG.info("Parameters table query: %s" % params_query)
+
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
         with conn:
-            conn.execute("CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields)
-            conn.execute("CREATE TABLE IF NOT EXISTS parameters (%s)" % param_fields)
+            conn.execute(res_query)
+            conn.execute(params_query)
         conn.close()
 
     def do_write(self, db_name, timeout):
