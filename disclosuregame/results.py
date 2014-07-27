@@ -54,7 +54,8 @@ class Result(object):
         Write this result set to an sqlite db.
         Creates the db if it does not exist, and if it does
         will attempt to add any missing columns.
-
+        Will fail if the target db has columns not described in
+        this resultset.
         """
         if not single_db:
             db_name = "%s_%s" % (db_name, scoop.worker[0])
@@ -90,7 +91,7 @@ class Result(object):
         Add columns to the database table.
         """
         conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        LOG.debug("Adding columns %s to %s.%s" % (", ".join(columns), db_name, table))
+        LOG.info("Adding columns %s to %s.%s" % (", ".join(columns), db_name, table))
         for field in columns:
             with conn:
                 alter_query = 'ALTER TABLE %s ADD COLUMN %s;' % (table, field)

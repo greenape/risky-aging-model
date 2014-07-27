@@ -120,7 +120,7 @@ def arguments():
 
     logger.setLevel(numeric_level)
     if args.log_file != "":
-        fh = logging.FileHandler(log_file)
+        fh = logging.FileHandler(args.log_file)
         fh.setLevel(numeric_level)
         formatter = logging.Formatter('[%(levelname)s/%(processName)s] %(message)s')
         fh.setFormatter(formatter)
