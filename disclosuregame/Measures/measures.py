@@ -438,7 +438,7 @@ class GroupResponse(Measure):
         except:
             raise
         r = woman.respond(self.signal, signaller)
-        woman.get_signal_log().pop()
+        woman.signal_log.pop()
         woman.response_log.pop()
         woman.rounds -= 1
         woman.signal_matches[self.signal] -= 1
