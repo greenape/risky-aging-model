@@ -174,7 +174,11 @@ class PayoffType(Measure):
             women = filter(lambda x: x.player_type == self.player_type, women)
         if len(women) == 0:
             return 0.
-        return sum(map(lambda x: x.payoff_log[len(x.payoff_log)], women)) / float(len(women))
+        try:
+            result = sum(map(lambda x: x.get_memory()[1][3][len(x.get_memory()[1][3])], women)) / float(len(women))
+        except AttributeError:
+            result = sum(map(lambda x: x.payoff_log[len(x.payoff_log)], women)) / float(len(women))
+        return result
     
 
 class SignalChange(Measure):
