@@ -100,7 +100,7 @@ class Referred(Measure):
     """
 
     def measure(self, roundnum, women, game):
-        return len(filter(lambda x: 1 in x.response_log, women)) / float(len(women))
+        return len(filter(lambda x: 1 in x.get_memory()[1][2], women)) / float(len(women))
 
 class Appointment(Measure):
     def measure(self, roundnum, women, game):
@@ -157,7 +157,7 @@ class TypeReferralBreakdown(Measure):
         if self.signal is not None:
             women = filter(lambda x: x.get_memory()[1][1][len(x.get_memory()[1][1]) - 1] == self.signal, women)
         num_women = float(len(women))
-        women = filter(lambda x: 1 in x.response_log, women)
+        women = filter(lambda x: 1 in x.get_memory()[1][2], women)
         signalled = len(women)
         if num_women == 0:
             return 0.
