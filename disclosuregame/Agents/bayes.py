@@ -246,6 +246,14 @@ class Signaller(Agent):
         self.signal_matches[signal] += weight
         self.signal_log.append(signal)
 
+    def get_memory(self):
+        """
+        return the memory of this agent with the experiences of others stripped out.
+        """
+        memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
+        payoff_sum = sum(map(lambda x: x[3], memories))
+        return (payoff_sum, memories)
+
 
 class BayesianSignaller(Signaller):
 
