@@ -254,6 +254,30 @@ class Signaller(Agent):
         payoff_sum = sum(map(lambda x: x[3], memories))
         return (payoff_sum, memories)
 
+    def get_type_log(self):
+        try:
+            return self.get_memory()[1][0]
+        except IndexError:
+            return []
+
+    def get_signal_log(self):
+        try:
+            return self.get_memory()[1][1]
+        except IndexError:
+            return []
+
+    def get_response_log(self):
+        try:
+            return self.get_memory()[1][2]
+        except IndexError:
+            return []
+
+    def get_payoff_log(self):
+        try:
+            return self.get_memory()[1][3]
+        except IndexError:
+            return []
+
 
 class BayesianSignaller(Signaller):
 

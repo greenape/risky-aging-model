@@ -100,7 +100,7 @@ class Referred(Measure):
     """
 
     def measure(self, roundnum, women, game):
-        return len(filter(lambda x: 1 in x.get_memory()[1][2], women)) / float(len(women))
+        return len(filter(lambda x: 1 in x.get_response_log(), women)) / float(len(women))
 
 class Appointment(Measure):
     def measure(self, roundnum, women, game):
@@ -132,10 +132,10 @@ class TypeSignalBreakdown(Measure):
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
         if self.midwife_type is not None:
-            women = filter(lambda x: x.get_memory()[1][0][len(x.get_memory()[1][0]) - 1] == self.midwife_type, women)
+            women = filter(lambda x: x.get_type_log()[len(x.get_type_log()) - 1] == self.midwife_type, women)
         num_women = float(len(women))
 
-        women = filter(lambda x: x.get_memory()[1][1][len(x.get_memory()[1][1]) - 1] == self.signal, women)
+        women = filter(lambda x: x.get_signal_log()[len(x.get_signal_log()) - 1] == self.signal, women)
         signalled = len(women)
         if num_women == 0:
             return 0.
@@ -153,11 +153,11 @@ class TypeReferralBreakdown(Measure):
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
         if self.midwife_type is not None:
-            women = filter(lambda x: x.get_memory()[1][0][len(x.get_memory()[1][0]) - 1] == self.midwife_type, women)
+            women = filter(lambda x: x.get_type_log()[len(x.get_type_log()) - 1] == self.midwife_type, women)
         if self.signal is not None:
-            women = filter(lambda x: x.get_memory()[1][1][len(x.get_memory()[1][1]) - 1] == self.signal, women)
+            women = filter(lambda x: x.get_signal_log()[len(x.get_signal_log()) - 1] == self.signal, women)
         num_women = float(len(women))
-        women = filter(lambda x: 1 in x.get_memory()[1][2], women)
+        women = filter(lambda x: 1 in x.get_response_log(), women)
         signalled = len(women)
         if num_women == 0:
             return 0.
@@ -193,7 +193,7 @@ class SignalChange(Measure):
         num_women = len(women)
         if num_women == 0:
             return 0.
-        change = map(lambda x: x.get_memory()[1][1][roundnum - x.started] - x.get_memory()[1][1][roundnum - 1 - x.started], women)
+        change = map(lambda x: x.get_signal_log()[roundnum - x.started] - x.get_signal_log()[roundnum - 1 - x.started], women)
         return sum(change) / float(num_women)
     
 
@@ -204,11 +204,11 @@ class SignalRisk(Measure):
     midwife type on their last round.
     """
     def measure(self, roundnum, women, game):
-        #women = filter(lambda x: len(x.get_memory()[1][0]) > roundnum, women)
+        #women = filter(lambda x: len(x.get_type_log()) > roundnum, women)
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
         if self.midwife_type is not None:
-            women = filter(lambda x: x.get_memory()[1][0][len(x.get_memory()[1][0]) - 1] == self.midwife_type, women)
+            women = filter(lambda x: x.get_type_log()[len(x.get_type_log()) - 1] == self.midwife_type, women)
         total = sum(map(lambda x: x.round_signal_risk(roundnum)[self.signal], women))
         if len(women) == 0:
             return 0.
@@ -236,7 +236,7 @@ class SignalExperience(Measure):
         if self.midwife_type is not None:
             women = filter(lambda x: x.player_type == self.midwife_type, women)
         else:
-            group_log = itertools.chain(*map(lambda x: x.get_memory()[1][1], women))
+            group_log = itertools.chain(*map(lambda x: x.get_signal_log(), women))
         frequencies = collections.Counter(group_log)
         total_signals = sum(frequencies.values())
         if total_signals == 0:
@@ -438,7 +438,7 @@ class GroupResponse(Measure):
         except:
             raise
         r = woman.respond(self.signal, signaller)
-        woman.get_memory()[1][1].pop()
+        woman.get_signal_log().pop()
         woman.response_log.pop()
         woman.rounds -= 1
         woman.signal_matches[self.signal] -= 1
@@ -464,7 +464,7 @@ class GroupHonesty(Measure):
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.do_signal(self.signal)
-        woman.get_memory()[1][1].pop()
+        woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
         try:
@@ -489,7 +489,7 @@ class GroupSignal(GroupHonesty):
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.do_signal(self.signal)
-        woman.get_memory()[1][1].pop()
+        woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
         try:
@@ -508,7 +508,7 @@ class SquaredGroupHonesty(GroupHonesty):
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.do_signal(self.signal)
-        woman.get_memory()[1][1].pop()
+        woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
         try:
@@ -530,7 +530,7 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.do_signal(self.signal)
-        woman.get_memory()[1][1].pop()
+        woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
         try:
