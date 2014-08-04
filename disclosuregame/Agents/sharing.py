@@ -63,13 +63,18 @@ class SharingSignaller(BayesianSignaller):
         self.log_signal(signal, tmp_signaller, self.share_weight)
         self.exogenous.append((tmp_signaller.player_type, signal, response, payoff))
         self.update_counts(response, tmp_signaller, payoff, midwife_type, self.share_weight)
+        #Remove from memory, but keep the count
+        self.type_log.pop()
+        self.signal_log.pop()
+        self.response_log.pop()
+        self.payoff_log.pop()
 
-    def get_memory(self):
-        """
-        return the memory of this agent with the experiences of others stripped out.
-        """
-        memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
-        for memory in self.exogenous:
-            memories.remove(memory)
-        payoff_sum = sum(map(lambda x: x[3], memories))
-        return (payoff_sum, memories)
+    #def get_memory(self):
+    #    """
+    #    return the memory of this agent with the experiences of others stripped out.
+    #    """
+    #    memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
+    #    for memory in self.exogenous:
+    #        memories.remove(memory) 
+    #    payoff_sum = sum(map(lambda x: x[3], memories))
+    #    return (payoff_sum, memories)
