@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = "0.1.9.4"
+__version__ = "0.1.9.5"
 
 setup(name='disclosuregame',
         version=__version__,
