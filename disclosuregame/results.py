@@ -123,7 +123,8 @@ class Result(object):
 
     def do_write(self, db_name, timeout):
 
-        params = map(tuple, self.parameters.values())
+        params = map(lambda x: tuple(map(self.type_safety, x)), self.parameters.values())
+        #params = map(tuple, self.parameters.values())
         param_fields = ", ".join(self.param_fields)
         placeholders = ",".join(['?']*len(self.param_fields))
         insert_params = "INSERT OR IGNORE INTO parameters (%s) VALUES(%s)" % (param_fields, placeholders)
@@ -131,7 +132,8 @@ class Result(object):
         #print insert
 
         res_fields = ", ".join(self.fields)
-        results = map(tuple, self.results)
+        params = map(lambda x: tuple(map(self.type_safety, x)), self.results)
+        #results = map(tuple, self.results)
         placeholders = ",".join(['?']*len(self.fields))
         insert_results = "INSERT INTO results (id, %s) VALUES(NULL, %s)" % (res_fields, placeholders)
         LOG.debug("Results insert query: %s", insert_results)
@@ -142,6 +144,20 @@ class Result(object):
             conn.executemany(insert_results, results)
             
         conn.close()
+
+    def type_safety(self, x):
+        """
+        Attempt to forcibly convert a value to a float, if that fails
+        return the original value.
+        This is to avoid the unpleasant scenario where values get cast to
+        ints when importing into R using sqldf.
+        """
+        if type(x) != str:
+            try:
+                x = float(x)
+            except ValueError:
+                pass
+        return x
 
 
 
