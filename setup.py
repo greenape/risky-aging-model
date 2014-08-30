@@ -5,7 +5,7 @@ __version__ = "0.1.9.5"
 setup(name='disclosuregame',
         version=__version__,
         description='Simulator for the disclosure game between midwives and women.',
-        entry_points={'console_scripts': ['disclosure-game=disclosuregame.run:main']},
+        entry_points={'console_scripts': ['disclosure-game=disclosuregame.run:main', 'disclosure-game-pbs=disclosuregame.pbsrun:main']},
         url='https://github.com/greenape/disclosure-game',
         author='Jonathan Gray',
         author_email='j.gray@soton.ac.uk',
