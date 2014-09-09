@@ -112,7 +112,7 @@ def arguments():
     parser.add_argument('--log-file', dest='log_file', type=str, default='')
     parser.add_argument('--tag', dest='tag', type=str, default='')
 
-    args = parser.parse_args()
+    args, extras = parser.parse_known_args()
 
     numeric_level = getattr(logging, args.log_level.upper(), None)
     if not isinstance(numeric_level, int):

@@ -193,10 +193,10 @@ def w_sharing_experiment(resolution=0.1, chunksize=None):
     results.append(kwargs)
     return results
 
-def w_simple_sharing_experiment(resolution=0.1, chunksize=None):
+def w_simple_sharing_experiment(chunksize=None):
     kwargs = []
     results = []
-    for x in (y*resolution for y in range(0, int(1/resolution) + 1)):
+    for x in [0., 0.25, 0.5, 0.75, 1.]:
         kwarg = {'game_args': {'mw_share_prob':0, 'mw_share_bias':1,
             'women_share_prob':x}, 'signaller_args':{'share_weight':x}}
         kwargs.append(kwarg)
