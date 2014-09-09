@@ -31,9 +31,9 @@ def merge_dbs(sources, target=None):
 
 def list_matching(directory, name):
     matching = []
-    for file in os.listdir(directory):
-        if fnmatch.fnmatch(file, name):
-            matching.append("%s/%s" % (directory, file))
+    for f in os.listdir(directory):
+        if fnmatch.fnmatch(f, name):
+            matching.append(os.path.join(directory, f))
     return matching
 
 def clone_empty(source, target):

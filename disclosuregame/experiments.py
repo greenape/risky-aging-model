@@ -24,6 +24,8 @@ import itertools
 from collections import OrderedDict
 import argparse
 from os.path import expanduser
+import os.path
+
 import cPickle
 import gzip, csv
 
@@ -209,7 +211,7 @@ def w_simple_sharing_experiment(chunksize=None):
 def args_write(args, directory, name):
     files = []
     for i in xrange(len(args)):
-        target = "%s/%s_%d.args" % (directory, name, i)
+        target = os.path.join(directory, "%s_%d.args" % (name, i))
         files.append(target)
         print "Writing %s" % target
         f = open(target, "wb")

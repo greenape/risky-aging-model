@@ -52,9 +52,9 @@ def dump_db(where, output, sources):
 
 def list_matching(directory, name):
     matching = []
-    for file in os.listdir(directory):
-        if fnmatch.fnmatch(file, name):
-            matching.append("%s/%s" % (directory, file))
+    for f in os.listdir(directory):
+        if fnmatch.fnmatch(f, name):
+            matching.append(os.path.join(directory, f))
     return matching
 
  

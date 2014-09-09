@@ -33,6 +33,7 @@ import sys
 import logging
 from random import Random
 import time
+import os.path
 
 logger = multiprocessing.log_to_stderr()
 
@@ -126,7 +127,7 @@ def arguments():
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
-    file_name = "%s/%s" % (args.dir, args.file_name)
+    file_name = os.path.join(args.dir, args.file_name)
     games = map(eval, args.games)
     if args.combinations:
         players = list(itertools.product(map(eval, set(args.signallers)), map(eval, set(args.responders))))
