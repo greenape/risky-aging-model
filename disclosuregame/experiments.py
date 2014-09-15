@@ -118,6 +118,17 @@ def naive_partition(resolution=0.1):
             #parts.append(map(lambda y: y / 100., x))
     #return parts
 
+def qualitative_trends():
+    args = {'game_args': {'mw_share_prob':0.,
+            'women_share_prob':0.,
+            'type_weights':[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]],
+            'baby_payoff':10, 'referral_cost':9}, 
+            'signaller_args':{'share_weight':0.},
+            'responder_args':{'share_weight':0.},
+            'mw_weights':[0.85, 0.1, 0.05, 
+            'women_weights':1/3., 1/3., 1/3.]}
+    return [args]
+
 def naive_proportions(key='women_weights', resolution=0.1, chunksize=None):
     """
     Produces a list of lists of kwargs for type proportions split into
@@ -186,7 +197,7 @@ def w_sharing_experiment(resolution=0.1, chunksize=None):
     kwargs = []
     results = []
     for x in itertools.product((y*resolution for y in range(0, int(1/resolution) + 1) ), repeat=2):
-        kwarg = {'game_args': {'mw_share_prob':0, 'mw_share_bias':1,
+        kwarg = {'game_args': {'mw_share_prob':0., 'mw_share_bias':1.,
             'women_share_prob':x[0]}, 'signaller_args':{'share_weight':x[1]}}
         kwargs.append(kwarg)
         if chunksize is not None and len(kwargs) >= chunksize:
@@ -199,7 +210,7 @@ def w_simple_sharing_experiment(chunksize=None):
     kwargs = []
     results = []
     for x in [0., 0.25, 0.5, 0.75, 1.]:
-        kwarg = {'game_args': {'mw_share_prob':0, 'mw_share_bias':1,
+        kwarg = {'game_args': {'mw_share_prob':0., 'mw_share_bias':1.,
             'women_share_prob':x}, 'signaller_args':{'share_weight':x}}
         kwargs.append(kwarg)
         if chunksize is not None and len(kwargs) >= chunksize:
