@@ -126,7 +126,7 @@ def qualitative_trends():
             'signaller_args':{'share_weight':0.},
             'responder_args':{'share_weight':0.},
             'mw_weights':[0.85, 0.1, 0.05, 
-            'women_weights':1/3., 1/3., 1/3.]}
+            'women_weights':[1/3., 1/3., 1/3.]}
     return [args]
 
 def naive_proportions(key='women_weights', resolution=0.1, chunksize=None):
