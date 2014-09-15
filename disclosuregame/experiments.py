@@ -125,7 +125,7 @@ def qualitative_trends():
             'baby_payoff':10, 'referral_cost':9}, 
             'signaller_args':{'share_weight':0.},
             'responder_args':{'share_weight':0.},
-            'mw_weights':[0.85, 0.1, 0.05, 
+            'mw_weights':[0.85, 0.1, 0.05], 
             'women_weights':[1/3., 1/3., 1/3.]}
     return [args]
 
