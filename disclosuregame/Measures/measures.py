@@ -3,6 +3,19 @@ import collections
 from disclosuregame.results import Result
 import itertools
 
+def median(lst):
+    """
+    Median function, taken from http://stackoverflow.com/a/24101534
+    """
+    sortedLst = sorted(lst)
+    lstLen = len(lst)
+    index = (lstLen - 1) // 2
+
+    if (lstLen % 2):
+        return sortedLst[index]
+    else:
+        return (sortedLst[index] + sortedLst[index + 1])/2.0
+
 class Measures(object):
     def __init__(self, measures, dump_after=0, dump_every=25):
         self.measures = measures
@@ -498,6 +511,17 @@ class GroupSignal(GroupHonesty):
         except:
             pass
         return r
+
+class MedianGroupSignal(GroupSignal):
+    """
+    Return the median signal of the group.
+    """
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            women = filter(lambda x: x.player_type == self.player_type, women)
+        if len(women) == 0:
+            return "NA"
+        return median(map(self.measure_one, women))
 
 
 class SquaredGroupHonesty(GroupHonesty):
