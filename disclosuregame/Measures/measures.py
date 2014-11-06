@@ -2,6 +2,36 @@ from collections import OrderedDict
 import collections
 from disclosuregame.results import Result
 import itertools
+import math
+
+def percentile(N, percent, key=lambda x:x):
+    """
+    Taken from http://code.activestate.com/recipes/511478/
+    Find the percentile of a list of values.
+
+    @parameter N - is a list of values. Note N MUST BE already sorted.
+    @parameter percent - a float value from 0.0 to 1.0.
+    @parameter key - optional key function to compute value from each element of N.
+
+    @return - the percentile of the values
+    """
+    if not N:
+        return None
+    k = (len(N)-1) * percent
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return key(N[int(k)])
+    d0 = key(N[int(f)]) * (c-k)
+    d1 = key(N[int(c)]) * (k-f)
+    return d0+d1
+
+def median(lst):
+    return percentile(sorted(lst), 0.5)
+
+def iqr(lst):
+    lst = sorted(lst)
+    return percentile(lst, 0.75) - percentile(lst, 0.25)
 
 class Measures(object):
     def __init__(self, measures, dump_after=0, dump_every=25):
@@ -498,6 +528,31 @@ class GroupSignal(GroupHonesty):
         except:
             pass
         return r
+
+class GroupSignalMedian(GroupSignal):
+    """
+    Return the median signal of the group.
+    """
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            women = filter(lambda x: x.player_type == self.player_type, women)
+        if len(women) == 0:
+            return "NA"
+        return median(map(self.measure_one, women))
+
+
+class GroupSignalIQR(GroupSignal):
+    """
+    Return the IQR of the group's signals.
+    """
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            women = filter(lambda x: x.player_type == self.player_type, women)
+        if len(women) == 0:
+            return "NA"
+        return iqr(map(self.measure_one, women))
+
+
 
 
 class SquaredGroupHonesty(GroupHonesty):
