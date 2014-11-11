@@ -553,6 +553,39 @@ class GroupSignalIQR(GroupSignal):
         return iqr(map(self.measure_one, women))
 
 
+class PointMutualInformation(Measure):
+    """
+    Return the current point mutual information of this group-signal combination.
+    """
+    def measure_one(self, woman, signal):
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        r = woman.do_signal(self.signal)
+        woman.signal_log.pop()
+        woman.rounds -= 1
+        woman.signal_matches[r] -= 1
+        try:
+            woman.signal_memory.pop(hash(signaller), None)
+            woman.shareable = None
+        except:
+            pass
+        return 1. if r == signal else 0.
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if self.player_type is not None:
+            typed_women = filter(lambda x: x.player_type == self.player_type, women)
+        total_type = float(len(typed_women))
+        # Probability of being this player type
+        p_type = total_type / total_women
+        # Probability of this signal
+        p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
+        # Probabilty of this signal and this type
+        p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
+        if len(women) == 0:
+            return "NA"
+        return math.log(p_type_signal / (p_type*p_signal))
+
 
 
 class SquaredGroupHonesty(GroupHonesty):
