@@ -573,6 +573,8 @@ class PointMutualInformation(Measure):
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
         if self.player_type is not None:
             typed_women = filter(lambda x: x.player_type == self.player_type, women)
         total_type = float(len(typed_women))
@@ -582,8 +584,6 @@ class PointMutualInformation(Measure):
         p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
         # Probabilty of this signal and this type
         p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
-        if len(women) == 0:
-            return "NA"
         return math.log(p_type_signal / (p_type*p_signal))
 
 
