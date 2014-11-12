@@ -558,6 +558,9 @@ class PointMutualInformation(Measure):
     Return the current point mutual information of this group-signal combination.
     """
     def measure_one(self, woman, signal):
+        """
+        Return a 1 if this agent would signal to match the signal parameter.
+        """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.do_signal(self.signal)

@@ -97,7 +97,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         Make a judgement about somebody based on
         the signal they sent based on expe
         """
-        super(ProspectTheorySignaller, self).do_signal(opponent)
+        #super(ProspectTheorySignaller, self).do_signal(opponent)
         best = (self.random.randint(0, 2), -9999999)
         for signal in shuffled(self.signals, self.random):
             act_risk = self.cpt_value(self.collect_prospects(signal))
@@ -105,8 +105,8 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
             #self.risk_log_general[signal].append(act_risk)
             if act_risk > best[1]:
                 best = (signal, act_risk)
-        self.signal_log.pop()
-        self.signal_log.append(best[0])
+        self.rounds += 1
+        self.log_signal(best[0], opponent)
         return best[0]
 
     def __str__(self):
