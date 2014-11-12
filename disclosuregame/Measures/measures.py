@@ -553,9 +553,9 @@ class GroupSignalIQR(GroupSignal):
         return iqr(map(self.measure_one, women))
 
 
-class PointMutualInformation(Measure):
+class ExpectedPointMutualInformation(Measure):
     """
-    Return the current point mutual information of this group-signal combination.
+    Return the expected pointwise mutual information of this group-signal combination.
     """
     def measure_one(self, woman, signal):
         """
@@ -563,7 +563,7 @@ class PointMutualInformation(Measure):
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
+        r = woman.do_signal()
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -587,8 +587,7 @@ class PointMutualInformation(Measure):
         p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
         # Probabilty of this signal and this type
         p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
-        return math.log(p_type_signal / (p_type*p_signal))
-
+        return p_type_signal*math.log(p_type_signal / (p_type*p_signal), 2)
 
 
 class SquaredGroupHonesty(GroupHonesty):
@@ -644,6 +643,8 @@ def measures_women():
     #measures["honesty"] = GroupHonesty()
     #measures["nom_sq_honesty"] = NormalisedSquaredGroupHonesty()
     measures["group_signal"] = GroupSignal()
+    measures["median_signal"] = GroupSignalMedian()
+    measures["signal_iqr"] = GroupSignalIQR()
     #measures['accrued_payoffs'] = AccruedPayoffs()
     for i in range(3):
         #measures["type_%d_ref" % i] = TypeReferralBreakdown(player_type=i)
@@ -654,8 +655,10 @@ def measures_women():
         measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
         measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
         measures["group_signal_%d" % i] = GroupSignal(player_type=i)
+        measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
+        measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(3):
-            foo = 0
+            measures["pointwise_mi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
