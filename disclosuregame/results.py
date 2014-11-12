@@ -132,7 +132,7 @@ class Result(object):
         #print insert
 
         res_fields = ", ".join(self.fields)
-        params = map(lambda x: tuple(map(self.type_safety, x)), self.results)
+        results = map(lambda x: tuple(map(self.type_safety, x)), self.results)
         #results = map(tuple, self.results)
         placeholders = ",".join(['?']*len(self.fields))
         insert_results = "INSERT INTO results (id, %s) VALUES(NULL, %s)" % (res_fields, placeholders)
