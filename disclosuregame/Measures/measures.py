@@ -587,6 +587,8 @@ class ExpectedPointMutualInformation(Measure):
         p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
         # Probabilty of this signal and this type
         p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
+        if p_type_signal == 0 :
+            return 0.
         return p_type_signal*math.log(p_type_signal / (p_type*p_signal), 2)
 
 
