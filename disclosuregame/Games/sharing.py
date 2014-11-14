@@ -251,7 +251,7 @@ class CarryingInformationGame(CarryingReferralGame):
 
 class ShuffledSharingGame(CarryingInformationGame):
     def __str__(self):
-        return "shuffled_%s" % super(CaseloadSharingGame, self).__unicode__()
+        return "shuffled_%s" % super(CarryingInformationGame, self).__unicode__()
 
     def play_game(self, players, file_name=""):
         #self.random.seed(1)
