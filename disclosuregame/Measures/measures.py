@@ -593,7 +593,7 @@ class ExpectedPointMutualInformation(Measure):
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
-    Return the entropy of the signalling distribution.
+    Return the shannon entropy of the signalling distribution.
     """
 
     def measure(self, roundnum, women, game):
@@ -605,12 +605,12 @@ class SignalEntropy(ExpectedPointMutualInformation):
             p_signal = sum(map(lambda x: self.measure_one(x, signal), women)) / total_women
             if p_signal == 0 :
                 return 0.
-            return p_signal*math.log(p_signal / (p_signal*p_signal), 2)
-        return sum(map(pointentropy, [0, 1, 2]))
+            return p_signal*math.log(p_signal, 2)
+        return -sum(map(pointentropy, [0, 1, 2]))
 
 class TypeEntropy(Measure):
     """
-    Return the entropy of the type distribution.
+    Return the shannon entropy of the type distribution.
     """
 
     def measure(self, roundnum, women, game):
@@ -625,8 +625,8 @@ class TypeEntropy(Measure):
             p_type = total_type / total_women
             if p_type == 0:
                 return 0.
-            return p_type*math.log(p_type / (p_type*p_type), 2)
-        return sum(map(pointentropy, [0, 1, 2]))
+            return p_type*math.log(p_type, 2)
+        return -sum(map(pointentropy, [0, 1, 2]))
 
 
 class SquaredGroupHonesty(GroupHonesty):
