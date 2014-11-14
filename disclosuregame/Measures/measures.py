@@ -96,7 +96,7 @@ class NumRounds(Measure):
             women = filter(lambda x: x.player_type == self.player_type, women)
         women = filter(lambda x: x.is_finished, women)
         if len(women) == 0:
-            return 0.
+            return "NA"
         return sum(map(lambda woman: woman.finished - woman.started, women)) / float(len(women))
 
 
@@ -591,6 +591,46 @@ class ExpectedPointMutualInformation(Measure):
             return 0.
         return p_type_signal*math.log(p_type_signal / (p_type*p_signal), 2)
 
+class SignalEntropy(ExpectedPointMutualInformation):
+    """
+    Return the entropy of the signalling distribution.
+    """
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        def pointentropy(signal):
+            # Probability of this signal
+            p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
+            if p_signal == 0 :
+                return 0.
+            return p_signal*math.log(p_signal / (p_signal*p_signal), 2)
+        return sum(map(pointentropy, [0, 1, 2]))
+
+class TypeEntropy(Measure):
+    """
+    Return the entropy of the type distribution.
+    """
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        def pointentropy(type):
+            # Probability of this type
+            typed_women = filter(lambda x: x.player_type == self.player_type, women)
+            total_type = float(len(typed_women))
+            # Probability of being this player type
+            p_type = total_type / total_women
+            if p_type == 0:
+                return 0.
+            return p_type*math.log(p_type / (p_type*p_type), 2)
+        return sum(map(pointentropy, [0, 1, 2]))
+
 
 class SquaredGroupHonesty(GroupHonesty):
     """
@@ -647,6 +687,8 @@ def measures_women():
     measures["group_signal"] = GroupSignal()
     measures["median_signal"] = GroupSignalMedian()
     measures["signal_iqr"] = GroupSignalIQR()
+    measures["type_entropy"] = TypeEntropy()
+    measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
     for i in range(3):
         #measures["type_%d_ref" % i] = TypeReferralBreakdown(player_type=i)
