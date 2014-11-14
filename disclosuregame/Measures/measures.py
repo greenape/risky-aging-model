@@ -553,6 +553,25 @@ class GroupSignalIQR(GroupSignal):
         return iqr(map(self.measure_one, women))
 
 
+class TypeSignalProbability(ExpectedPointMutualInformation):
+    """
+    Calculate p(signal, type). Can marginalize for individual distributions.
+    """
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        if self.player_type is not None:
+            typed_women = filter(lambda x: x.player_type == self.player_type, women)
+        # Probabilty of this signal and this type
+        p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
+        if p_type_signal == 0 :
+            return 0.
+        return p_type_signal
+
+
+
 class ExpectedPointMutualInformation(Measure):
     """
     Return the expected pointwise mutual information of this group-signal combination.
@@ -699,7 +718,8 @@ def measures_women():
         measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(3):
-            measures["pointwise_mi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
+            measures["pmi(type %d, signal %d)" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
+            measures["p(signal %d, type %d)" % (i, j)] = TypeSignalProbability(player_type=j, signal=i)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)

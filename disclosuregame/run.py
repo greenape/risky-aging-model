@@ -66,7 +66,7 @@ def arguments():
                    choices=['Game', 'CaseloadGame', 'RecognitionGame', 'ReferralGame',
                    'CaseloadRecognitionGame', 'CaseloadReferralGame', 'CarryingGame',
                    'CarryingReferralGame', 'CarryingCaseloadReferralGame', 'CaseloadSharingGame',
-                   'CarryingInformationGame'],
+                   'CarryingInformationGame', 'ShuffledSharingGame'],
                    dest="games")
     parser.add_argument('-s','--signallers', type=str, nargs='*',
         help='A signaller type.', default=["SharingSignaller"],
