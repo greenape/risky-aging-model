@@ -553,25 +553,6 @@ class GroupSignalIQR(GroupSignal):
         return iqr(map(self.measure_one, women))
 
 
-class TypeSignalProbability(ExpectedPointMutualInformation):
-    """
-    Calculate p(signal, type). Can marginalize for individual distributions.
-    """
-
-    def measure(self, roundnum, women, game):
-        total_women = float(len(women))
-        if total_women == 0:
-            return "NA"
-        if self.player_type is not None:
-            typed_women = filter(lambda x: x.player_type == self.player_type, women)
-        # Probabilty of this signal and this type
-        p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
-        if p_type_signal == 0 :
-            return 0.
-        return p_type_signal
-
-
-
 class ExpectedPointMutualInformation(Measure):
     """
     Return the expected pointwise mutual information of this group-signal combination.
@@ -609,6 +590,24 @@ class ExpectedPointMutualInformation(Measure):
         if p_type_signal == 0 :
             return 0.
         return p_type_signal*math.log(p_type_signal / (p_type*p_signal), 2)
+
+
+class TypeSignalProbability(ExpectedPointMutualInformation):
+    """
+    Calculate p(signal, type). Can marginalize for individual distributions.
+    """
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        if self.player_type is not None:
+            typed_women = filter(lambda x: x.player_type == self.player_type, women)
+        # Probabilty of this signal and this type
+        p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
+        if p_type_signal == 0 :
+            return 0.
+        return p_type_signal
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
