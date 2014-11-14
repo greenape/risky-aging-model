@@ -602,7 +602,7 @@ class SignalEntropy(ExpectedPointMutualInformation):
             return "NA"
         def pointentropy(signal):
             # Probability of this signal
-            p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
+            p_signal = sum(map(lambda x: self.measure_one(x, signal), women)) / total_women
             if p_signal == 0 :
                 return 0.
             return p_signal*math.log(p_signal / (p_signal*p_signal), 2)
@@ -617,12 +617,9 @@ class TypeEntropy(Measure):
         total_women = float(len(women))
         if total_women == 0:
             return "NA"
-        total_women = float(len(women))
-        if total_women == 0:
-            return "NA"
-        def pointentropy(type):
+        def pointentropy(player_type):
             # Probability of this type
-            typed_women = filter(lambda x: x.player_type == self.player_type, women)
+            typed_women = filter(lambda x: x.player_type == player_type, women)
             total_type = float(len(typed_women))
             # Probability of being this player type
             p_type = total_type / total_women
@@ -697,7 +694,7 @@ def measures_women():
         #measures['rounds_played_type_%d_upto' % i] = NumRoundsCumulative(player_type=i)
         measures['rounds_played_type_%d' % i] = NumRounds(player_type=i)
         measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
-        measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
+        #measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
         measures["group_signal_%d" % i] = GroupSignal(player_type=i)
         measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
