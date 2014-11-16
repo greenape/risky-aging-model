@@ -583,8 +583,12 @@ class ExpectedPointMutualInformation(Measure):
         total_type = float(len(typed_women))
         # Probability of being this player type
         p_type = total_type / total_women
+        if p_type == 0:
+            return 0.
         # Probability of this signal
         p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
+        if p_signal == 0:
+            return 0.
         # Probabilty of this signal and this type
         p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
         if p_type_signal == 0 :

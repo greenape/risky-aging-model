@@ -35,7 +35,10 @@ from random import Random
 import time
 import os.path
 
+formatter = logging.Formatter('%(asctime)s - [%(levelname)s/%(processName)s] %(message)s')
 logger = multiprocessing.log_to_stderr()
+logger.handlers[0].setFormatter(formatter)
+
 
 version = disclosuregame.__version__
 
@@ -123,7 +126,6 @@ def arguments():
     if args.log_file != "":
         fh = logging.FileHandler(args.log_file)
         fh.setLevel(numeric_level)
-        formatter = logging.Formatter('[%(levelname)s/%(processName)s] %(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
