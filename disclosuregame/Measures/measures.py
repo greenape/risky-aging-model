@@ -702,8 +702,8 @@ def measures_women():
     measures["group_signal"] = GroupSignal()
     measures["median_signal"] = GroupSignalMedian()
     measures["signal_iqr"] = GroupSignalIQR()
-    measures["type_entropy"] = TypeEntropy()
-    measures["signal_entropy"] = SignalEntropy()
+    #measures["type_entropy"] = TypeEntropy()
+    #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
     for i in range(3):
         #measures["type_%d_ref" % i] = TypeReferralBreakdown(player_type=i)
@@ -717,7 +717,7 @@ def measures_women():
         measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(3):
-            measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
+            #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalProbability(player_type=j, signal=i)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
