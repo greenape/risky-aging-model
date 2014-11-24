@@ -493,7 +493,9 @@ class GroupHonesty(Measure):
     """
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
+        state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -518,7 +520,9 @@ class GroupSignal(GroupHonesty):
     """
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
+        state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -563,7 +567,9 @@ class ExpectedPointMutualInformation(Measure):
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        state = woman.random.getstate()
         r = woman.do_signal()
+        woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -600,6 +606,28 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
     """
     Calculate p(signal, type). Can marginalize for individual distributions.
     """
+
+    def measure_one(self, woman, signal):
+        """
+        Return a 1 if this agent would signal to match the signal parameter.
+        There is a fudge here - agents will sometimes choose effectively randomly,
+        where there's no reason to prefer one option. So we reset the random state 
+        after pulling a signal to avoid messing up the distributions on sucessive measures.
+        """
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
+        woman.signal_log.pop()
+        woman.rounds -= 1
+        woman.signal_matches[r] -= 1
+        try:
+            woman.signal_memory.pop(hash(signaller), None)
+            woman.shareable = None
+        except:
+            pass
+        return 1. if r == signal else 0.
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
