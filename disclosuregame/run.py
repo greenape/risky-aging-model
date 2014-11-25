@@ -115,6 +115,9 @@ def arguments():
         'info', 'warniing', 'error'], default='info', nargs="?")
     parser.add_argument('--log-file', dest='log_file', type=str, default='')
     parser.add_argument('--tag', dest='tag', type=str, default='')
+    parser.add_argument('--measure-every', dest='measure_freq', type=int,
+        help="Measure every x rounds.",
+        default=1)
 
     args, extras = parser.parse_known_args()
 
@@ -222,13 +225,14 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     runs=1, game=None, rounds=100,
     mw_weights=[80/100., 15/100., 5/100.], women_weights=[1/3., 1/3., 1/3.], women_priors=None, seeds=None,
     women_modifier=None, measures_women=measures_women(), measures_midwives=measures_midwives(),
-    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag=""):
+    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="", measure_freq=1):
 
     if game is None:
         game = Game()
     if mw_priors is not None:
         game.type_weights = mw_priors
-
+    measures_midwives.dump_every = measure_freq
+    measures_women.dump_every = measure_freq
     game.measures_midwives = measures_midwives
     game.measures_women = measures_women
     game.signaller_args = signaller_args
