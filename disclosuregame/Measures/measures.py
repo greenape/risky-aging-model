@@ -65,8 +65,8 @@ class Measures(object):
             results = Result(self.measures.keys(), game.parameters, [])
         if women is None:
             return results
-        line = map(lambda x: x.measure(rounds, women, game), self.measures.values())
         if rounds >= self.dump_after and (rounds % self.dump_every == 0 or rounds == (game.rounds - 1)):
+            line = map(lambda x: x.measure(rounds, women, game), self.measures.values())
             results.add_results(Result(self.measures.keys(), game.parameters, [line]))
         return results
 
