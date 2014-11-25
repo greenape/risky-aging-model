@@ -672,18 +672,16 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
             pass
         BayesTypeSignalProbability.total += 1.
         BayesTypeSignalProbability.counts[woman.player_type][r] += 1.
-        return
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
         if total_women == 0:
             return "NA"
-        BayesTypeSignalProbability.total += total_women
         if self.player_type is None:
             return "NA"
         # Probabilty of this signal and this type
         map(lambda x: self.measure_one(x), women)
-        return BayesTypeSignalProbability.counts[self.signal][self.player_type] / BayesTypeSignalProbability.total
+        return BayesTypeSignalProbability.counts[self.player_type][self.signal] / BayesTypeSignalProbability.total
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
