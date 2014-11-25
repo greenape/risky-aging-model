@@ -669,7 +669,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
             return 0.
         return p_type_signal
 
-class BayesTypeSignalProbability(ExpectedPointMutualInformation):
+class BayesTypeSignalProbability(TypeSignalProbability):
     def __init__(self, player_type=None, midwife_type=None, signal=None):
         super(BayesTypeSignalProbability, self).__init__(player_type, midwife_type, signal)
         self.counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
