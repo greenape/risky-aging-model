@@ -650,7 +650,7 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
     """
 
-    def measure_one(self, woman, signal):
+    def measure_one(self, woman):
         """
         Update the distribution with this agent's signal.
         """
