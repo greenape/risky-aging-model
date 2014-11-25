@@ -676,7 +676,7 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
         total_women = float(len(women))
         if total_women == 0:
             return "NA"
-        BayesTypeSignalProbability.total_count += total_women
+        BayesTypeSignalProbability.total += total_women
         if self.player_type is None:
             return "NA"
         typed_women = filter(lambda x: x.player_type == self.player_type, women)
