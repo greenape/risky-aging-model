@@ -57,7 +57,7 @@ class Measures(object):
         Measures should contain a mapping from a field name to method for getting a result
         given an appointment, set of players, and a game. Params should contain mappings
         from parameter names to values.
-        Optionally takes an exist results object to add records to. This should have the same
+        Optionally takes an existing results object to add records to. This should have the same
         measures and params.
         Returns a results object for writing to csv.
         """
