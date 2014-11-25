@@ -652,10 +652,7 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
 
     def measure_one(self, woman, signal):
         """
-        Return a 1 if this agent would signal to match the signal parameter.
-        There is a fudge here - agents will sometimes choose effectively randomly,
-        where there's no reason to prefer one option. So we reset the random state 
-        after pulling a signal to avoid messing up the distributions on sucessive measures.
+        Update the distribution with this agent's signal.
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
