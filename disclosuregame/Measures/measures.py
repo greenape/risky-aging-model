@@ -683,7 +683,7 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
         # Probabilty of this signal and this type
         local_count = sum(map(lambda x: self.measure_one(x, self.signal), typed_women))
         BayesTypeSignalProbability.counts[self.signal][self.player_type] += local_count
-        return BayesTypeSignalProbability.counts[self.signal][self.player_type] / total
+        return BayesTypeSignalProbability.counts[self.signal][self.player_type] / BayesTypeSignalProbability.total
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
