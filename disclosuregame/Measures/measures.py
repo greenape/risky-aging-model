@@ -643,7 +643,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
 
 class BayesTypeSignalProbability(ExpectedPointMutualInformation):
     def __init__(self, counts, player_type=None, midwife_type=None, signal=None):
-        super(self, BayesTypeSignalProbability).__init__(player_type, midwife_type, signal)
+        super(BayesTypeSignalProbability, self).__init__(player_type, midwife_type, signal)
         self.counts = counts
 
     """
