@@ -682,7 +682,7 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
         if self.player_type is None:
             return "NA"
         # Probabilty of this signal and this type
-        map(lambda x: self.measure_one(x), women))
+        map(lambda x: self.measure_one(x), women)
         return BayesTypeSignalProbability.counts[self.signal][self.player_type] / BayesTypeSignalProbability.total
 
 class SignalEntropy(ExpectedPointMutualInformation):
