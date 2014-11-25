@@ -642,10 +642,10 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         return p_type_signal
 
 class BayesTypeSignalProbability(ExpectedPointMutualInformation):
-    counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
-                1: {0: 70.0, 1: 30.0, 2: 0.0},
-                2: {0: 60.0, 1: 30.0, 2: 10.0}}
-    total = 300.
+    def __init__(self, counts, player_type=None, midwife_type=None, signal=None):
+        super(self, BayesTypeSignalProbability).__init__(player_type, midwife_type, signal)
+        self.counts = counts
+
     """
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
     """
@@ -667,8 +667,7 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
             woman.shareable = None
         except:
             pass
-        BayesTypeSignalProbability.total += 1.
-        BayesTypeSignalProbability.counts[woman.player_type][r] += 1.
+        self.counts[woman.player_type][r] += 1.
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
@@ -678,7 +677,8 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
             return "NA"
         # Probabilty of this signal and this type
         map(lambda x: self.measure_one(x), women)
-        return BayesTypeSignalProbability.counts[self.player_type][self.signal] / BayesTypeSignalProbability.total
+        total = sum(x for counter in self.counts.values() for x in counter.values())
+        return self.counts[self.player_type][self.signal] / total
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
@@ -764,6 +764,9 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
         return diff**2
 
 def measures_women():
+    counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
+                1: {0: 70.0, 1: 30.0, 2: 0.0},
+                2: {0: 60.0, 1: 30.0, 2: 10.0}}
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
@@ -789,7 +792,7 @@ def measures_women():
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(3):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
-            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i)
+            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(counts, player_type=j, signal=i)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
