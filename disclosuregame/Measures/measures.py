@@ -607,6 +607,32 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
     Calculate p(signal, type). Can marginalize for individual distributions.
     """
 
+    def sample_one(self, woman):
+        """
+        Sample signals a few* times to get the possible ones.
+        These are guaranteed to be of uniform probability.
+
+        *100 times, based on a estimating the maximum time for python
+        random to choose all three options given uniform random choice.
+        """
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        #state = woman.random.getstate()
+        sigs = set()
+        for i in range(100):
+            r = woman.do_signal()
+            #woman.random.setstate(state)
+            woman.signal_log.pop()
+            woman.rounds -= 1
+            woman.signal_matches[r] -= 1
+            try:
+                woman.signal_memory.pop(hash(signaller), None)
+                woman.shareable = None
+            except:
+                pass
+            sigs.add(r)
+        return sigs
+
     def measure_one(self, woman, signal):
         """
         Return a 1 if this agent would signal to match the signal parameter.
@@ -616,7 +642,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        state = woman.random.getstate()
+        """state = woman.random.getstate()
         r = woman.do_signal()
         woman.random.setstate(state)
         woman.signal_log.pop()
@@ -627,7 +653,9 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
             woman.shareable = None
         except:
             pass
-        return 1. if r == signal else 0.
+        return 1. if r == signal else 0."""
+        sigs = self.sample_one(woman)
+        return 1./len(sigs) if r in sigs else 0.
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
@@ -642,9 +670,11 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         return p_type_signal
 
 class BayesTypeSignalProbability(ExpectedPointMutualInformation):
-    def __init__(self, counts, player_type=None, midwife_type=None, signal=None):
+    def __init__(self, player_type=None, midwife_type=None, signal=None):
         super(BayesTypeSignalProbability, self).__init__(player_type, midwife_type, signal)
-        self.counts = counts
+        self.counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
+                        1: {0: 70.0, 1: 30.0, 2: 0.0},
+                        2: {0: 60.0, 1: 30.0, 2: 10.0}}
 
     """
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
@@ -657,17 +687,20 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         #state = woman.random.getstate()
-        r = woman.do_signal()
+        #r = woman.do_signal()
         #woman.random.setstate(state)
-        woman.signal_log.pop()
-        woman.rounds -= 1
-        woman.signal_matches[r] -= 1
-        try:
-            woman.signal_memory.pop(hash(signaller), None)
-            woman.shareable = None
-        except:
-            pass
-        self.counts[woman.player_type][r] += 1.
+        #woman.signal_log.pop()
+        #woman.rounds -= 1
+        #woman.signal_matches[r] -= 1
+        #try:
+        #    woman.signal_memory.pop(hash(signaller), None)
+        #    woman.shareable = None
+        #except:
+        #    pass
+        #self.counts[woman.player_type][r] += 1.
+        sigs = self.sample_one(woman)
+        for s in sigs:
+            self.counts[woman.player_type][s] += 1.
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
@@ -764,9 +797,6 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
         return diff**2
 
 def measures_women():
-    counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
-                1: {0: 70.0, 1: 30.0, 2: 0.0},
-                2: {0: 60.0, 1: 30.0, 2: 10.0}}
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
