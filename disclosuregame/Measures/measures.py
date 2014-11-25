@@ -641,6 +641,48 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
             return 0.
         return p_type_signal
 
+class BayesTypeSignalProbability(ExpectedPointMutualInformation):
+    counts = {s:dict.fromkeys([0, 1, 2], 0.) for s in [0, 1, 2]}
+    total = 0.
+    """
+    Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
+    """
+
+    def measure_one(self, woman, signal):
+        """
+        Return a 1 if this agent would signal to match the signal parameter.
+        There is a fudge here - agents will sometimes choose effectively randomly,
+        where there's no reason to prefer one option. So we reset the random state 
+        after pulling a signal to avoid messing up the distributions on sucessive measures.
+        """
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
+        woman.signal_log.pop()
+        woman.rounds -= 1
+        woman.signal_matches[r] -= 1
+        try:
+            woman.signal_memory.pop(hash(signaller), None)
+            woman.shareable = None
+        except:
+            pass
+        return 1. if r == signal else 0.
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        BayesTypeSignalProbability.total_count += total_women
+        if self.player_type is None:
+            return "NA"
+        typed_women = filter(lambda x: x.player_type == self.player_type, women)
+        # Probabilty of this signal and this type
+        local_count = sum(map(lambda x: self.measure_one(x, self.signal), typed_women))
+        BayesTypeSignalProbability.counts[self.signal, self.player_type] += local_count
+        return BayesTypeSignalProbability.counts[self.signal, self.player_type] / total
+
 class SignalEntropy(ExpectedPointMutualInformation):
     """
     Return the shannon entropy of the signalling distribution.
@@ -750,7 +792,7 @@ def measures_women():
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(3):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
-            measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalProbability(player_type=j, signal=i)
+            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
