@@ -642,8 +642,10 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         return p_type_signal
 
 class BayesTypeSignalProbability(ExpectedPointMutualInformation):
-    counts = {s:dict.fromkeys([0, 1, 2], 0.) for s in [0, 1, 2]}
-    total = 0.
+    counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
+                1: {0: 70.0, 1: 30.0, 2: 0.0},
+                2: {0: 60.0, 1: 30.0, 2: 10.0}}
+    total = 300.
     """
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
     """
@@ -657,9 +659,9 @@ class BayesTypeSignalProbability(ExpectedPointMutualInformation):
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        state = woman.random.getstate()
+        #state = woman.random.getstate()
         r = woman.do_signal()
-        woman.random.setstate(state)
+        #woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
