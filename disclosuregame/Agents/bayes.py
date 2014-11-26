@@ -277,7 +277,7 @@ class BayesianSignaller(Signaller):
         """
         return -payoff
 
-    def risk(self, signal, opponent):
+    def risk(self, signal):
         """
         Compute the bayes risk of sending this signal.
         """
@@ -295,7 +295,7 @@ class BayesianSignaller(Signaller):
     def signal_search(self, signals):
         best = (-1, float('inf'))
         for signal in signals:
-            signal_risk = self.risk(signal, opponent)
+            signal_risk = self.risk(signal)
             #self.risk_log[signal].append(signal_risk)
             #self.risk_log_general[signal].append(self.risk(signal, None))
            #print "Risk for signal %d is %f. Best so far is signal %d at %f." % (signal, signal_risk, best[0], best[1])
@@ -303,11 +303,11 @@ class BayesianSignaller(Signaller):
                 best = (signal, signal_risk)
         return best
 
-    def do_signal(self, opponent=None):
+    def do_signal(self):
        #print "Type %d woman evaluating signals." % self.player_type
         best = self.signal_search(shuffled(self.signals, self.random))
         self.rounds += 1
-        self.log_signal(best[0], opponent)
+        self.log_signal(best[0])
         return best[0]
 
 

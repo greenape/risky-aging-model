@@ -77,7 +77,7 @@ class LexicographicSignaller(BayesianSignaller):
             response_weights)
         
 
-    def frequent(self, signal, n, responder=None):
+    def frequent(self, signal, n):
         """
         Return the nth most frequently experienced outcome from
         this signal.
@@ -110,7 +110,7 @@ class LexicographicSignaller(BayesianSignaller):
             mappings = {}
             # N most frequent outcome of each signal
             for signal in signals:
-                payoff = self.frequent(signal, n, opponent)
+                payoff = self.frequent(signal, n)
                 mappings[signal] = payoff
             n += 1
             # Choose the highest unless there's a tie
