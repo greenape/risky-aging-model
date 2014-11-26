@@ -93,7 +93,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         return signal_risk
 
     def signal_search(self, signals):
-        best = (-1, float('inf'))
+        best = (-1, float('-inf'))
         for signal in signals:
             act_risk = self.cpt_value(self.collect_prospects(signal))
             #self.risk_log[signal].append(act_risk)
