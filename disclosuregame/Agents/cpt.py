@@ -92,22 +92,14 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
             signal_risk += self.value(payoff) * weight
         return signal_risk
 
-    def do_signal(self, opponent=None):
-        """
-        Make a judgement about somebody based on
-        the signal they sent based on expe
-        """
-        #super(ProspectTheorySignaller, self).do_signal(opponent)
-        best = (self.random.randint(0, 2), -9999999)
-        for signal in shuffled(self.signals, self.random):
+    def signal_search(self, signals):
+        best = (-1, float('inf'))
+        for signal in signals:
             act_risk = self.cpt_value(self.collect_prospects(signal))
             #self.risk_log[signal].append(act_risk)
             #self.risk_log_general[signal].append(act_risk)
             if act_risk > best[1]:
                 best = (signal, act_risk)
-        self.rounds += 1
-        self.log_signal(best[0], opponent)
-        return best[0]
 
     def __str__(self):
         return "prospect"

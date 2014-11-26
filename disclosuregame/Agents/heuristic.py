@@ -104,12 +104,8 @@ class LexicographicSignaller(BayesianSignaller):
         return None
         #self.update_counts(response, midwife, payoff, midwife_type, weight)
 
-    def do_signal(self, opponent=None):
-        #super(LexicographicSignaller, self).do_signal(opponent)
-        signals = shuffled(self.signals, self.random)
+    def signal_search(self, signals):
         n = 0
-        # Reduce to possible
-        best = self.random.choice(signals)
         while n < self.depth:
             mappings = {}
             # N most frequent outcome of each signal
@@ -130,9 +126,6 @@ class LexicographicSignaller(BayesianSignaller):
                 #    signals.remove(sorted_mappings[2][0])
             except IndexError:
                 pass
-        # No advantage found so take the first
-        self.rounds += 1
-        self.log_signal(best, opponent)
         return best
 
 

@@ -292,16 +292,20 @@ class BayesianSignaller(Signaller):
        #print "R(%d|x)=%f" % (signal, signal_risk)
         return signal_risk
 
-    def do_signal(self, opponent=None):
-        best = (self.random.randint(0, 2), 9999999)
-       #print "Type %d woman evaluating signals." % self.player_type
-        for signal in shuffled(self.signals, self.random):
+    def signal_search(self, signals):
+        best = (-1, float('inf'))
+        for signal in signals:
             signal_risk = self.risk(signal, opponent)
             #self.risk_log[signal].append(signal_risk)
             #self.risk_log_general[signal].append(self.risk(signal, None))
            #print "Risk for signal %d is %f. Best so far is signal %d at %f." % (signal, signal_risk, best[0], best[1])
             if signal_risk < best[1]:
                 best = (signal, signal_risk)
+        return best
+
+    def do_signal(self, opponent=None):
+       #print "Type %d woman evaluating signals." % self.player_type
+        best = self.signal_search(shuffled(self.signals, self.random))
         self.rounds += 1
         self.log_signal(best[0], opponent)
         return best[0]
