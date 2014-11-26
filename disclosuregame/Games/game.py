@@ -137,7 +137,7 @@ class Game(object):
         two players.
         """
         #print "Playing between", signaller, "and", receiver
-        signal = signaller.do_signal(receiver)
+        signal = signaller.do_signal()
         #print "Signal is %d" % signal
         #print "Signaller played %d rounds" % signaller.rounds
         act = receiver.respond(signal, opponent=signaller)
