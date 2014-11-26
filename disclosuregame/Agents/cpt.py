@@ -100,6 +100,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
             #self.risk_log_general[signal].append(act_risk)
             if act_risk > best[1]:
                 best = (signal, act_risk)
+        return best
 
     def __str__(self):
         return "prospect"
