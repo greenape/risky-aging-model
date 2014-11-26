@@ -620,7 +620,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         #state = woman.random.getstate()
         sigs = set()
         signals = [0, 1, 2]
-        for combo in itertools.permutations(signal):
+        for combo in itertools.permutations(signals):
             r = woman.signal_search(combo)
             sigs.add(r)
         return sigs
