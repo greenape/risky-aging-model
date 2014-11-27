@@ -116,7 +116,7 @@ class LexicographicSignaller(BayesianSignaller):
             # Choose the highest unless there's a tie
             sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True)
             # Is there a best option?
-            best = sorted_mappings[0][0]
+            best = sorted_mappings[0]
             try:
                 if sorted_mappings[0][1] > sorted_mappings[1][1]:
                     break
