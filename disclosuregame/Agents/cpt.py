@@ -18,7 +18,12 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         super(ProspectTheorySignaller, self).__init__(player_type, signals, responses, seed=seed)
 
     def weighting(self, probability, power):
-        return pow(probability, power) / pow(pow(probability, power) + pow(1. - probability, power), 1. / power)
+        try:
+            weight = pow(probability, power) / pow(pow(probability, power) + pow(1. - probability, power), 1. / power)
+        except ValueError:
+            LOG.debug("P = %f, pow = %f" % (probability, power))
+            raise
+        return weight
 
 
     def value(self, outcome):
