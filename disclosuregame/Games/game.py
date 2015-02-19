@@ -79,8 +79,7 @@ class Payoffs(object):
 
 class Game(object):
     # b > m > n
-    def __init__(self, payoffs=None, randomise_payoffs=False,
-     type_weights=[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]], rounds=100, measures_women=measures_women(),
+    def __init__(self, payoffs=None, rounds=100, measures_women=measures_women(),
      measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None):
         """ A multistage game played by two agents.
         """
@@ -90,7 +89,6 @@ class Game(object):
         self.act_log = []
         self.disclosure_log = []
         
-        self.type_weights = type_weights
         self.rounds = rounds
         self.measures_women = measures_women
         self.measures_midwives = measures_midwives
@@ -116,13 +114,6 @@ class Game(object):
             self.make_responder = make_responder
 
 
-    def priors(self):
-        priors = {}
-        for i in range(3):
-            for j in range(3):
-                priors["prior_%d_%d" % (i, j)] = self.type_weights[i][j]
-        return priors
-
     def all_played(self, women, rounds=12):
         for woman in women:
             if(woman.rounds < rounds) and not woman.is_finished:
@@ -140,7 +131,7 @@ class Game(object):
         #print "Signaller played %d rounds" % signaller.rounds
         act = receiver.respond(signal, opponent=signaller)
         #print "Response was %d" % act
-        signal_payoff = self.payoffs.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
+        signal_payoff = self.payoffs.woman_baby_payoff[signaller.player_type][act] + self.payoffs.woman_social_payoff[signal][receiver.player_type]
         receive_payoff = self.payoffs.midwife_payoff[signaller.player_type][act]
         #self.signal_log.append(signal)
         #self.act_log.append(act)

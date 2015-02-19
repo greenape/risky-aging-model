@@ -21,19 +21,19 @@ class RecognitionGame(Game):
                 """
                 signal = signaller.do_signal(receiver)
                 act = receiver.respond(signal, opponent=signaller)
-                signal_payoff = self.payoffs.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
+                signal_payoff = self.payoffs.woman_baby_payoff[signaller.player_type][act] + self.payoffs.woman_social_payoff[signal][receiver.player_type]
                 receive_payoff = self.payoffs.midwife_payoff[signaller.player_type][act]
 
                 signaller.accrued_payoffs += signal_payoff
                 receiver.accrued_payoffs += receive_payoff
 
                 #Signaller learns something about the type
-                social = self.woman_social_payoff[signal][receiver.player_type]
+                social = self.payoffs.woman_social_payoff[signal][receiver.player_type]
 
                 possible_types = []
 
-                for i in range(len(self.woman_social_payoff[signal])):
-                        if social == self.woman_social_payoff[signal][i]:
+                for i in range(len(self.payoffs.woman_social_payoff[signal])):
+                        if social == self.payoffs.woman_social_payoff[signal][i]:
                                 possible_types.append(i)
                 #True type is known
                 if len(possible_types) == 1:

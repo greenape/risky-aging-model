@@ -6,7 +6,7 @@ class AgentGenerator(object):
 	A machine that produces new agents to fit some distribution of types.
 	"""
 
-	def __init__(self, constructor, agent_args, payoffs, type_distribution=[1/3., 1/3., 1/3.], random=Random()):
+	def __init__(self, constructor, payoffs, agent_args={}, type_distribution=[1/3., 1/3., 1/3.], random=None):
 		self.type_distribution = type_distribution
 		self.random = random
 		self.constructor = constructor
@@ -47,9 +47,13 @@ class SignallerGenerator(AgentGenerator):
 
 class ResponderGenerator(AgentGenerator):
 	"""
-	Generator that produces responders with uniformly random beliefs.
+	Generator that produces responders with uniformly fixed beliefs.
 	"""
+
+	def __init__(self, constructor, payoffs, type_weights=[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]], **kwargs):
+		super(ResponderGenerator, self).__init__(constructor, payoffs, **kwargs)
+		self.type_weights = type_weights
 
 	def init(self, agent):
 		agent.init_payoffs(self.game.midwife_payoff)
-		agent.init_beliefs(self.game.type_weights)
+		agent.init_beliefs(self.type_weights)
