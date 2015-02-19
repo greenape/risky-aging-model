@@ -24,7 +24,8 @@ class CarryingInformationGame(CarryingReferralGame):
     is shared on each round. Sharing is controlled by the share_prob parameters which
     are the probability that any given memory is shared.
     """
-    def __init__(self, signaller_args={}, responder_args={}, **kwargs):
+    def __init__(self, mw_share_prob=0, mw_share_bias=-.99,
+        women_share_prob=0, women_share_bias=0.99, **kwargs):
         super(CarryingInformationGame, self).__init__(**kwargs)
         self.parameters['mw_share_prob'] = mw_share_prob
         self.parameters['mw_share_bias'] = mw_share_bias
@@ -34,9 +35,6 @@ class CarryingInformationGame(CarryingReferralGame):
         self.mw_share_prob = mw_share_prob
         self.women_share_bias = women_share_bias
         self.women_share_prob = women_share_prob
-        self.num_appointments = num_appointments
-        self.signaller_args = signaller_args
-        self.responder_args = responder_args
 
     def __str__(self):
         return "sharing_%s" % super(CarryingInformationGame, self).__unicode__()
@@ -50,7 +48,7 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = multiprocessing.current_process()
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
-        player_dist = self.get_distribution(women)
+        signallers = self.make_signallers.generator()
 
         rounds = self.rounds
         birthed = []
@@ -72,9 +70,7 @@ class CarryingInformationGame(CarryingReferralGame):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman, self.signaller_args)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = signallers.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -258,7 +254,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         else:
             LOG.debug("Playing a game.")
         women, midwives = players
-        player_dist = self.get_distribution(women)
+        signallers = self.make_signallers.generator()
 
         rounds = self.rounds
         birthed = []
@@ -300,9 +296,7 @@ class CaseloadSharingGame(CarryingInformationGame):
                     LOG.debug("Adding a new player")
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman, self.signaller_args)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = signallers.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)

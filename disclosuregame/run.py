@@ -370,14 +370,17 @@ def write(queue, db_name, kill_queue):
 
 def experiment(file_name, game_fns=[Game, CaseloadGame], 
     agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
-    kwargs=[{}]):
+    kwargs=[{}], signaller_generator_fn=SignallerGenerator, responder_generator_fn=ResponderGenerator):
     run_params = []
     for pair in agents:
         for game_fn in game_fns:
             for kwarg in kwargs:
                 arg = kwarg.copy()
                 try:
-                    game = game_fn(**arg.pop('game_args', {}))
+                    payoffs = Payoffs(**args.pop('payoff_args', {}))
+                    signaller_generator = signaller_generator_fn(pair[0], payoffs, **args.pop('signaller_generator_args', {}))
+                    responder_generator = responder_generator_fn(pair[1], payoffs, **args.pop('responder_generator_args', {}))
+                    game = game_fn(**arg.pop('game_args', {}), payoffs=payoffs, make_signaller=responder_generator, make_responder=responder_generator)
                 except TypeError as e:
                     logger.error("Wrong arguments for this game type.")
                     logger.error(e)

@@ -15,10 +15,6 @@ class CarryingGame(game.Game):
     def __unicode__(self):
         return "carrying_%s" % super(CarryingGame, self).__unicode__()
 
-    def __init__(self, make_signaller=None, make_responder=None, **kwargs):
-        super(CarryingGame, self).__init__(**kwargs)
-        self.player_random = Random(self.random.random())
-
     def random_player(self, probabilities, player, args={}):
         """
         Generate a random player, based on the probabilities
@@ -54,7 +50,7 @@ class CarryingGame(game.Game):
     """
     def play_game(self, players, file_name=""):
         women, midwives = players
-        player_dist = self.get_distribution(women)
+        signallers = self.make_signallers.generator()
 
         rounds = self.rounds
         birthed = []
@@ -71,12 +67,10 @@ class CarryingGame(game.Game):
             women_res = self.measures_women.dump(players, i, self, women_res)
             mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
             for woman in players:
-                if self.all_played([woman], 12):
+                if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = signallers.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -101,7 +95,7 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
 
     def play_game(self, players, file_name=""):
         women, midwives = players
-        player_dist = self.get_distribution(women)
+        signallers = self.make_signallers.generator()
 
         rounds = self.rounds
         birthed = []
@@ -134,12 +128,10 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
             for j in range(len(players)):
                 woman = players[j]
                 women = caseloads[midwives[j]]
-                if self.all_played([woman], 12):
+                if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = signallers.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)

@@ -80,7 +80,8 @@ class Payoffs(object):
 class Game(object):
     # b > m > n
     def __init__(self, payoffs=None, rounds=100, measures_women=measures_women(),
-     measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None):
+     measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None,
+     make_signaller=None, make_responder=None):
         """ A multistage game played by two agents.
         """
         self.seed = seed
@@ -105,11 +106,11 @@ class Game(object):
         self.parameters['baby_payoff'] = self.payoffs['baby_payoff']
 
         if make_signaller is None:
-            self.make_signaller = SignallerGenerator()
+            self.make_signaller = SignallerGenerator(random=Random(self.random.random()))
         else:
             self.make_signaller = make_signaller
         if make_responder is None:
-            self.make_responder = ResponderGenerator()
+            self.make_responder = ResponderGenerator(random=Random(self.random.random()))
         else:
             self.make_responder = make_responder
 
