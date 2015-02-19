@@ -17,8 +17,8 @@ class ReferralGame(Game):
                 if signaller.rounds == self.num_appointments:
                         signaller.is_finished = True
                 act = receiver.respond(signal, opponent=signaller)
-                signal_payoff = self.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
-                receive_payoff = self.midwife_payoff[signaller.player_type][act]
+                signal_payoff = self.payoffs.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
+                receive_payoff = self.payoffs.midwife_payoff[signaller.player_type][act]
 
                 #Signaller learns the true type
                 signaller.update_counts(act, receiver, signal_payoff)

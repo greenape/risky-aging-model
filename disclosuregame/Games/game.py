@@ -16,71 +16,28 @@ except:
     pass
 
 
-
-class Game(object):
-    # b > m > n
+class Payoffs(object):
     def __init__(self, baby_payoff=2, no_baby_payoff=2, mid_baby_payoff=1,referral_cost=1, harsh_high=2,
-     harsh_mid=1, harsh_low=0, mid_high=1, mid_mid=0, mid_low=0, low_high=0,low_mid=0,low_low=0, randomise_payoffs=False,
-     type_weights=[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]], rounds=100, measures_women=measures_women(),
-     measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None, make_signaller=None, make_responder=None):
-        """ A multistage game played by two agents.
-        """
-        self.seed = seed
-        self.random = Random(seed)
-        self.signal_log = []
-        self.act_log = []
-        self.disclosure_log = []
+     harsh_mid=1, harsh_low=0, mid_high=1, mid_mid=0, mid_low=0, low_high=0,low_mid=0,low_low=0):
         self.woman_baby_payoff = [[0, 0] for x in range(3)]
         self.woman_social_payoff = [[0, 0, 0] for x in range(3)]
         self.midwife_payoff = [[0, 0] for x in range(3)]
         self.payoffs = {}
-        self.type_weights = type_weights
-        self.rounds = rounds
-        self.measures_women = measures_women
-        self.measures_midwives = measures_midwives
-        self.num_appointments = num_appointments
-        if params is None:
-            self.parameters = OrderedDict()
-        else:
-            self.parameters = params
-        self.parameters['baby_payoff'] = baby_payoff
-        if randomise_payoffs:
-            self.random_payoffs()
-        else:
-            self.payoffs["baby_payoff"] = baby_payoff
-            self.payoffs["no_baby_payoff"] = -no_baby_payoff
-            self.payoffs["mid_baby_payoff"] = -mid_baby_payoff
-            self.payoffs["referral_cost"] = -referral_cost
+        self.payoffs["baby_payoff"] = baby_payoff
+        self.payoffs["no_baby_payoff"] = -no_baby_payoff
+        self.payoffs["mid_baby_payoff"] = -mid_baby_payoff
+        self.payoffs["referral_cost"] = -referral_cost
 
-            self.payoffs["harsh_high"] = -harsh_high
-            self.payoffs["harsh_mid"] = -harsh_mid
-            self.payoffs["harsh_low"] = -harsh_low
-            self.payoffs["mid_high"] = -mid_high
-            self.payoffs["mid_mid"] = -mid_mid
-            self.payoffs["mid_low"] = -mid_low
-            self.payoffs["low_high"] = -low_high
-            self.payoffs["low_mid"] = -low_mid
-            self.payoffs["low_low"] = -low_low
+        self.payoffs["harsh_high"] = -harsh_high
+        self.payoffs["harsh_mid"] = -harsh_mid
+        self.payoffs["harsh_low"] = -harsh_low
+        self.payoffs["mid_high"] = -mid_high
+        self.payoffs["mid_mid"] = -mid_mid
+        self.payoffs["mid_low"] = -mid_low
+        self.payoffs["low_high"] = -low_high
+        self.payoffs["low_mid"] = -low_mid
+        self.payoffs["low_low"] = -low_low
         self.init_payoffs()
-        self.make_signaller = make_signaller
-        self.make_responder = make_responder
-
-    def random_payoffs(self):
-
-        self.payoffs["baby_payoff"] = self.self.random.randint(0, 100)
-        self.payoffs["no_baby_payoff"] = self.random.randint(-100, 0)
-        self.payoffs["mid_baby_payoff"] = self.random.randint(self.payoffs["no_baby_payoff"], 0)
-        self.payoffs["referral_cost"] = self.random.randint(self.payoffs["no_baby_payoff"], 0)
-
-        self.payoffs["harsh_high"] = self.random.randint(self.payoffs["mid_baby_payoff"], 0)
-        self.payoffs["harsh_mid"] = self.random.randint(self.payoffs["harsh_high"], 0)
-        self.payoffs["harsh_low"] = self.random.randint(self.payoffs["harsh_mid"], 0)
-        self.payoffs["mid_high"] = self.random.randint(self.payoffs["harsh_low"], 0)
-        self.payoffs["mid_mid"] = self.random.randint(self.payoffs["mid_high"], 0)
-        self.payoffs["mid_low"] = self.random.randint(self.payoffs["mid_mid"], 0)
-        self.payoffs["low_high"] = self.random.randint(self.payoffs["mid_low"], 0)
-        self.payoffs["low_mid"] = self.random.randint(self.payoffs["low_high"], 0)
-        self.payoffs["low_low"] = self.random.randint(self.payoffs["low_mid"], 0)
 
     def init_payoffs(self):
         #Midwife payoffs
@@ -120,6 +77,45 @@ class Game(object):
         self.woman_social_payoff[1][2] = self.payoffs["mid_high"]
         self.woman_social_payoff[2][2] = self.payoffs["harsh_high"]
 
+class Game(object):
+    # b > m > n
+    def __init__(self, payoffs=None, randomise_payoffs=False,
+     type_weights=[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]], rounds=100, measures_women=measures_women(),
+     measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None):
+        """ A multistage game played by two agents.
+        """
+        self.seed = seed
+        self.random = Random(seed)
+        self.signal_log = []
+        self.act_log = []
+        self.disclosure_log = []
+        
+        self.type_weights = type_weights
+        self.rounds = rounds
+        self.measures_women = measures_women
+        self.measures_midwives = measures_midwives
+        self.num_appointments = num_appointments
+
+        if payoffs is None:
+            self.payoffs = Payoffs()
+        else:
+            self.payoffs = payoffs
+        if params is None:
+            self.parameters = OrderedDict()
+        else:
+            self.parameters = params
+        self.parameters['baby_payoff'] = self.payoffs['baby_payoff']
+
+        if make_signaller is None:
+            self.make_signaller = SignallerGenerator()
+        else:
+            self.make_signaller = make_signaller
+        if make_responder is None:
+            self.make_responder = ResponderGenerator()
+        else:
+            self.make_responder = make_responder
+
+
     def priors(self):
         priors = {}
         for i in range(3):
@@ -144,8 +140,8 @@ class Game(object):
         #print "Signaller played %d rounds" % signaller.rounds
         act = receiver.respond(signal, opponent=signaller)
         #print "Response was %d" % act
-        signal_payoff = self.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
-        receive_payoff = self.midwife_payoff[signaller.player_type][act]
+        signal_payoff = self.payoffs.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
+        receive_payoff = self.payoffs.midwife_payoff[signaller.player_type][act]
         #self.signal_log.append(signal)
         #self.act_log.append(act)
         signaller.accrued_payoffs += signal_payoff
@@ -184,27 +180,6 @@ class Game(object):
         res_mw  = self.measures_midwives.dump(midwives, self.rounds, self)
         return res_women, res_mw
 
-    def new_signaller():
-        """
-        Generate a new signaller to add to the population of players.
-        """
-        return self.make_signaller(self.player_random())
-
-    def new_responder():
-        """
-        Generate a new responder to add to the population of players.
-        """
-        return self.make_responder(self.player_random())
-
-    def make_responders(n):
-        """
-        Generate n new responders.
-        """
-
-    def make_signallers(n):
-        """
-        Generate n new signallers.
-        """
 
     def __str__(self):
         return self.__unicode__()

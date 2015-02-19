@@ -69,17 +69,17 @@ class Signaller(Agent):
     def response_belief_dict(self, signals, responses):
         return {s:{k:[] for k in responses} for s in signals}#dict([(signal, dict([(response, []) for response in responses])) for signal in signals])
 
-    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.], 
-                     response_weights=[[1., 1.], [1., 1.], [1., 2.]]):
+    def init_payoffs(self, baby_payoffs, social_payoffs):
         # Don't set up twice.
         if self.baby_payoffs is not None:
             return
         #Only interested in payoffs for own type
         self.baby_payoffs = baby_payoffs[self.player_type]
         self.social_payoffs = social_payoffs
+
+    def init_beliefs(type_weights=[1., 1., 1.], response_weights=[[1., 1.], [1., 1.], [1., 2.]]):
         self.type_weights = type_weights
         self.response_weights = response_weights
-
         # Front load alpha_dot values
         for signal, responses in self.response_signal_matches.iteritems():
             for response, count in responses.iteritems():
@@ -87,6 +87,7 @@ class Signaller(Agent):
         #Response per signal per type
         self.update_counts(None, None, None)
         self.update_beliefs()
+
 
     def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.], 
                      response_weights=[[1., 1.], [1., 1.], [1., 2.]], num=10):
@@ -316,10 +317,11 @@ class Responder(Agent):
 
         super(Responder, self).__init__(player_type, signals, responses, seed)
 
-    def init_payoffs(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]):
-        self.type_weights = type_weights
-        #Only interested in payoffs for own type
+    def init_payoffs(self, payoffs):
         self.payoffs = payoffs
+
+    def init_beliefs(self, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]):
+        self.type_weights = type_weights
         self.update_beliefs(None, None, None)
 
     def init_payoffs_(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]], num=25):
