@@ -133,9 +133,10 @@ def arguments():
         players = list(itertools.product(map(eval, set(args.signallers)), map(eval, set(args.responders))))
     else:
         players = zip(map(eval, args.signallers), map(eval, args.responders))
-    kwargs = {'runs':args.runs, 'rounds':args.rounds, 'nested':False, 'file_name':file_name, 'tag':args.tag}
+    kwargs = {'runs':args.runs, 'rounds':args.rounds, 'nested':False, 'file_name':file_name, 'tag':args.tag,
+    'signaller_generator_args':{}}
     if args.women is not None:
-        kwargs['women_weights'] = args.women
+        kwargs['signaller_generator_args']['type_distribution'] = args.women
     #if args.indiv:
     #    kwargs['measures_midwives'] = indiv_measures_mw()
     #    kwargs['measures_women'] = indiv_measures_women()
