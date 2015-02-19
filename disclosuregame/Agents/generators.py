@@ -6,19 +6,20 @@ class AgentGenerator(object):
 	A machine that produces new agents to fit some distribution of types.
 	"""
 
-	def __init__(self, constructor, payoffs, agent_args={}, type_distribution=[1/3., 1/3., 1/3.], random=None):
+	def __init__(self, constructor, payoffs, agent_args={}, type_distribution=[1/3., 1/3., 1/3.]):
 		self.type_distribution = type_distribution
-		self.random = random
 		self.constructor = constructor
 		self.agent_args = agent_args
 		self.game = payoffs
 
-	def generator(self):
+	def generator(self, random=None):
 		"""
 		A generator that yields a player with random beliefs, according to the type distribution.
 		"""
+		if random is None:
+			random = Random()
 		while True:
-			draw = self.random.random()
+			draw = random.random()
 			bracket = 0.
 			for i in range(len(self.type_distribution)):
 				bracket += self.type_distribution[i]

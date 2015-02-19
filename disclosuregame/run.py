@@ -249,31 +249,30 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         random = Random(seeds[i])
         game.seed = seeds[i]
         game.random = Random(seeds[i])
-        try:
-          game.player_random = Random(game.random.random())
-        except AttributeError:
-          pass
           
         #random.seed(1)
         #logger.info "Making run %d/%d on %s" % (i + 1, runs, file_name)
 
         #Make players and initialise beliefs
-        women = make_players(signaller_fn, num=num_women, weights=women_weights, nested=nested, player_args=signaller_args, random=random)
+        signallers = game.make_signaller.generator(Random(game.random.random()))
+        women = [signallers.next() for i in range(num_women)]#make_players(signaller_fn, num=num_women, weights=women_weights, nested=nested, player_args=signaller_args, random=random)
         #logger.info "made %d women." % len(women)
-        for j in range(len(women)):
-            woman = women[j]
-            if women_priors is not None:
-                woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, women_priors[j][0], women_priors[j][1])
-            else:
-                woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, random_expectations(random=random), [random_expectations(breadth=2, random=random) for x in range(3)])
-        if women_modifier is not None:
-            women_modifier(women)
+        #for j in range(len(women)):
+        #    woman = women[j]
+        #    if women_priors is not None:
+        #        woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, women_priors[j][0], women_priors[j][1])
+        #    else:
+        #        woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, random_expectations(random=random), [random_expectations(breadth=2, random=random) for x in range(3)])
+        #if women_modifier is not None:
+        #    women_modifier(women)
         #logger.info("Set priors.")
         #print responder_args
-        mw = make_players(responder_fn, num_midwives, weights=mw_weights, nested=nested, signaller=False, player_args=responder_args, random=random)
+        #mw = make_players(responder_fn, num_midwives, weights=mw_weights, nested=nested, signaller=False, player_args=responder_args, random=random)
+        responders = game.make_responder.generator(Random(game.random.random())
+        mw = [responders.next() for i in range(num_midwives)]
         #logger.info("Made agents.")
-        for midwife in mw:
-            midwife.init_payoffs(game.midwife_payoff, game.type_weights)
+        #for midwife in mw:
+        #    midwife.init_payoffs(game.midwife_payoff, game.type_weights)
         #logger.info("Set priors.")
         #player_pairs.append((deepcopy(game), women, mw))
         yield (deepcopy(game), women, mw)
@@ -380,7 +379,7 @@ def experiment(file_name, game_fns=[Game, CaseloadGame],
                     payoffs = Payoffs(**args.pop('payoff_args', {}))
                     signaller_generator = signaller_generator_fn(pair[0], payoffs, **args.pop('signaller_generator_args', {}))
                     responder_generator = responder_generator_fn(pair[1], payoffs, **args.pop('responder_generator_args', {}))
-                    game = game_fn(**arg.pop('game_args', {}), payoffs=payoffs, make_signaller=responder_generator, make_responder=responder_generator)
+                    game = game_fn(**arg.pop('game_args', {}), payoffs=payoffs, make_signaller=signaller_generator, make_responder=responder_generator)
                 except TypeError as e:
                     logger.error("Wrong arguments for this game type.")
                     logger.error(e)

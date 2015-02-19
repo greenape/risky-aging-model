@@ -48,7 +48,7 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = multiprocessing.current_process()
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
-        signallers = self.make_signallers.generator()
+        signallers = self.make_signallers.generator(self.random.Random())
 
         rounds = self.rounds
         birthed = []
@@ -254,7 +254,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         else:
             LOG.debug("Playing a game.")
         women, midwives = players
-        signallers = self.make_signallers.generator()
+        signallers = self.make_signallers.generator(self.random.Random())
 
         rounds = self.rounds
         birthed = []

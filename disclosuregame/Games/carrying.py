@@ -50,7 +50,7 @@ class CarryingGame(game.Game):
     """
     def play_game(self, players, file_name=""):
         women, midwives = players
-        signallers = self.make_signallers.generator()
+        signallers = self.make_signallers.generator(self.random.Random())
 
         rounds = self.rounds
         birthed = []
@@ -95,7 +95,7 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
 
     def play_game(self, players, file_name=""):
         women, midwives = players
-        signallers = self.make_signallers.generator()
+        signallers = self.make_signallers.generator(self.random.Random())
 
         rounds = self.rounds
         birthed = []

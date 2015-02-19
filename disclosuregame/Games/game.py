@@ -106,11 +106,11 @@ class Game(object):
         self.parameters['baby_payoff'] = self.payoffs['baby_payoff']
 
         if make_signaller is None:
-            self.make_signaller = SignallerGenerator(random=Random(self.random.random()))
+            self.make_signaller = SignallerGenerator()
         else:
             self.make_signaller = make_signaller
         if make_responder is None:
-            self.make_responder = ResponderGenerator(random=Random(self.random.random()))
+            self.make_responder = ResponderGenerator()
         else:
             self.make_responder = make_responder
 
