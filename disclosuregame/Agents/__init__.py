@@ -1,1 +1,1 @@
-__all__ = ["bayes", "cpt", "heuristic", "payoff", "recognition", "rl", "sharing"]
+__all__ = ["bayes", "cpt", "heuristic", "payoff", "recognition", "rl", "sharing", "generator"]
