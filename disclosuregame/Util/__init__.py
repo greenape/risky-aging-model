@@ -24,6 +24,13 @@ def weighted_random_choice(choices, weights, random=Random()):
     population = [val for val, cnt in zip(choices, weights) for i in range(int(cnt))]
     return random.choice(population)
 
+def logistic_random(loc, scale, random=Random()):
+    """
+    Return a random number from a specified logistic distribution.
+    """
+    x = random.Random()
+    return loc + scale*math.log(x / (1-x))
+
 def shuffled(target, random=Random()):
     """
     Return a shuffled version of the argument
