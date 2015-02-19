@@ -25,7 +25,7 @@ class AgentGenerator(object):
 				bracket += self.type_distribution[i]
 				if draw < bracket:
 					break
-			agent = constructor(player_type=i, seed=self.random.random(), **self.agent_args)
+			agent = constructor(player_type=i, seed=random.random(), **self.agent_args)
 			self.init(agent)
 			yield agent
 
