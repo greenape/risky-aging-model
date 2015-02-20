@@ -14,6 +14,8 @@ def ebreferral_logisticstigma(agent, woman_baby_payoff=[], woman_social_payoff=[
 	Initiate a signaller with Eurobarometer style multinomially distributed belief in referral,
 	and logistic distribution beliefs on type distribution drawn from ESS. Both priors are multiplied by a
 	constant with a lower bound of of that constant, representing the weight of the prior.
+
+	Agent may have a 3:1, or 2:1 bias in favour of or against their being referred.
 	"""
 	x = logistic_random(location, scale, random=agent.random)
 	

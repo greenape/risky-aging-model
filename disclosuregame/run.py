@@ -220,7 +220,9 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     runs=1, game=None, rounds=100,
     mw_weights=[80/100., 15/100., 5/100.], women_weights=[1/3., 1/3., 1/3.], women_priors=None, seeds=None,
     women_modifier=None, measures_women=measures_women(), measures_midwives=measures_midwives(),
-    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag=""):
+    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="",
+    responder_initor=initors.responder, signaller_initor=initors.signaller, signaller_init_args={},
+    responder_init_args={}):
 
     if game is None:
         game = Game()
@@ -258,22 +260,18 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         #logger.info "Making run %d/%d on %s" % (i + 1, runs, file_name)
 
         #Make players and initialise beliefs
-        women = make_players(signaller_fn, num=num_women, weights=women_weights, nested=nested, player_args=signaller_args, random=random)
-        #logger.info "made %d women." % len(women)
-        for j in range(len(women)):
-            woman = women[j]
-            if women_priors is not None:
-                woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, women_priors[j][0], women_priors[j][1])
-            else:
-                woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, random_expectations(random=random), [random_expectations(breadth=2, random=random) for x in range(3)])
+        signaller_init_args['woman_baby_payoff'] = game.woman_baby_payoff
+        signaller_init_args['woman_social_payoff'] = game.woman_social_payoff
+        women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
+        women = [women_generator.next() for i in range(num_women)]
+        game.signaller_generator = women_generator
         if women_modifier is not None:
             women_modifier(women)
         #logger.info("Set priors.")
         #print responder_args
-        mw = make_players(responder_fn, num_midwives, weights=mw_weights, nested=nested, signaller=False, player_args=responder_args, random=random)
-        #logger.info("Made agents.")
-        for midwife in mw:
-            midwife.init_payoffs(game.midwife_payoff, game.type_weights)
+        responder_init_args['midwife_payoff'] = game.midwife_payoff
+        mw_generator = responder_fn.generator(random=game.player_random, type_distribution=mw_weights, agent_args=responder_args, initor=responder_initor,init_args=responder_init_args)
+        mw = [mw_generator.next() for i in range(num_midwives)]
         #logger.info("Set priors.")
         #player_pairs.append((deepcopy(game), women, mw))
         yield (deepcopy(game), women, mw)
