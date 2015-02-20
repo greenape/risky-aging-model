@@ -24,9 +24,14 @@ class CarryingInformationGame(CarryingReferralGame):
     is shared on each round. Sharing is controlled by the share_prob parameters which
     are the probability that any given memory is shared.
     """
-    def __init__(self, mw_share_prob=0, mw_share_bias=-.99,
-        women_share_prob=0, women_share_bias=0.99, **kwargs):
-        super(CarryingInformationGame, self).__init__(**kwargs)
+    def __init__(self, baby_payoff=10, no_baby_payoff=2, mid_baby_payoff=1,referral_cost=9, harsh_high=2,
+     harsh_mid=1, harsh_low=0, mid_high=1, mid_mid=0, mid_low=0, low_high=0,low_mid=0,low_low=0, randomise_payoffs=False,
+     type_weights=[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]], rounds=100, measures_women=measures_women(),
+     measures_midwives=measures_midwives(), params=None, mw_share_prob=0, mw_share_bias=-.99, women_share_prob=0, women_share_bias=0.99,
+     num_appointments=12, seed=None, signaller_args={}, responder_args={}):
+        super(CarryingInformationGame, self).__init__(baby_payoff, no_baby_payoff, mid_baby_payoff, referral_cost, harsh_high,
+            harsh_mid, harsh_low, mid_high, mid_mid, mid_low, low_high, low_mid, low_low, randomise_payoffs, type_weights,
+            rounds, measures_women, measures_midwives, params, seed)
         self.parameters['mw_share_prob'] = mw_share_prob
         self.parameters['mw_share_bias'] = mw_share_bias
         self.parameters['women_share_prob'] = women_share_prob
@@ -35,6 +40,9 @@ class CarryingInformationGame(CarryingReferralGame):
         self.mw_share_prob = mw_share_prob
         self.women_share_bias = women_share_bias
         self.women_share_prob = women_share_prob
+        self.num_appointments = num_appointments
+        self.signaller_args = signaller_args
+        self.responder_args = responder_args
 
     def __str__(self):
         return "sharing_%s" % super(CarryingInformationGame, self).__unicode__()
@@ -48,7 +56,7 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = multiprocessing.current_process()
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
-        signallers = self.make_signallers.generator(self.random.Random())
+        player_dist = self.get_distribution(women)
 
         rounds = self.rounds
         birthed = []
@@ -70,7 +78,9 @@ class CarryingInformationGame(CarryingReferralGame):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = signallers.next()
+                    new_woman = self.random_player(player_dist, woman, self.signaller_args)#type(woman)(player_type=woman.player_type)
+                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
+                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -254,7 +264,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         else:
             LOG.debug("Playing a game.")
         women, midwives = players
-        signallers = self.make_signallers.generator(self.random.Random())
+        player_dist = self.get_distribution(women)
 
         rounds = self.rounds
         birthed = []
@@ -296,7 +306,9 @@ class CaseloadSharingGame(CarryingInformationGame):
                     LOG.debug("Adding a new player")
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = signallers.next()
+                    new_woman = self.random_player(player_dist, woman, self.signaller_args)#type(woman)(player_type=woman.player_type)
+                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
+                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)

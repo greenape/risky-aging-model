@@ -133,10 +133,9 @@ def arguments():
         players = list(itertools.product(map(eval, set(args.signallers)), map(eval, set(args.responders))))
     else:
         players = zip(map(eval, args.signallers), map(eval, args.responders))
-    kwargs = {'runs':args.runs, 'rounds':args.rounds, 'nested':False, 'file_name':file_name, 'tag':args.tag,
-    'signaller_generator_args':{}}
+    kwargs = {'runs':args.runs, 'rounds':args.rounds, 'nested':False, 'file_name':file_name, 'tag':args.tag}
     if args.women is not None:
-        kwargs['signaller_generator_args']['type_distribution'] = args.women
+        kwargs['women_weights'] = args.women
     #if args.indiv:
     #    kwargs['measures_midwives'] = indiv_measures_mw()
     #    kwargs['measures_women'] = indiv_measures_women()
@@ -191,47 +190,49 @@ def make_players(constructor, num=100, weights=[1/3., 1/3., 1/3.], nested=False,
             women.append(constructor(player_type=player_type, **player_args))
     return women
 
-def params_dict(game, rounds, tag):
+def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game, rounds,
+    signaller_args, responder_args, tag):
     params = OrderedDict()
     params['game'] = str(game)
-    params['decision_rule_responder'] = str(game.make_responder.constructor())
-    params['decision_rule_signaller'] = str(game.make_signaller.constructor())
+    params['decision_rule_responder'] = responder_rule
+    params['decision_rule_signaller'] = signaller_rule
     params['caseload'] = game.is_caseloaded()
-    for i in range(len(game.make_responder.type_distribution)):
-        params['mw_%d' % i] = game.make_responder.type_distribution[i]
-
-    for i in range(len(game.make_signaller.type_distribution)):
-        params['women_%d' % i] = game.make_signaller.type_distribution[i]
-
+    params['mw_0'] = mw_weights[0]
+    params['mw_1'] = mw_weights[1]
+    params['mw_2'] = mw_weights[2]
+    params['women_0'] = women_weights[0]
+    params['women_1'] = women_weights[1]
+    params['women_2'] = women_weights[2]
     params['max_rounds'] = rounds
     params['tag'] = tag
-    for k, v in game.make_signaller.agent_args.items():
+    for k, v in signaller_args.items():
         params['signaller_%s' % k] = v
-    for k, v in game.make_respodnder.agent_args.items():
+    for k, v in responder_args.items():
         params['responder_%s' % k] = v
 
-    try:
-        for i in range(3):
-            for j in range(3):
-                params['weight_%d_%d' % (i, j)] = game.make_responder.type_weights[i][j]
-    except AttributeException:
-        pass
+    for i in range(3):
+        for j in range(3):
+            params['weight_%d_%d' % (i, j)] = game.type_weights[i][j]
     return params
 
-def decision_fn_compare(num_midwives=100, num_women=1000, 
-    runs=1, game=None, rounds=100, seeds=None,
-    measures_women=measures_women(), measures_midwives=measures_midwives(),
-    mw_priors=None, file_name="", tag=""):
+def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder,
+    num_midwives=100, num_women=1000, 
+    runs=1, game=None, rounds=100,
+    mw_weights=[80/100., 15/100., 5/100.], women_weights=[1/3., 1/3., 1/3.], women_priors=None, seeds=None,
+    women_modifier=None, measures_women=measures_women(), measures_midwives=measures_midwives(),
+    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag=""):
 
     if game is None:
         game = Game()
     if mw_priors is not None:
-        game.make_responder.type_weights = mw_priors
+        game.type_weights = mw_priors
 
     game.measures_midwives = measures_midwives
     game.measures_women = measures_women
-    
-    params = params_dict(game, rounds, tag)
+    game.signaller_args = signaller_args
+    game.responder_args = responder_args
+    params = params_dict(str(signaller_fn()), str(responder_fn()), mw_weights, women_weights, game, rounds,
+        signaller_args, responder_args, tag)
     for key, value in params.items():
         game.parameters[key] = value
     game.rounds = rounds
@@ -248,30 +249,31 @@ def decision_fn_compare(num_midwives=100, num_women=1000,
         random = Random(seeds[i])
         game.seed = seeds[i]
         game.random = Random(seeds[i])
+        try:
+          game.player_random = Random(game.random.random())
+        except AttributeError:
+          pass
           
         #random.seed(1)
         #logger.info "Making run %d/%d on %s" % (i + 1, runs, file_name)
 
         #Make players and initialise beliefs
-        signallers = game.make_signaller.generator(Random(game.random.random()))
-        women = [signallers.next() for i in range(num_women)]#make_players(signaller_fn, num=num_women, weights=women_weights, nested=nested, player_args=signaller_args, random=random)
+        women = make_players(signaller_fn, num=num_women, weights=women_weights, nested=nested, player_args=signaller_args, random=random)
         #logger.info "made %d women." % len(women)
-        #for j in range(len(women)):
-        #    woman = women[j]
-        #    if women_priors is not None:
-        #        woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, women_priors[j][0], women_priors[j][1])
-        #    else:
-        #        woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, random_expectations(random=random), [random_expectations(breadth=2, random=random) for x in range(3)])
-        #if women_modifier is not None:
-        #    women_modifier(women)
+        for j in range(len(women)):
+            woman = women[j]
+            if women_priors is not None:
+                woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, women_priors[j][0], women_priors[j][1])
+            else:
+                woman.init_payoffs(game.woman_baby_payoff, game.woman_social_payoff, random_expectations(random=random), [random_expectations(breadth=2, random=random) for x in range(3)])
+        if women_modifier is not None:
+            women_modifier(women)
         #logger.info("Set priors.")
         #print responder_args
-        #mw = make_players(responder_fn, num_midwives, weights=mw_weights, nested=nested, signaller=False, player_args=responder_args, random=random)
-        responders = game.make_responder.generator(Random(game.random.random())
-        mw = [responders.next() for i in range(num_midwives)]
+        mw = make_players(responder_fn, num_midwives, weights=mw_weights, nested=nested, signaller=False, player_args=responder_args, random=random)
         #logger.info("Made agents.")
-        #for midwife in mw:
-        #    midwife.init_payoffs(game.midwife_payoff, game.type_weights)
+        for midwife in mw:
+            midwife.init_payoffs(game.midwife_payoff, game.type_weights)
         #logger.info("Set priors.")
         #player_pairs.append((deepcopy(game), women, mw))
         yield (deepcopy(game), women, mw)
@@ -368,23 +370,22 @@ def write(queue, db_name, kill_queue):
 
 def experiment(file_name, game_fns=[Game, CaseloadGame], 
     agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
-    kwargs=[{}], signaller_generator_fn=SignallerGenerator, responder_generator_fn=ResponderGenerator):
+    kwargs=[{}]):
     run_params = []
     for pair in agents:
         for game_fn in game_fns:
             for kwarg in kwargs:
                 arg = kwarg.copy()
                 try:
-                    payoffs = Payoffs(**args.pop('payoff_args', {}))
-                    signaller_generator = signaller_generator_fn(pair[0], payoffs, **args.pop('signaller_generator_args', {}))
-                    responder_generator = responder_generator_fn(pair[1], payoffs, **args.pop('responder_generator_args', {}))
-                    game = game_fn(**arg.pop('game_args', {}), payoffs=payoffs, make_signaller=signaller_generator, make_responder=responder_generator)
+                    game = game_fn(**arg.pop('game_args', {}))
                 except TypeError as e:
                     logger.error("Wrong arguments for this game type.")
                     logger.error(e)
                     raise
                 #kwarg.update({'measures_midwives': measures_midwives, 'measures_women': measures_women})
                 arg['game'] = game
+                arg['signaller_fn'] = pair[0]
+                arg['responder_fn'] = pair[1]
                 run_params.append(arg)
     kw_experiment(run_params, file_name)
 
