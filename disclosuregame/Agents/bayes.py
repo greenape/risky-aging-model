@@ -2,6 +2,7 @@ from ..Util import shuffled
 
 from random import Random
 from itertools import count
+import initors
 
 class Agent(object):
     id_generator = count()
@@ -48,6 +49,21 @@ class Agent(object):
             setattr(result, k, deepcopy(v, memo))
         result.ident = Agent.id_generator.next()
         return result
+
+    @classmethod
+    def generator(cls, random=None, type_distribution=[1/3., 1/3., 1/3.], agent_args={}, initor=initors.signaller,init_args={}):
+        if random is None:
+            random = Random()
+        while True:
+            draw = random.random()
+            bracket = 0.
+            for i in range(len(type_distribution)):
+                bracket += type_distribution[i]
+                if draw < bracket:
+                    break
+            agent = cls(player_type=i, seed=random.random(), **agent_args)
+            initor(agent, **init_args)
+            yield agent
 
 
 class Signaller(Agent):
@@ -305,6 +321,8 @@ class BayesianSignaller(Signaller):
         self.rounds += 1
         self.log_signal(best[0], opponent)
         return best[0]
+
+
 
 
 class Responder(Agent):

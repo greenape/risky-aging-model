@@ -24,6 +24,25 @@ def weighted_random_choice(choices, weights, random=Random()):
     population = [val for val, cnt in zip(choices, weights) for i in range(int(cnt))]
     return random.choice(population)
 
+def multinomial(probabilities, draws=1, random=Random()):
+        """
+        Draw from a multinomial distribution
+        """
+        def pick():
+            draw = random.random()
+            bracket = 0.
+            for i in range(len(probabilities)):
+                bracket += probabilities[i]
+                if draw < bracket:
+                    return i
+            return i
+        
+        result = [0]*len(probabilities)
+        for i in range(draws):
+            result[pick()] += 1
+        return result
+
+
 def logistic_random(loc, scale, random=Random()):
     """
     Return a random number from a specified logistic distribution.
