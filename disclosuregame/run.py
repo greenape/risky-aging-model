@@ -227,13 +227,9 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     runs=1, game=None, rounds=100,
     mw_weights=[80/100., 15/100., 5/100.], women_weights=[1/3., 1/3., 1/3.], women_priors=None, seeds=None,
     women_modifier=None, measures_women=measures_women(), measures_midwives=measures_midwives(),
-<<<<<<< HEAD
-    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="",
+    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="", measure_freq=1,
     responder_initor=initors.responder, signaller_initor=initors.signaller, signaller_init_args={},
     responder_init_args={}):
-=======
-    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="", measure_freq=1):
->>>>>>> upstream/master
 
     if game is None:
         game = Game()

@@ -26,7 +26,7 @@ class CarryingGame(game.Game):
     """
     def play_game(self, players, file_name=""):
         women, midwives = players
-        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
@@ -71,7 +71,7 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
 
     def play_game(self, players, file_name=""):
         women, midwives = players
-        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []

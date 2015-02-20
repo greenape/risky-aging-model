@@ -51,7 +51,7 @@ class CarryingInformationGame(CarryingReferralGame):
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
 
-        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
@@ -73,7 +73,7 @@ class CarryingInformationGame(CarryingReferralGame):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    nnew_woman = signaller_generator.next()
+                    new_woman = signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -330,7 +330,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         else:
             LOG.debug("Playing a game.")
         women, midwives = players
-        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
