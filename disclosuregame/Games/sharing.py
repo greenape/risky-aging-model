@@ -35,7 +35,6 @@ class CarryingInformationGame(CarryingReferralGame):
         self.mw_share_prob = mw_share_prob
         self.women_share_bias = women_share_bias
         self.women_share_prob = women_share_prob
-        self.num_appointments = num_appointments
         self.signaller_args = signaller_args
         self.responder_args = responder_args
 
@@ -51,8 +50,9 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = multiprocessing.current_process()
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
-        player_dist = self.get_distribution(women)
 
+        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
         self.random.shuffle(women)
@@ -73,7 +73,7 @@ class CarryingInformationGame(CarryingReferralGame):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    nnew_woman = self.signaller_generator.next()
+                    nnew_woman = signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -257,8 +257,8 @@ class CaseloadSharingGame(CarryingInformationGame):
         else:
             LOG.debug("Playing a game.")
         women, midwives = players
-        player_dist = self.get_distribution(women)
-
+        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
         self.random.shuffle(women)
@@ -299,7 +299,7 @@ class CaseloadSharingGame(CarryingInformationGame):
                     LOG.debug("Adding a new player")
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.signaller_generator.next()
+                    new_woman = signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)

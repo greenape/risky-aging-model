@@ -69,7 +69,7 @@ def onsreferral_logisticstigma(agent, woman_baby_payoff=[], woman_social_payoff=
 	agent.init_payoffs(woman_baby_payoff, woman_social_payoff, type_weights, referral_weights)
 
 
-def responder(agent, midwife_payoff=[], type_weights=[]):
+def responder(agent, midwife_payoff=[], type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]):
 	"""
 	Set up a responder with fixed payoffs and beliefs.
 	"""

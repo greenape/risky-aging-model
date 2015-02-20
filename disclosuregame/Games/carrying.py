@@ -15,38 +15,9 @@ class CarryingGame(game.Game):
     def __unicode__(self):
         return "carrying_%s" % super(CarryingGame, self).__unicode__()
 
-    def __init__(self, mw_share_prob=0, mw_share_bias=-.99, women_share_prob=0, women_share_bias=0.99,
-     **kwargs):
+    def __init__(self, **kwargs):
         super(CarryingGame, self).__init__(**kwargs)
         self.player_random = Random(self.random.random())
-
-    def random_player(self, probabilities, player, args={}):
-        """
-        Generate a random player, based on the probabilities
-        provided by roulette.
-        """
-        draw = self.player_random.random()
-        bracket = 0.
-        for i in range(len(probabilities)):
-            bracket += probabilities[i]
-            if draw < bracket:
-                try:
-                    new_player = type(player)(player_type=i, child_fn=player.child_fn, **args)
-                    player = new_player
-                except AttributeError:
-                    player = type(player)(player_type=i, seed=self.player_random.random(), **args)
-                return player
-        print "Whoops!",bracket,draw
-
-
-    def get_distribution(self, players):
-        """
-        Return a list giving the distribution of player types.
-        """
-        player_types = map(lambda x: x.player_type, players)
-        counts = collections.Counter(player_types)
-        return map(lambda x: float(x) / sum(counts.values()), counts.values())
-
 
 
     """
@@ -55,8 +26,8 @@ class CarryingGame(game.Game):
     """
     def play_game(self, players, file_name=""):
         women, midwives = players
-        player_dist = self.get_distribution(women)
-
+        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
         self.random.shuffle(women)
@@ -75,7 +46,7 @@ class CarryingGame(game.Game):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.signaller_generator.next()
+                    new_woman = signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -100,8 +71,8 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
 
     def play_game(self, players, file_name=""):
         women, midwives = players
-        player_dist = self.get_distribution(women)
-
+        women_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         birthed = []
         self.random.shuffle(women)
@@ -136,7 +107,7 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.signaller_generator.next()
+                    new_woman = signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)

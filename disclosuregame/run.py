@@ -17,6 +17,8 @@ from disclosuregame.experiments import *
 
 from disclosuregame.Util import *
 
+import disclosuregame.Agents.initors
+
 import disclosuregame
 
 import multiprocessing
@@ -233,6 +235,14 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     game.measures_women = measures_women
     game.signaller_args = signaller_args
     game.responder_args = responder_args
+    signaller_init_args['woman_baby_payoff'] = game.woman_baby_payoff
+    signaller_init_args['woman_social_payoff'] = game.woman_social_payoff
+    responder_init_args['midwife_payoff'] = game.midwife_payoff
+    game.women_weights = women_weights
+    game.signaller_initor = signaller_initor
+    game.signaller_init_args = signaller_init_args
+    game.signaller_fn = signaller_fn
+
     params = params_dict(str(signaller_fn()), str(responder_fn()), mw_weights, women_weights, game, rounds,
         signaller_args, responder_args, tag)
     for key, value in params.items():
@@ -260,16 +270,14 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         #logger.info "Making run %d/%d on %s" % (i + 1, runs, file_name)
 
         #Make players and initialise beliefs
-        signaller_init_args['woman_baby_payoff'] = game.woman_baby_payoff
-        signaller_init_args['woman_social_payoff'] = game.woman_social_payoff
+
         women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
         women = [women_generator.next() for i in range(num_women)]
-        game.signaller_generator = women_generator
+
         if women_modifier is not None:
             women_modifier(women)
         #logger.info("Set priors.")
         #print responder_args
-        responder_init_args['midwife_payoff'] = game.midwife_payoff
         mw_generator = responder_fn.generator(random=game.player_random, type_distribution=mw_weights, agent_args=responder_args, initor=responder_initor,init_args=responder_init_args)
         mw = [mw_generator.next() for i in range(num_midwives)]
         #logger.info("Set priors.")
