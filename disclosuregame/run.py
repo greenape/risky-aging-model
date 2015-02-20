@@ -262,6 +262,7 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     #for i in range(runs):
     i =  0
     while i < runs:
+        logger.debug("Generated run %d of %d" % (i, runs))
         #game.parameters['seed'] = i
         # Parity across different conditions but random between runs.
         random = Random(seeds[i])
@@ -278,14 +279,14 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         #Make players and initialise beliefs
 
         women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
-        women = [women_generator.next() for i in range(num_women)]
+        women = [women_generator.next() for x in range(num_women)]
 
         if women_modifier is not None:
             women_modifier(women)
         #logger.info("Set priors.")
         #print responder_args
         mw_generator = responder_fn.generator(random=game.player_random, type_distribution=mw_weights, agent_args=responder_args, initor=responder_initor,init_args=responder_init_args)
-        mw = [mw_generator.next() for i in range(num_midwives)]
+        mw = [mw_generator.next() for x in range(num_midwives)]
         #logger.info("Set priors.")
         #player_pairs.append((deepcopy(game), women, mw))
         yield (deepcopy(game), women, mw)
