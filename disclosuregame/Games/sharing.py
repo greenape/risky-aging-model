@@ -242,6 +242,79 @@ class CarryingInformationGame(CarryingReferralGame):
         return memories[0:num]
 
 
+class ShuffledSharingGame(CarryingInformationGame):
+    def __str__(self):
+        return "shuffled_%s" % super(CarryingInformationGame, self).__unicode__()
+
+    def play_game(self, players, file_name=""):
+        #self.random.seed(1)
+        try:
+            worker = scoop.worker[0]
+        except:
+            worker = multiprocessing.current_process()
+        LOG.debug("Worker %s playing a game." % (worker))
+        women, midwives = players
+        player_dist = self.get_distribution(women)
+
+        rounds = self.rounds
+        birthed = []
+        self.random.shuffle(women)
+        num_midwives = len(midwives)
+        women_res = self.measures_women.dump(None, self.rounds, self, None)
+        mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
+        women_memories = []
+        mw_memories = []
+        for i in range(rounds):
+            self.random.shuffle(women)
+            players = [women.pop() for j in range(num_midwives)]
+            self.random.shuffle(midwives)
+            map(self.play_round, players, midwives)
+            for x in midwives:
+                x.finished += 1
+            women_res = self.measures_women.dump(women + players, i, self, women_res)
+            mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+            for woman in players:
+                if self.all_played([woman], self.num_appointments):
+                    woman.is_finished = True
+                    # Add a new naive women back into the mix
+                    new_woman = self.random_player(player_dist, woman, self.signaller_args)#type(woman)(player_type=woman.player_type)
+                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
+                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman.started = i
+                    new_woman.finished = i
+                    women.insert(0, new_woman)
+                    if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
+                        women_memories.append(woman.get_memory())
+                    for midwife in midwives:
+                        midwife.signal_memory.pop(hash(woman), None)
+                    del woman
+                else:
+                    women.insert(0, woman)
+                    woman.finished += 1
+            # Share information
+            LOG.debug("Worker %s prepping share." % (worker))
+            #Midwives
+            try:
+                self.share_midwives(midwives)
+            except e:
+                LOG.debug("Sharing to midwives failed.")
+                LOG.debug(e)
+
+            #Women
+            try:
+                self.share_women(women, women_memories)
+            except Exception as e:
+                LOG.debug("Sharing to women failed.")
+                LOG.debug(e)
+
+            #if scoop_on:
+            #    scoop.logger.debug("Worker %s played %d rounds." % (worker, i))
+        del women
+        del midwives
+        del women_memories
+        LOG.debug("Worker %s completed a game." % (worker))
+        return women_res, mw_res
+
 class CaseloadSharingGame(CarryingInformationGame):
     def __str__(self):
         return "caseload_%s" % super(CaseloadSharingGame, self).__unicode__()

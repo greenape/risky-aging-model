@@ -77,7 +77,7 @@ class LexicographicSignaller(BayesianSignaller):
             response_weights)
         
 
-    def frequent(self, signal, n, responder=None):
+    def frequent(self, signal, n):
         """
         Return the nth most frequently experienced outcome from
         this signal.
@@ -104,23 +104,19 @@ class LexicographicSignaller(BayesianSignaller):
         return None
         #self.update_counts(response, midwife, payoff, midwife_type, weight)
 
-    def do_signal(self, opponent=None):
-        #super(LexicographicSignaller, self).do_signal(opponent)
-        signals = shuffled(self.signals, self.random)
+    def signal_search(self, signals):
         n = 0
-        # Reduce to possible
-        best = self.random.choice(signals)
         while n < self.depth:
             mappings = {}
             # N most frequent outcome of each signal
             for signal in signals:
-                payoff = self.frequent(signal, n, opponent)
+                payoff = self.frequent(signal, n)
                 mappings[signal] = payoff
             n += 1
             # Choose the highest unless there's a tie
             sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True)
             # Is there a best option?
-            best = sorted_mappings[0][0]
+            best = sorted_mappings[0]
             try:
                 if sorted_mappings[0][1] > sorted_mappings[1][1]:
                     break
@@ -130,9 +126,6 @@ class LexicographicSignaller(BayesianSignaller):
                 #    signals.remove(sorted_mappings[2][0])
             except IndexError:
                 pass
-        # No advantage found so take the first
-        self.rounds += 1
-        self.log_signal(best, opponent)
         return best
 
 

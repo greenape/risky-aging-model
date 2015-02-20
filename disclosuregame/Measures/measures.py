@@ -57,7 +57,7 @@ class Measures(object):
         Measures should contain a mapping from a field name to method for getting a result
         given an appointment, set of players, and a game. Params should contain mappings
         from parameter names to values.
-        Optionally takes an exist results object to add records to. This should have the same
+        Optionally takes an existing results object to add records to. This should have the same
         measures and params.
         Returns a results object for writing to csv.
         """
@@ -65,8 +65,8 @@ class Measures(object):
             results = Result(self.measures.keys(), game.parameters, [])
         if women is None:
             return results
-        line = map(lambda x: x.measure(rounds, women, game), self.measures.values())
         if rounds >= self.dump_after and (rounds % self.dump_every == 0 or rounds == (game.rounds - 1)):
+            line = map(lambda x: x.measure(rounds, women, game), self.measures.values())
             results.add_results(Result(self.measures.keys(), game.parameters, [line]))
         return results
 
@@ -96,7 +96,7 @@ class NumRounds(Measure):
             women = filter(lambda x: x.player_type == self.player_type, women)
         women = filter(lambda x: x.is_finished, women)
         if len(women) == 0:
-            return 0.
+            return "NA"
         return sum(map(lambda woman: woman.finished - woman.started, women)) / float(len(women))
 
 
@@ -493,7 +493,9 @@ class GroupHonesty(Measure):
     """
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
+        state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -518,7 +520,9 @@ class GroupSignal(GroupHonesty):
     """
     def measure_one(self, woman):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
+        state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -563,7 +567,9 @@ class ExpectedPointMutualInformation(Measure):
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        state = woman.random.getstate()
         r = woman.do_signal()
+        woman.random.setstate(state)
         woman.signal_log.pop()
         woman.rounds -= 1
         woman.signal_matches[r] -= 1
@@ -583,11 +589,155 @@ class ExpectedPointMutualInformation(Measure):
         total_type = float(len(typed_women))
         # Probability of being this player type
         p_type = total_type / total_women
+        if p_type == 0:
+            return 0.
         # Probability of this signal
         p_signal = sum(map(lambda x: self.measure_one(x, self.signal), women)) / total_women
+        if p_signal == 0:
+            return 0.
         # Probabilty of this signal and this type
         p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
+        if p_type_signal == 0 :
+            return 0.
         return p_type_signal*math.log(p_type_signal / (p_type*p_signal), 2)
+
+
+class TypeSignalProbability(ExpectedPointMutualInformation):
+    """
+    Calculate p(signal, type). Can marginalize for individual distributions.
+    """
+
+    def sample_one(self, woman):
+        """
+        Sample signals a few* times to get the possible ones.
+        These are guaranteed to be of uniform probability.
+
+        *100 times, based on a estimating the maximum time for python
+        random to choose all three options given uniform random choice.
+        """
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        #state = woman.random.getstate()
+        sigs = set()
+        signals = [0, 1, 2]
+        for combo in itertools.permutations(signals):
+            r = woman.signal_search(combo)[0]
+            sigs.add(r)
+        return sigs
+
+    def measure_one(self, woman, signal):
+        """
+        Return the probability of this agent signalling this signal.
+        """
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        """state = woman.random.getstate()
+        r = woman.do_signal()
+        woman.random.setstate(state)
+        woman.signal_log.pop()
+        woman.rounds -= 1
+        woman.signal_matches[r] -= 1
+        try:
+            woman.signal_memory.pop(hash(signaller), None)
+            woman.shareable = None
+        except:
+            pass
+        return 1. if r == signal else 0."""
+        sigs = self.sample_one(woman)
+        return 1./len(sigs) if r in sigs else 0.
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        if self.player_type is not None:
+            typed_women = filter(lambda x: x.player_type == self.player_type, women)
+        # Probabilty of this signal and this type
+        p_type_signal = sum(map(lambda x: self.measure_one(x, self.signal), typed_women)) / total_women
+        if p_type_signal == 0 :
+            return 0.
+        return p_type_signal
+
+class BayesTypeSignalProbability(TypeSignalProbability):
+    def __init__(self, player_type=None, midwife_type=None, signal=None):
+        super(BayesTypeSignalProbability, self).__init__(player_type, midwife_type, signal)
+        self.counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
+                        1: {0: 70.0, 1: 30.0, 2: 0.0},
+                        2: {0: 60.0, 1: 30.0, 2: 10.0}}
+
+    """
+    Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
+    """
+
+    def measure_one(self, woman):
+        """
+        Update the distribution with this agent's signal.
+        """
+        #
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        #state = woman.random.getstate()
+        #r = woman.do_signal()
+        #woman.random.setstate(state)
+        #woman.signal_log.pop()
+        #woman.rounds -= 1
+        #woman.signal_matches[r] -= 1
+        #try:
+        #    woman.signal_memory.pop(hash(signaller), None)
+        #    woman.shareable = None
+        #except:
+        #    pass
+        #self.counts[woman.player_type][r] += 1.
+        sigs = self.sample_one(woman)
+        for s in sigs:
+            self.counts[woman.player_type][s] += 1.
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        if self.player_type is None:
+            return "NA"
+        # Probabilty of this signal and this type
+        map(lambda x: self.measure_one(x), women)
+        total = sum(x for counter in self.counts.values() for x in counter.values())
+        return self.counts[self.player_type][self.signal] / total
+
+class SignalEntropy(ExpectedPointMutualInformation):
+    """
+    Return the shannon entropy of the signalling distribution.
+    """
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        def pointentropy(signal):
+            # Probability of this signal
+            p_signal = sum(map(lambda x: self.measure_one(x, signal), women)) / total_women
+            if p_signal == 0 :
+                return 0.
+            return p_signal*math.log(p_signal, 2)
+        return -sum(map(pointentropy, [0, 1, 2]))
+
+class TypeEntropy(Measure):
+    """
+    Return the shannon entropy of the type distribution.
+    """
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        def pointentropy(player_type):
+            # Probability of this type
+            typed_women = filter(lambda x: x.player_type == player_type, women)
+            total_type = float(len(typed_women))
+            # Probability of being this player type
+            p_type = total_type / total_women
+            if p_type == 0:
+                return 0.
+            return p_type*math.log(p_type, 2)
+        return -sum(map(pointentropy, [0, 1, 2]))
 
 
 class SquaredGroupHonesty(GroupHonesty):
@@ -645,6 +795,8 @@ def measures_women():
     measures["group_signal"] = GroupSignal()
     measures["median_signal"] = GroupSignalMedian()
     measures["signal_iqr"] = GroupSignalIQR()
+    #measures["type_entropy"] = TypeEntropy()
+    #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
     for i in range(3):
         #measures["type_%d_ref" % i] = TypeReferralBreakdown(player_type=i)
@@ -653,12 +805,13 @@ def measures_women():
         #measures['rounds_played_type_%d_upto' % i] = NumRoundsCumulative(player_type=i)
         measures['rounds_played_type_%d' % i] = NumRounds(player_type=i)
         measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
-        measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
+        #measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
         measures["group_signal_%d" % i] = GroupSignal(player_type=i)
         measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(3):
-            measures["pointwise_mi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
+            #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
+            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)

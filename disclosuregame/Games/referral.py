@@ -13,7 +13,7 @@ class ReferralGame(Game):
                 """ Play a round of this game between the
                 two players.
                 """
-                signal = signaller.do_signal(receiver)
+                signal = signaller.do_signal()
                 if signaller.rounds == self.num_appointments:
                         signaller.is_finished = True
                 act = receiver.respond(signal, opponent=signaller)
