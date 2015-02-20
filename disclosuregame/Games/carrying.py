@@ -15,14 +15,9 @@ class CarryingGame(game.Game):
     def __unicode__(self):
         return "carrying_%s" % super(CarryingGame, self).__unicode__()
 
-    def __init__(self, baby_payoff=10, no_baby_payoff=2, mid_baby_payoff=1,referral_cost=9, harsh_high=2,
-     harsh_mid=1, harsh_low=0, mid_high=1, mid_mid=0, mid_low=0, low_high=0,low_mid=0,low_low=0, randomise_payoffs=False,
-     type_weights=[[100., 1., 1.], [1., 10., 1.], [1., 1., 10.]], rounds=100, measures_women=measures_women(),
-     measures_midwives=measures_midwives(), params=None, mw_share_prob=0, mw_share_bias=-.99, women_share_prob=0, women_share_bias=0.99,
-     num_appointments=12, seed=None):
-        super(CarryingGame, self).__init__(baby_payoff, no_baby_payoff, mid_baby_payoff, referral_cost, harsh_high,
-            harsh_mid, harsh_low, mid_high, mid_mid, mid_low, low_high, low_mid, low_low, randomise_payoffs, type_weights,
-            rounds, measures_women, measures_midwives, params, num_appointments, seed)
+    def __init__(self, mw_share_prob=0, mw_share_bias=-.99, women_share_prob=0, women_share_bias=0.99,
+     **kwargs):
+        super(CarryingGame, self).__init__(**kwargs)
         self.player_random = Random(self.random.random())
 
     def random_player(self, probabilities, player, args={}):
@@ -77,12 +72,10 @@ class CarryingGame(game.Game):
             women_res = self.measures_women.dump(players, i, self, women_res)
             mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
             for woman in players:
-                if self.all_played([woman], 12):
+                if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = self.signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
@@ -140,12 +133,10 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
             for j in range(len(players)):
                 woman = players[j]
                 women = caseloads[midwives[j]]
-                if self.all_played([woman], 12):
+                if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = self.signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)

@@ -22,7 +22,7 @@ class Game(object):
     def __init__(self, baby_payoff=2, no_baby_payoff=2, mid_baby_payoff=1,referral_cost=1, harsh_high=2,
      harsh_mid=1, harsh_low=0, mid_high=1, mid_mid=0, mid_low=0, low_high=0,low_mid=0,low_low=0, randomise_payoffs=False,
      type_weights=[[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]], rounds=100, measures_women=measures_women(),
-     measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None, make_signaller=None, make_responder=None):
+     measures_midwives=measures_midwives(), params=None, num_appointments=12, seed=None):
         """ A multistage game played by two agents.
         """
         self.seed = seed
@@ -62,8 +62,6 @@ class Game(object):
             self.payoffs["low_mid"] = -low_mid
             self.payoffs["low_low"] = -low_low
         self.init_payoffs()
-        self.make_signaller = make_signaller
-        self.make_responder = make_responder
 
     def random_payoffs(self):
 
@@ -184,27 +182,6 @@ class Game(object):
         res_mw  = self.measures_midwives.dump(midwives, self.rounds, self)
         return res_women, res_mw
 
-    def new_signaller():
-        """
-        Generate a new signaller to add to the population of players.
-        """
-        return self.make_signaller(self.player_random())
-
-    def new_responder():
-        """
-        Generate a new responder to add to the population of players.
-        """
-        return self.make_responder(self.player_random())
-
-    def make_responders(n):
-        """
-        Generate n new responders.
-        """
-
-    def make_signallers(n):
-        """
-        Generate n new signallers.
-        """
 
     def __str__(self):
         return self.__unicode__()
