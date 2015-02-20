@@ -34,9 +34,35 @@ def ebreferral_logisticstigma(agent, woman_baby_payoff=[], woman_social_payoff=[
 	elif referral_category[2] == 1:
 		referral_weights[0][0] *= 2
 		referral_weights[1][0] *= 2
-	if referral_category[3] == 1:
+	elif referral_category[3] == 1:
 		referral_weights[0][0] *= 3
 		referral_weights[1][0] *= 3
+
+	agent.init_payoffs(woman_baby_payoff, woman_social_payoff, type_weights, referral_weights)
+
+def onsreferral_logisticstigma(agent, woman_baby_payoff=[], woman_social_payoff=[], referral_beliefs=[0.26357, 0.14288, 0.59355],
+	location=0.5025573,scale=0.0630946, prior_weight=1):
+	"""
+	Initiate a signaller with an ONS style multinomially distributed belief in referral,
+	and logistic distribution beliefs on type distribution drawn from ESS. Both priors are multiplied by a
+	constant with a lower bound of of that constant, representing the weight of the prior.
+	"""
+	x = logistic_random(location, scale, random=agent.random)
+	
+	type_weights = [prior_weight,prior_weight+x*-prior_weight]
+	if x > 0:
+		type_weights.reverse()
+		type_weights[0] *= -1
+
+	referral_category = multinomial(referral_beliefs, random=agent.random)
+
+	referral_weights = [[prior_weight]*2, [prior_weight]*2]
+	if referral_category[1] == 1:
+		referral_weights[0][1] *= 2
+		referral_weights[1][1] *= 2
+	elif referral_category[2] == 1:
+		referral_weights[0][0] *= 2
+		referral_weights[1][0] *= 2
 
 	agent.init_payoffs(woman_baby_payoff, woman_social_payoff, type_weights, referral_weights)
 
