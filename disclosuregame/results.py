@@ -152,11 +152,14 @@ class Result(object):
         This is to avoid the unpleasant scenario where values get cast to
         ints when importing into R using sqldf.
         """
-        if type(x) is not str or type(x) is not unicode:
+        try:
+            x = float(x)
+        except ValueError:
             try:
-                x = float(x)
-            except ValueError:
+                x = str(x)
+            except ValueError
                 pass
+            pass
         return x
 
 
