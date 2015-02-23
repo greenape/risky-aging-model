@@ -32,11 +32,11 @@ import gzip, csv
 
 
 def test():
-    game_args = {"baby_payoff":2, "mid_baby_payoff":1,"referral_cost":7800,
-     "harsh_mid":1, "harsh_low":0, "mid_mid":0, "mid_low":0, "low_mid":0,"low_low":0}
+    game_args = {"baby_payoff":7800, "mid_baby_payoff":1,"referral_cost":7800,
+     "mid_mid":7800, "mid_low":0, "low_mid":0,"low_low":0}
     args = {'game_args': game_args, 
-            'signaller_args':{'share_weight':0.},
-            'responder_args':{'share_weight':0.},
+            'signaller_args':{'share_weight':0., "signals":[0, 1]},
+            'responder_args':{'share_weight':0., "signals":[0, 1]},
             'mw_weights':[1., 0.], 
             'women_weights':[.75, .25],
             'signaller_initor':initors.ebreferral_logisticstigma,

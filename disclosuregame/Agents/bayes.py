@@ -4,6 +4,17 @@ from random import Random
 from itertools import count
 import initors
 
+try:
+    import scoop
+    scoop.worker
+    scoop_on = True
+    LOG = scoop.logger
+except:
+    scoop_on = False
+    import multiprocessing
+    LOG = multiprocessing.get_logger()
+    pass
+
 class Agent(object):
     id_generator = count()
     """
@@ -95,7 +106,8 @@ class Signaller(Agent):
         self.social_payoffs = social_payoffs
         self.type_weights = type_weights
         self.response_weights = response_weights
-
+        #LOG.debug(self.response_signal_matches)
+        #LOG.debug(response_weights)
         # Front load alpha_dot values
         for signal, responses in self.response_signal_matches.iteritems():
             for response, count in responses.iteritems():

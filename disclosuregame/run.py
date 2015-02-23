@@ -207,12 +207,11 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
     params['signaller_generator'] = signaller_initor.__name__
     params['responder_generator'] = responder_initor.__name__
     params['caseload'] = game.is_caseloaded()
-    params['mw_0'] = mw_weights[0]
-    params['mw_1'] = mw_weights[1]
-    params['mw_2'] = mw_weights[2]
-    params['women_0'] = women_weights[0]
-    params['women_1'] = women_weights[1]
-    params['women_2'] = women_weights[2]
+    for i in range(len(mw_weights)):
+        params['mw_%d' % i] = mw_weights[i]
+
+    for i in range(len(women_weights)):
+        params['women_%d' % i] = women_weights[i]
     params['max_rounds'] = rounds
     params['tag'] = tag
     for k, v in signaller_args.items():
@@ -223,8 +222,8 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
         params['signaller_init_%s' % k] = v
     for k, v in responder_init_args.items():
         params['responder_init_%s' % k] = v
-    for i in range(3):
-        for j in range(3):
+    for i in range(len(game.type_weights)):
+        for j in range(len(game.type_weights[i])):
             params['weight_%d_%d' % (i, j)] = game.type_weights[i][j]
     return params
 
@@ -259,6 +258,9 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     responder_init_args['midwife_payoff'] = game.midwife_payoff
     for key, value in params.items():
         game.parameters[key] = value
+    logger.debug("Parameters")
+    logger.debug("----------")
+    logger.debug(game.parameters)
     game.rounds = rounds
     random = Random()
     if seeds is None:
