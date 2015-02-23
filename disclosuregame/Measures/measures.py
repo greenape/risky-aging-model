@@ -621,8 +621,12 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         sigs = set()
         signals = [0, 1, 2]
         for combo in itertools.permutations(signals):
-            r = woman.signal_search(combo)[0]
-            sigs.add(r)
+            try:
+                r = woman.signal_search(combo)[0]
+                sigs.add(r)
+            except KeyError:
+                #Ignore signals that don't occur
+                pass
         return sigs
 
     def measure_one(self, woman, signal):
@@ -785,7 +789,7 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 
-def measures_women():
+def measures_women(n_signals=2):
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
@@ -798,7 +802,7 @@ def measures_women():
     #measures["type_entropy"] = TypeEntropy()
     #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(3):
+    for i in range(n_signals):
         #measures["type_%d_ref" % i] = TypeReferralBreakdown(player_type=i)
         #measures["type_%d_finished" % i] = TypeFinished(player_type=i)
         #measures['accrued_payoffs_type_%d' % i] = AccruedPayoffs(player_type=i)
@@ -809,7 +813,7 @@ def measures_women():
         measures["group_signal_%d" % i] = GroupSignal(player_type=i)
         measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
-        for j in range(3):
+        for j in range(n_signals):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
@@ -821,7 +825,7 @@ def measures_women():
 
 
 ##@profile
-def measures_midwives():
+def measures_midwives(n_signals=2):
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
@@ -832,7 +836,7 @@ def measures_midwives():
     measures['false_negatives_upto'] = FalseNegativeUpto()
     #measures['false_negatives'] = FalseNegative()
     #measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(3):
+    for i in range(n_signals):
         measures['response_signal_%d' % i] = GroupResponse(signal=i)
         measures['response_signal_0_type_%d' % i] = GroupResponse(signal=0,midwife_type=i)
         #measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
