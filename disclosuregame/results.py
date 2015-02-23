@@ -157,7 +157,7 @@ class Result(object):
         except ValueError:
             try:
                 x = str(x)
-            except ValueError
+            except ValueError:
                 pass
             pass
         return x
