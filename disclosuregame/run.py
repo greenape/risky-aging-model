@@ -198,11 +198,14 @@ def make_players(constructor, num=100, weights=[1/3., 1/3., 1/3.], nested=False,
     return women
 
 def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game, rounds,
-    signaller_args, responder_args, tag):
+    signaller_args, responder_args, tag, signaller_init_args, responder_init_args, 
+    signaller_initor, responder_initor):
     params = OrderedDict()
     params['game'] = str(game)
     params['decision_rule_responder'] = responder_rule
     params['decision_rule_signaller'] = signaller_rule
+    params['signaller_generator'] = signaller_initor.__name__
+    params['responder_generator'] = responder_initor.__name__
     params['caseload'] = game.is_caseloaded()
     params['mw_0'] = mw_weights[0]
     params['mw_1'] = mw_weights[1]
@@ -216,7 +219,10 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
         params['signaller_%s' % k] = v
     for k, v in responder_args.items():
         params['responder_%s' % k] = v
-
+    for k, v in signaller_init_args.items():
+        params['signaller_init_%s' % k] = v
+    for k, v in responder_init_args.items():
+        params['responder_init_%s' % k] = v
     for i in range(3):
         for j in range(3):
             params['weight_%d_%d' % (i, j)] = game.type_weights[i][j]
@@ -250,7 +256,7 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     game.signaller_fn = signaller_fn
 
     params = params_dict(str(signaller_fn()), str(responder_fn()), mw_weights, women_weights, game, rounds,
-        signaller_args, responder_args, tag)
+        signaller_args, responder_args, tag, signaller_init_args, responder_init_args, signaller_initor, responder_initor)
     for key, value in params.items():
         game.parameters[key] = value
     game.rounds = rounds
