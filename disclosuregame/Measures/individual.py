@@ -84,7 +84,7 @@ class Response(Measure):
             raise
         return r
 
-def indiv_measures_women():
+def indiv_measures_women(n_signals=2):
     measures = OrderedDict()
     measures['player_id'] = PlayerHash()
     measures['player_type'] = PlayerType()
@@ -93,7 +93,7 @@ def indiv_measures_women():
     measures['started'] = Started()
     measures['signalled'] = LastSignal()
     measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(3):
+    for i in range(n_signals):
         # Midwife types seen, signals sent
         measures['type_%d_frequency' % i] = TypeExperience(player_type=i, present=False)
         measures['signal_%d_frequency' % i] = SignalExperience(signal=i, present=False)
@@ -101,7 +101,7 @@ def indiv_measures_women():
         measures['round_%d_signal' % i] = RoundSignal(player_type = i)
     return IndividualMeasures(measures)
 
-def indiv_measures_mw():
+def indiv_measures_mw(n_signals=2):
     measures = OrderedDict()
     measures['player_id'] = PlayerHash()
     measures['player_type'] = PlayerType()
@@ -110,7 +110,7 @@ def indiv_measures_mw():
     measures['false_positives'] = FalsePositiveUpto()
     measures['false_negatives_upto'] = FalseNegativeUpto()
     measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(3):
+    for i in range(n_signals):
         # Women types seen, signals sent
         measures['type_%d_frequency' % i] = TypeExperience(player_type=i, present=False)
         measures['signal_%d_frequency' % i] = SignalExperience(signal=i, present=False)

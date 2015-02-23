@@ -81,10 +81,10 @@ class CumulativeHonestyCount(Measure):
         return sum(map(lambda x: x.measure(roundnum, women, game), self.counters))
 
 
-def abstract_measures_women():
+def abstract_measures_women(n_signals=2):
     measures = OrderedDict()
     measures['round'] = Appointment()
-    for i in range(3):
+    for i in range(n_signals):
         measures["type_%d_pop" % i] = PopCount(player_type = i)
         for j in range(1,12):
             measures["type_%d_round_%d_ref" % (i, j)] = CumulativeRefCount(player_type=i, signal=j)
