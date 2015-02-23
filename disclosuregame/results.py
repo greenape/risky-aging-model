@@ -154,12 +154,13 @@ class Result(object):
         """
         try:
             x = float(x)
-        except ValueError:
+        except (TypeError, ValueError):
             try:
                 x = str(x)
-            except ValueError:
+            except TypeError:
                 pass
             pass
+
         return x
 
 
