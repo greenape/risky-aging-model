@@ -9,6 +9,7 @@ from disclosuregame.Agents.recognition import *
 from disclosuregame.Agents.heuristic import *
 from disclosuregame.Agents.payoff import *
 from disclosuregame.Agents.rl import *
+import disclosuregame.Agents.initors
 
 from disclosuregame.Measures import *
 from disclosuregame.Measures.abstract import *
@@ -29,6 +30,18 @@ import os.path
 import cPickle
 import gzip, csv
 
+
+def test():
+    game_args = {"baby_payoff":2, "mid_baby_payoff":1,"referral_cost":7800,
+     "harsh_mid":1, "harsh_low":0, "mid_mid":0, "mid_low":0, "low_mid":0,"low_low":0}
+    args = {'game_args': game_args, 
+            'signaller_args':{'share_weight':0.},
+            'responder_args':{'share_weight':0.},
+            'mw_weights':[1., 0.], 
+            'women_weights':[.75, .25],
+            'signaller_initor':initors.ebreferral_logisticstigma,
+            'responder_initor':initors.normalresponder}
+    return args
 
 def scale_weights(weights, top):
     scaling = top / float(sum(weights))

@@ -53,6 +53,7 @@ class CarryingInformationGame(CarryingReferralGame):
 
         signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
+        LOG.debug("Made player generator.")
         rounds = self.rounds
         birthed = []
         self.random.shuffle(women)
@@ -61,6 +62,7 @@ class CarryingInformationGame(CarryingReferralGame):
         mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
         women_memories = []
         mw_memories = []
+        LOG.debug("Starting play.")
         for i in range(rounds):
             players = [women.pop() for j in range(num_midwives)]
             self.random.shuffle(midwives)
@@ -77,6 +79,7 @@ class CarryingInformationGame(CarryingReferralGame):
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
+                    LOG.debug("Generated a new player.")
                     if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
                         women_memories.append(woman.get_memory())
                     for midwife in midwives:

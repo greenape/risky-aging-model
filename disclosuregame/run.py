@@ -247,9 +247,6 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     game.measures_women = measures_women
     game.signaller_args = signaller_args
     game.responder_args = responder_args
-    signaller_init_args['woman_baby_payoff'] = game.woman_baby_payoff
-    signaller_init_args['woman_social_payoff'] = game.woman_social_payoff
-    responder_init_args['midwife_payoff'] = game.midwife_payoff
     game.women_weights = women_weights
     game.signaller_initor = signaller_initor
     game.signaller_init_args = signaller_init_args
@@ -257,6 +254,9 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
 
     params = params_dict(str(signaller_fn()), str(responder_fn()), mw_weights, women_weights, game, rounds,
         signaller_args, responder_args, tag, signaller_init_args, responder_init_args, signaller_initor, responder_initor)
+    signaller_init_args['woman_baby_payoff'] = game.woman_baby_payoff
+    signaller_init_args['woman_social_payoff'] = game.woman_social_payoff
+    responder_init_args['midwife_payoff'] = game.midwife_payoff
     for key, value in params.items():
         game.parameters[key] = value
     game.rounds = rounds

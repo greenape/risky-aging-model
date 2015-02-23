@@ -1,6 +1,7 @@
 __all__ = ["sqlite_dump", "sqlite_merge"]
 
 from random import Random
+import math
 
 def random_expectations(depth=0, breadth=3, low=1, high=10, random=Random()):
     """
@@ -47,7 +48,7 @@ def logistic_random(loc, scale, random=Random()):
     """
     Return a random number from a specified logistic distribution.
     """
-    x = random.Random()
+    x = random.random()
     return loc + scale*math.log(x / (1-x))
 
 def shuffled(target, random=Random()):
