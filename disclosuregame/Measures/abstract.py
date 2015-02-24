@@ -115,7 +115,7 @@ def abstract_measures_women(signals=[0, 1]):
             measures["type_%d_round_%d_ref" % (i, j+1)] = CumulativeRefCount(player_type=i, appointment=j)
             measures["type_%d_round_%d_honesty" % (i, j+1)] = CumulativeHonestyCount(player_type=i, appointment=j)
             for k in range(n_signals):
-                measures["n_type_%d_sig_%d_round_%d" % (i, j+1, k)] = AppointmentTypeSignalCount(player_type=i, signal=k, appointment=j, signals=signals)
+                measures["n_type_%d_sig_%d_round_%d" % (i, k, j+1)] = AppointmentTypeSignalCount(player_type=i, signal=k, appointment=j, signals=signals)
     base = measures_women()
     base.add(Measures(measures))
     return base

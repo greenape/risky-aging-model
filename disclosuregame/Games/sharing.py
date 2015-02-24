@@ -127,6 +127,10 @@ class CarryingInformationGame(CarryingReferralGame):
 
     #@profile
     def share_midwives(self, midwives):
+        """
+        Share the recent experiences of each midwife with some probability,
+        or erase them if not shared.
+        """
         #Worst outcome for a responder
         worst = self.payoffs["no_baby_payoff"] * self.num_appointments
         best = self.payoffs["baby_payoff"] * self.num_appointments
@@ -140,47 +144,12 @@ class CarryingInformationGame(CarryingReferralGame):
                 possibles = filter(lambda x: hash(x) != hash(midwife), midwives)
                 self.disseminate_midwives(memory[1][1], possibles)
 
-        #Collect memories
-            #mw_memories += filter(lambda x: x is not None, map(lambda x: x.shareable, midwives))
-            #print mw_memories
-            #Sort them according to the threshold sign
-            #if self.mw_share_bias == 0:
-            #    self.random.shuffle(mw_memories)
-            #elif copysign(1, self.mw_share_bias) == 1:
-            #    mw_memories.sort(key=operator.itemgetter(0), reverse=True)
-            #elif copysign(1, self.mw_share_bias) == -1:
-            #    mw_memories.sort(key=operator.itemgetter(0))
-            #Weight them by position in the sort
-            #memories = self.n_most(self.mw_share_bias, mw_memories)
-            #print mw_memories
-            #Choose one by weighted random choice
-            #memory = self.weighted_random_choice(mw_memories, self.mw_share_bias)
-            #memories = [self.weighted_random_choice(mw_memories, self.mw_share_bias)]
-            #print "Memory is", memory, "worst was", mw_memories[len(mw_memories) - 1]
-            #for memory in memories:
-            #    possibles = filter(lambda x: hash(x) != memory[0], midwives)
-            #    #Share it
-            #    self.disseminate_midwives(memory[1], self.share_to(possibles, self.mw_share_prob))
-            #    #And null it
-            #    lucky = filter(lambda x: hash(x) == memory[0], midwives)[0]
-            #    lucky.shareable = None
-            #del mw_memories
 
     def share_women(self, women, women_memories):
-            #return
-        #Sort them according to the threshold sign
-            #if self.women_share_bias == 0:
-            #    self.random.shuffle(women_memories)
-            #elif copysign(1, self.women_share_bias) == 1:
-            #    women_memories.sort(key=operator.itemgetter(0), reverse=True)
-            #elif copysign(1, self.women_share_bias) == -1:
-            #    women_memories.sort(key=operator.itemgetter(0))
-            #Weight them by position in the sort
-            #memories = self.n_most(self.women_share_bias, women_memories)
-            #Choose one by weighted random choice
-            #memories = [self.weighted_random_choice(tmp_memories, self.women_share_bias)]
-            #Share it
-            #Worst outcome for a signaller
+            """
+            Go through all the experiences of those who were referred this round,
+            and for each one share with probability self.women_share_prob.
+            """
             worst = (self.payoffs["harsh_high"] + self.payoffs["no_baby_payoff"]) * self.num_appointments
             best = (self.payoffs["baby_payoff"] + self.payoffs["low_low"]) * self.num_appointments
             while len(women_memories) > 0:
@@ -222,6 +191,10 @@ class CarryingInformationGame(CarryingReferralGame):
 
    #@profile
     def disseminate_women(self, memory, recepients):
+        """
+        Trigger an exogenous update of this memory into the mind of the
+        recepients.
+        """
         LOG.debug("Sharing a memory to women.")
         #print "Sharing to women.", memory
         if memory is None:
@@ -250,6 +223,9 @@ class ShuffledSharingGame(CarryingInformationGame):
         return "shuffled_%s" % super(CarryingInformationGame, self).__unicode__()
 
     def play_game(self, players, file_name=""):
+        """
+        Minor variant, where women are chosen at random rather than in a rotating queue.
+        """
         #self.random.seed(1)
         try:
             worker = scoop.worker[0]
