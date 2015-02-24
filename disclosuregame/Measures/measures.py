@@ -4,6 +4,17 @@ from disclosuregame.results import Result
 import itertools
 import math
 
+try:
+    import scoop
+    scoop.worker
+    scoop_on = True
+    LOG = scoop.logger
+except:
+    scoop_on = False
+    import multiprocessing
+    LOG = multiprocessing.get_logger()
+    pass
+
 def percentile(N, percent, key=lambda x:x):
     """
     Taken from http://code.activestate.com/recipes/511478/
@@ -707,7 +718,16 @@ class BayesTypeSignalProbability(TypeSignalProbability):
         # Probabilty of this signal and this type
         map(lambda x: self.measure_one(x), women)
         total = sum(x for counter in self.counts.values() for x in counter.values())
-        return self.counts[self.player_type][self.signal] / total
+        result = self.counts[self.player_type][self.signal] / total
+        try:
+            assert result <= 1
+        except AssertionError:
+            LOG.info(result)
+            LOG.info(self.counts)
+            LOG.info(self.player_type)
+            LOG.info(self.signal)
+            raise
+        return result
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
