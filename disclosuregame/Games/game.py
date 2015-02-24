@@ -43,7 +43,6 @@ class Game(object):
             self.parameters = OrderedDict()
         else:
             self.parameters = params
-        self.parameters['baby_payoff'] = baby_payoff
         if randomise_payoffs:
             self.random_payoffs()
         else:
@@ -61,6 +60,7 @@ class Game(object):
             self.payoffs["low_high"] = -low_high
             self.payoffs["low_mid"] = -low_mid
             self.payoffs["low_low"] = -low_low
+        self.parameters.update(self.payoffs)
         self.init_payoffs()
 
     def random_payoffs(self):
