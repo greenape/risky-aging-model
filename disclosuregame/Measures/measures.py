@@ -730,6 +730,7 @@ class TypeSignalCount(BayesTypeSignalProbability):
         result = self.counts[self.player_type][self.signal]
         return result
 
+
 class SignalEntropy(ExpectedPointMutualInformation):
     """
     Return the shannon entropy of the signalling distribution.
