@@ -13,8 +13,8 @@ except:
 
 class Result(object):
     def __init__(self, fields, parameters, results):
-        fields.append("hash")
-        self.fields = fields
+        self.fields = map(lambda x: x+"__numeric", fields)
+        self.fields.append("hash")
         self.param_fields = parameters.keys()
         self.param_fields.append("hash")
         param_hash = "h%d" % hash(tuple(map(str, parameters.values())))
