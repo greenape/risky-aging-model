@@ -558,6 +558,11 @@ class GroupSignalIQR(GroupSignal):
 
 
 class ExpectedPointMutualInformation(Measure):
+    def __init__(self, signals=[0, 1, 2], **kwargs):
+        super(ExpectedPointMutualInformation, self).__init__(**kwargs)
+        self.signals = signals
+
+
     """
     Return the expected pointwise mutual information of this group-signal combination.
     """
@@ -619,8 +624,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         #state = woman.random.getstate()
         sigs = set()
-        signals = [0, 1, 2]
-        for combo in itertools.permutations(signals):
+        for combo in itertools.permutations(self.signals):
             try:
                 r = woman.signal_search(combo)[0]
                 sigs.add(r)
@@ -663,11 +667,10 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         return p_type_signal
 
 class BayesTypeSignalProbability(TypeSignalProbability):
-    def __init__(self, player_type=None, midwife_type=None, signal=None):
-        super(BayesTypeSignalProbability, self).__init__(player_type, midwife_type, signal)
-        self.counts = {0: {0: 100.0, 1: 0.0, 2: 0.0},
-                        1: {0: 70.0, 1: 30.0, 2: 0.0},
-                        2: {0: 60.0, 1: 30.0, 2: 10.0}}
+    def __init__(self, signals=[0, 1, 2], **kwargs):
+        super(BayesTypeSignalProbability, self).__init__(signals=signals,**kwargs)
+        #Uninformed prior
+        self.counts = {s:dict.fromkeys(signals, 1.) for s in signals}
 
     """
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
@@ -789,7 +792,8 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 
-def measures_women(n_signals=2):
+def measures_women(signals=[0, 1]):
+    n_signals = len(signals)
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
@@ -815,7 +819,7 @@ def measures_women(n_signals=2):
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(n_signals):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
-            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i)
+            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i, signals=signals)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
@@ -825,7 +829,8 @@ def measures_women(n_signals=2):
 
 
 ##@profile
-def measures_midwives(n_signals=2):
+def measures_midwives(signals=[0, 1]):
+    n_signals = len(signals)
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
