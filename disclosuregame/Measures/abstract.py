@@ -30,7 +30,7 @@ class HonestyMeasure(Measure):
     def measure(self, roundnum, women, game):
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
-        women = filter(lambda x: x.rounds == self.signal, women)
+        women = filter(lambda x: x.rounds == self.appointment, women)
         women = filter(lambda x: x.player_type in x.get_signal_log(), women)
         women = filter(lambda x: hash(x) not in self.counted, women)
         self.counted.update(map(hash, women))
