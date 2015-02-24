@@ -625,24 +625,12 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
 
     def sample_one(self, woman):
         """
-        Sample signals a few* times to get the possible ones.
-        These are guaranteed to be of uniform probability.
-
-        *100 times, based on a estimating the maximum time for python
-        random to choose all three options given uniform random choice.
+        Find the set of signals this agent is willing to use.
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
         #state = woman.random.getstate()
-        sigs = set()
-        for combo in itertools.permutations(self.signals):
-            try:
-                r = woman.signal_search(combo)[0]
-                sigs.add(r)
-            except KeyError:
-                #Ignore signals that don't occur
-                pass
-        return sigs
+        return set(map(lambda combo: woman.signal_search(combo)[0], itertools.permutations(self.signals)))
 
     def measure_one(self, woman, signal):
         """
@@ -719,14 +707,27 @@ class BayesTypeSignalProbability(TypeSignalProbability):
         map(lambda x: self.measure_one(x), women)
         total = sum(x for counter in self.counts.values() for x in counter.values())
         result = self.counts[self.player_type][self.signal] / total
-        try:
-            assert result <= 1
-        except AssertionError:
-            LOG.info(result)
-            LOG.info(self.counts)
-            LOG.info(self.player_type)
-            LOG.info(self.signal)
-            raise
+        return result
+
+class TypeSignalCount(BayesTypeSignalProbability):
+    """
+    Return a cumulative count of type-signal pairs.
+    """
+    def __init__(self, signals=[0, 1, 2], **kwargs):
+        super(TypeSignalCount, self).__init__(signals=signals,**kwargs)
+        #Uninformed prior
+        self.counts = {s:dict.fromkeys(signals, 0.) for s in signals}
+
+    def measure(self, roundnum, women, game):
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        if self.player_type is None:
+            return "NA"
+        # Probabilty of this signal and this type
+        map(lambda x: self.measure_one(x), women)
+        total = sum(x for counter in self.counts.values() for x in counter.values())
+        result = self.counts[self.player_type][self.signal]
         return result
 
 class SignalEntropy(ExpectedPointMutualInformation):
@@ -839,7 +840,7 @@ def measures_women(signals=[0, 1]):
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(n_signals):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
-            measures["p_signal_%d_type_%d" % (i, j)] = BayesTypeSignalProbability(player_type=j, signal=i, signals=signals)
+            measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalCount(player_type=j, signal=i, signals=signals)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
