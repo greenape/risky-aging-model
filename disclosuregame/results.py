@@ -145,6 +145,7 @@ class Result(object):
             
         conn.close()
 
+
     def type_safety(self, x):
         """
         Attempt to forcibly convert a value to a float, if that fails
