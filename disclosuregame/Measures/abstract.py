@@ -62,7 +62,7 @@ class CumulativeRefCount(Measure):
     def __init__(self, appointment=0, **kwargs):
         super(CumulativeRefCount, self).__init__(**kwargs)
         counted = set()
-        self.counters = [RefCount(counted=counted, appointment=x, player_type=self.player_type, midwife_type=self.midwife_type) for x in range(appointment)]
+        self.counters = [RefCount(counted=counted, appointment=x, player_type=self.player_type, midwife_type=self.midwife_type) for x in range(appointment + 1)]
 
     """
     Return the number of women referred upto an appointment.
@@ -74,7 +74,7 @@ class CumulativeHonestyCount(Measure):
     def __init__(self, appointment=0, **kwargs):
         super(CumulativeHonestyCount, self).__init__(**kwargs)
         counted = set()
-        self.counters = [HonestyMeasure(counted=counted, appointment=x, player_type=self.player_type, midwife_type=self.midwife_type) for x in range(appointment)]
+        self.counters = [HonestyMeasure(counted=counted, appointment=x, player_type=self.player_type, midwife_type=self.midwife_type) for x in range(appointment + 1)]
 
     """
     Return the number of women signalling honestly upto an appointment.
