@@ -45,10 +45,11 @@ logger.handlers[0].setFormatter(formatter)
 version = disclosuregame.__version__
 
 def load_kwargs(file_name):
-    
-    f = open(file_name, "r")
-    kwargs = cPickle.load(f)
-    f.close()
+    try:
+        kwargs = cPickle.loads(file_name)
+    except UnpicklingError:    
+        with open(file_name, "r") as f:
+            kwargs = cPickle.load(f)
     assert type(kwargs) is list, "%s does not contain a pickled list." % file_name
     #Check this is a valid list of dicts
     valid_args = decision_fn_compare.func_code.co_varnames[:decision_fn_compare.func_code.co_argcount]
