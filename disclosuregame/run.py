@@ -47,7 +47,7 @@ version = disclosuregame.__version__
 def load_kwargs(file_name):
     try:
         kwargs = cPickle.loads(file_name)
-    except UnpicklingError:    
+    except:    
         with open(file_name, "r") as f:
             kwargs = cPickle.load(f)
     assert type(kwargs) is list, "%s does not contain a pickled list." % file_name
@@ -121,6 +121,9 @@ def arguments():
     parser.add_argument('--measure-every', dest='measure_freq', type=int,
         help="Measure every x rounds.",
         default=1)
+    parser.add_argument('--procs', dest='procs', type=int,
+        help="Number of cpus to utilize.",
+        default=multiprocessing.cpu_count())
 
     args, extras = parser.parse_known_args()
 
@@ -167,7 +170,7 @@ def arguments():
         except cPickle.UnpicklingError:
             logger.info("Not a valid pickle file.")
             raise
-    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs
+    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs, args.procs
 
 
 def make_players(constructor, num=100, weights=[1/3., 1/3., 1/3.], nested=False,
@@ -392,7 +395,7 @@ def write(queue, db_name, kill_queue):
 
 def experiment(file_name, game_fns=[Game, CaseloadGame], 
     agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
-    kwargs=[{}]):
+    kwargs=[{}], procs=1):
     run_params = []
     for pair in agents:
         for game_fn in game_fns:
@@ -409,14 +412,14 @@ def experiment(file_name, game_fns=[Game, CaseloadGame],
                 arg['signaller_fn'] = pair[0]
                 arg['responder_fn'] = pair[1]
                 run_params.append(arg)
-    kw_experiment(run_params, file_name)
+    kw_experiment(run_params, file_name, procs)
 
-def kw_experiment(kwargs, file_name):
+def kw_experiment(kwargs, file_name, procs):
     """
     Run a bunch of experiments in parallel. Experiments are
     defined by a list of keyword argument dictionaries.
     """
-    num_consumers = multiprocessing.cpu_count()
+    num_consumers = procs
     #Make tasks
     jobs = multiprocessing.Queue(num_consumers)
     kill_queue = multiprocessing.Queue(1)
@@ -450,17 +453,18 @@ def kw_experiment(kwargs, file_name):
 
 
 def main():
-    games, players, kwargs, runs, test, file_name, args_path = arguments()
+    games, players, kwargs, runs, test, file_name, args_path, procs = arguments()
     logger.info("Version %s" % version)
     logger.info("Running %d game type%s, with %d player pair%s, and %d run%s of each." % (
         len(games), "s"[len(games)==1:], len(players), "s"[len(players)==1:], runs, "s"[runs==1:]))
     logger.info("Total simulations runs is %d" % (len(games) * len(players) * runs * len(kwargs)))
     logger.info("File is %s" % file_name)
+    logger.info("Using %d processors." % procs)
     if test:
         logger.info("This is a test of the emergency broadcast system. This is only a test.")
     else:
         start = time.clock()
-        experiment(file_name, games, players, kwargs=kwargs)
+        experiment(file_name, games, players, kwargs=kwargs, procs=procs)
         print "Ran in %f" % (time.clock() - start)
 
 if __name__ == "__main__":
