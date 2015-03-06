@@ -48,7 +48,7 @@ def load_kwargs(file_name):
     try:
         kwargs = cPickle.loads(file_name)
     except:    
-        with open(file_name, "r") as f:
+        with open(file_name, "rb") as f:
             kwargs = cPickle.load(f)
     assert type(kwargs) is list, "%s does not contain a pickled list." % file_name
     #Check this is a valid list of dicts
