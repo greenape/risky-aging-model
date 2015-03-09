@@ -463,9 +463,9 @@ def main():
     if test:
         logger.info("This is a test of the emergency broadcast system. This is only a test.")
     else:
-        start = time.clock()
+        start = time.time()
         experiment(file_name, games, players, kwargs=kwargs, procs=procs)
-        print "Ran in %f" % (time.clock() - start)
+        print "Ran in %f" % (time.time() - start)
 
 if __name__ == "__main__":
     main()

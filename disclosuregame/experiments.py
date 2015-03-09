@@ -256,7 +256,7 @@ def args_write(args, directory, name):
         files.append(target)
         print "Writing %s" % target
         f = open(target, "wb")
-        cPickle.dump(args[i], f)
+        cPickle.dump(args[i], f, cPickle.HIGHEST_PROTOCOL)
         f.close()
     return files
 
