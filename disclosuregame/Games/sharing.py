@@ -227,7 +227,6 @@ class ShuffledSharingGame(CarryingInformationGame):
         Minor variant, where women are chosen at random rather than in a rotating queue.
         """
         #self.random.seed(1)
-        play_game(self, players, file_name=""):
         #self.random.seed(1)
         try:
             worker = scoop.worker[0]
