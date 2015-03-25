@@ -227,22 +227,26 @@ class ShuffledSharingGame(CarryingInformationGame):
         Minor variant, where women are chosen at random rather than in a rotating queue.
         """
         #self.random.seed(1)
+        play_game(self, players, file_name=""):
+        #self.random.seed(1)
         try:
             worker = scoop.worker[0]
         except:
             worker = multiprocessing.current_process()
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
-        player_dist = self.get_distribution(women)
 
+        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
+        LOG.debug("Made player generator.")
         rounds = self.rounds
         birthed = []
-        self.random.shuffle(women)
         num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self, None)
         mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
         women_memories = []
         mw_memories = []
+        LOG.debug("Starting play.")
         for i in range(rounds):
             self.random.shuffle(women)
             players = [women.pop() for j in range(num_midwives)]
@@ -256,12 +260,11 @@ class ShuffledSharingGame(CarryingInformationGame):
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
                     # Add a new naive women back into the mix
-                    new_woman = self.random_player(player_dist, woman, self.signaller_args)#type(woman)(player_type=woman.player_type)
-                    new_woman.init_payoffs(self.woman_baby_payoff, self.woman_social_payoff,
-                        random_expectations(random=self.player_random), [random_expectations(breadth=2, random=self.player_random) for x in range(3)])
+                    new_woman = signaller_generator.next()
                     new_woman.started = i
                     new_woman.finished = i
                     women.insert(0, new_woman)
+                    LOG.debug("Generated a new player.")
                     if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
                         women_memories.append(woman.get_memory())
                     for midwife in midwives:

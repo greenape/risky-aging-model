@@ -730,6 +730,24 @@ class TypeSignalCount(BayesTypeSignalProbability):
         result = self.counts[self.player_type][self.signal]
         return result
 
+class PointTypeSignalCount(TypeSignalCount):
+    """
+    Return a count of type-signal pairs for the current population.
+    """
+
+    def measure(self, roundnum, women, game):
+        self.counts = {s:dict.fromkeys(self.signals, 0.) for s in self.signals}
+        total_women = float(len(women))
+        if total_women == 0:
+            return "NA"
+        if self.player_type is None:
+            return "NA"
+        # Probabilty of this signal and this type
+        map(lambda x: self.measure_one(x), women)
+        total = sum(x for counter in self.counts.values() for x in counter.values())
+        result = self.counts[self.player_type][self.signal]
+        return result
+
 
 class SignalEntropy(ExpectedPointMutualInformation):
     """
@@ -842,6 +860,7 @@ def measures_women(signals=[0, 1]):
         for j in range(n_signals):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalCount(player_type=j, signal=i, signals=signals)
+            measures["point_p_signal_%d_type_%d" % (i, j)] = PointTypeSignalCount(player_type=j, signal=i, signals=signals)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
