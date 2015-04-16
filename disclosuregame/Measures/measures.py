@@ -832,6 +832,28 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 
+class RiskSpace(Measure):
+    """
+    Return a signaller's position in 'risk space'. i.e.
+    a tuple of values corresponding to the risk associated
+    with each signal.
+    Returns valuespace for cpt players, and signal space for heuristic
+    players.
+    """
+    def measure_one(self, woman):
+        player_type = str(woman)
+        if player_type == "prospect":
+            res = map(lambda signal: woman.cpt_value(woman.collect_prospects(signal)), woman.signals)
+        elif player_type == "lexic":
+            res = woman.signal_search()
+        else:
+            res = map(lambda signal: woman.risk(signal), woman.signals)
+        return res
+
+    def measure(self, roundnum, women, game):
+        res = map(lambda x: (self.measure_one(x), hash(x), x.player_type), women)
+        return res
+
 def measures_women(signals=[0, 1]):
     n_signals = len(signals)
     measures = OrderedDict()
@@ -843,6 +865,7 @@ def measures_women(signals=[0, 1]):
     measures["group_signal"] = GroupSignal()
     measures["median_signal"] = GroupSignalMedian()
     measures["signal_iqr"] = GroupSignalIQR()
+    measures["riskspace"] = RiskSpace()
     #measures["type_entropy"] = TypeEntropy()
     #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()

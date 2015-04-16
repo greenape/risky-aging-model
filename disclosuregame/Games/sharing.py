@@ -248,6 +248,7 @@ class ShuffledSharingGame(CarryingInformationGame):
         LOG.debug("Starting play.")
         for i in range(rounds):
             self.random.shuffle(women)
+            LOG.debug("Shuffled women.")
             players = [women.pop() for j in range(num_midwives)]
             self.random.shuffle(midwives)
             map(self.play_round, players, midwives)
@@ -385,8 +386,9 @@ class CaseloadSharingGame(CarryingInformationGame):
             #Women
             try:
                 self.share_women(reduce(lambda x, y: x + y, caseloads.values()), women_memories)
-            except:
+            except Exception as e:
                 LOG.debug("Sharing to women failed.")
+                LOG.debug(e)
             LOG.debug("Played %d rounds." % i)
 
             #if scoop_on:
@@ -442,3 +444,10 @@ class SubgroupSharingGame(CarryingInformationGame):
                 #And null it
                 #women_memories.remove(memory)
             map(lambda x: x.update_beliefs(), women)
+
+class ShuffledSubgroupSharingGame(SubgroupSharingGame, ShuffledSharingGame):
+    """
+    In this game, rather than share to everybody with some probability,
+    everybody shares but people are selected to receive with some 
+    probability. And players are shuffled.
+    """
