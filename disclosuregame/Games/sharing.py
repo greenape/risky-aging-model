@@ -93,7 +93,7 @@ class CarryingInformationGame(CarryingReferralGame):
             #Midwives
             try:
                 self.share_midwives(midwives)
-            except e:
+            except Exception as e:
                 LOG.debug("Sharing to midwives failed.")
                 LOG.debug(e)
 
@@ -195,7 +195,7 @@ class CarryingInformationGame(CarryingReferralGame):
         Trigger an exogenous update of this memory into the mind of the
         recepients.
         """
-        LOG.debug("Sharing a memory to women.")
+        LOG.debug("Sharing %s to %d women." % (str(memory), len(recepients)))
         #print "Sharing to women.", memory
         if memory is None:
             return
@@ -418,12 +418,11 @@ class SubgroupSharingGame(CarryingInformationGame):
         for midwife in midwives:
             memory = midwife.shareable
             midwife.shareable = None
-            LOG.debug("p=%f, threshold is %f" % (p, self.mw_share_prob))
             if memory is not None:
                 LOG.debug("Sharing %s" % str(memory))
                 possibles = filter(lambda x: hash(x) != hash(midwife), midwives)
                 possibles = filter(lambda x: self.random.random() < self.mw_share_prob, possibles)
-                LOG.debug("Selected %d to share to with probability %f" % (len(possibles,  self.mw_share_prob)))
+                LOG.debug("Selected %d to share to with probability %f" % (len(possibles),  self.mw_share_prob))
                 self.disseminate_midwives(memory[1][1], possibles)
 
 
