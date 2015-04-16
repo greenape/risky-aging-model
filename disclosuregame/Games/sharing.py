@@ -220,7 +220,7 @@ class CarryingInformationGame(CarryingReferralGame):
 
 class ShuffledSharingGame(CarryingInformationGame):
     def __str__(self):
-        return "shuffled_%s" % super(CarryingInformationGame, self).__unicode__()
+        return "shuffled_%s" % super(ShuffledSharingGame, self).__unicode__()
 
     def play_game(self, players, file_name=""):
         """
@@ -406,6 +406,10 @@ class SubgroupSharingGame(CarryingInformationGame):
     everybody shares but people are selected to receive with some 
     probability.
     """
+
+    def __str__(self):
+        return "subgroup_%s" % super(SubgroupSharingGame, self).__unicode__()
+
         #@profile
     def share_midwives(self, midwives):
         """
