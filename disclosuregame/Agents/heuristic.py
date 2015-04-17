@@ -32,17 +32,17 @@ class LexicographicSignaller(BayesianSignaller):
         for signal, payoffs in self.payoff_count.items():
             self.depth = max(len(payoffs), self.depth)
         # Psuedocounts go in
-        for signal in self.signals:
-            breadth = len(self.payoff_count[signal])
-            weights = random_expectations(breadth=breadth, high=self.random.randint(breadth, 10), random=self.random)
-            i = 0
-            for payoff in self.payoff_count[signal].keys():
-                self.payoff_count[signal][payoff] = weights[i]
-                i += 1
-            #for player_type in self.signals:
-            #    for response in self.responses:
-            #        payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
-            #        self.payoff_count[signal][payoff] += type_weights[player_type] + response_weights[signal][response]
+        #for signal in self.signals:
+        #    breadth = len(self.payoff_count[signal])
+        #    weights = random_expectations(breadth=breadth, high=self.random.randint(breadth, 10), random=self.random)
+        #    i = 0
+        #    for payoff in self.payoff_count[signal].keys():
+        #        self.payoff_count[signal][payoff] = weights[i]
+        #        i += 1
+        for player_type in self.signals:
+            for response in self.responses:
+                payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
+                self.payoff_count[signal][payoff] += type_weights[player_type] + response_weights[signal][response]
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
             response_weights)
 
