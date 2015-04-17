@@ -104,7 +104,9 @@ class LexicographicSignaller(BayesianSignaller):
         return None
         #self.update_counts(response, midwife, payoff, midwife_type, weight)
 
-    def signal_search(self, signals):
+    def signal_search(self, signals=None):
+        if signals is None:
+            signals = self.signals
         n = 0
         while n < self.depth:
             mappings = {}
