@@ -842,11 +842,14 @@ class RiskSpace(Measure):
     """
     def measure_one(self, woman):
         player_type = str(woman)
-        if player_type == "prospect":
+        if "prospect" in player_type:
+            LOG.debug("Measuring valuespace for player %d, type %d, rule %s" % (hash(woman), woman.player_type, str(woman)))
             res = map(lambda signal: woman.cpt_value(woman.collect_prospects(signal)), woman.signals)
-        elif player_type == "lexic":
+        elif "lexic" in player_type:
+            LOG.debug("Measuring signalspace for player %d, type %d, rule %s" % (hash(woman), woman.player_type, str(woman)))
             res = woman.signal_search()
         else:
+            LOG.debug("Measuring riskspace for player %d, type %d, rule %s" % (hash(woman), woman.player_type, str(woman)))
             res = map(lambda signal: woman.risk(signal), woman.signals)
         return res
 
