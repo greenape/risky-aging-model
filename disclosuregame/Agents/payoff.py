@@ -32,7 +32,9 @@ class BayesianPayoffSignaller(LexicographicSignaller):
             risk += belief*self.loss(payoff)
         return risk
 
-    def signal_search(self, signals):
+    def signal_search(self, signals=None):
+        if signals is None:
+            signals = self.signals
         best = (-1, float('inf'))
         for signal in signals:
             signal_risk = self.risk(signal)

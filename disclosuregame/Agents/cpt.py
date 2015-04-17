@@ -97,7 +97,9 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
             signal_risk += self.value(payoff) * weight
         return signal_risk
 
-    def signal_search(self, signals):
+    def signal_search(self, signals=None):
+        if signals is None:
+            signals = self.signals
         best = (-1, float('-inf'))
         for signal in signals:
             act_risk = self.cpt_value(self.collect_prospects(signal))

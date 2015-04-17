@@ -320,7 +320,9 @@ class BayesianSignaller(Signaller):
        #print "R(%d|x)=%f" % (signal, signal_risk)
         return signal_risk
 
-    def signal_search(self, signals):
+    def signal_search(self, signals=None):
+        if signals is None:
+            signals = self.signals
         best = (-1, float('inf'))
         for signal in signals:
             signal_risk = self.risk(signal)

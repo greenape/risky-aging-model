@@ -861,6 +861,10 @@ class RiskSpace(Measure):
         res = map(lambda x: (self.measure_one(x), hash(x), x.player_type), women)
         return res
 
+class SignalSpace(RiskSpace):
+    def measure_one(self, woman):
+        return woman.signal_search()
+
 class ReferralEvents(Measure):
     def measure(self, roundnum, women, game):
         res = map(lambda x: (hash(x), x.player_type), filter(lambda x: 1 in x.get_response_log(), women))
@@ -879,6 +883,7 @@ def measures_women(signals=[0, 1]):
     measures["signal_iqr"] = GroupSignalIQR()
     measures["riskspace"] = RiskSpace()
     measures["referralevents"] = ReferralEvents()
+    measures["signalspace"] = SignalSpace()
     #measures["type_entropy"] = TypeEntropy()
     #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
