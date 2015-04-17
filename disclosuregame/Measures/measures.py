@@ -862,10 +862,16 @@ class RiskSpace(Measure):
         return res
 
 class SignalSpace(RiskSpace):
+    """
+    Return a signaller's preferred signal at this time.
+    """
     def measure_one(self, woman):
         return woman.signal_search()
 
 class ReferralEvents(Measure):
+    """
+    Log the id number and type of all players referred this round.
+    """
     def measure(self, roundnum, women, game):
         res = map(lambda x: (hash(x), x.player_type), filter(lambda x: 1 in x.get_response_log(), women))
         return res
