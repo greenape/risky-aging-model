@@ -477,11 +477,11 @@ class GameSeed(Measure):
 class GroupResponse(Measure):
     def measure_one(self, woman):
         signaller = type(woman)()
-        #print "Hashing by", hash(woman), "hashing", hash(signaller)
         try:
             memory = woman.shareable
         except:
             raise
+        #print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.respond(self.signal, signaller)
         woman.signal_log.pop()
         woman.response_log.pop()
@@ -887,9 +887,9 @@ def measures_women(signals=[0, 1]):
     measures["group_signal"] = GroupSignal()
     measures["median_signal"] = GroupSignalMedian()
     measures["signal_iqr"] = GroupSignalIQR()
-    measures["riskspace"] = RiskSpace()
-    measures["referralevents"] = ReferralEvents()
-    measures["signalspace"] = SignalSpace()
+    #measures["riskspace"] = RiskSpace()
+    #measures["referralevents"] = ReferralEvents()
+    #measures["signalspace"] = SignalSpace()
     #measures["type_entropy"] = TypeEntropy()
     #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
