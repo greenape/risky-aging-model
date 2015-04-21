@@ -354,10 +354,12 @@ def do_work(queueIn, queueOut, kill_queue):
             res = (number, play_game(config))
             queueOut.put(res)
             del config
-        except MemoryError:
+        except MemoryError as e:
+            logger.error(e)
             raise
             break
-        except AssertionError:
+        except AssertionError as e:
+            logger.error(e)
             kill_queue.put(None)
             raise
             break
@@ -386,7 +388,8 @@ def write(queue, db_name, kill_queue):
             kill_queue.put(None)
             raise
             break
-        except:
+        except Exception as e:
+            logger.error(e)
             kill_queue.put(None)
             raise
             break
