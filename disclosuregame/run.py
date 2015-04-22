@@ -243,14 +243,27 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     runs=1, game=None, rounds=100,
     mw_weights=[80/100., 15/100., 5/100.], women_weights=[1/3., 1/3., 1/3.], women_priors=None, seeds=None,
     women_modifier=None, measures_women=measures_women(), measures_midwives=measures_midwives(),
-    nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="", measure_freq=1,
-    responder_initor=initors.responder, signaller_initor=initors.signaller, signaller_init_args={},
-    responder_init_args={}):
+    nested=False, mw_priors=None, file_name="", responder_args=None, signaller_args=None, tag="", measure_freq=1,
+    responder_initor=initors.responder, signaller_initor=initors.signaller, signaller_init_args=None,
+    responder_init_args=None):
     
-    signaller_init_args = deepcopy(signaller_init_args)
-    responder_init_args = deepcopy(responder_init_args)
-    responder_args = deepcopy(responder_args)
-    signaller_args = deepcopy(signaller_args)
+    if responder_args is None:
+        responder_args = {}
+    else:
+        responder_args = deepcopy(responder_args)
+    if signaller_args is None:
+        signaller_args = {}
+    else:
+        signaller_args = deepcopy(signaller_args)
+    if signaller_init_args is None:
+        signaller_init_args = {}
+    else:
+        responder_init_args = deepcopy(responder_init_args)
+    if responder_init_args is None:
+        responder_init_args = {}
+    else:
+        signaller_init_args = deepcopy(signaller_init_args)
+
     if game is None:
         game = Game()
     if mw_priors is not None:
