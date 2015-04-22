@@ -246,7 +246,11 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     nested=False, mw_priors=None, file_name="", responder_args={}, signaller_args={}, tag="", measure_freq=1,
     responder_initor=initors.responder, signaller_initor=initors.signaller, signaller_init_args={},
     responder_init_args={}):
-
+    
+    signaller_init_args = deepcopy(signaller_init_args)
+    responder_init_args = deepcopy(responder_init_args)
+    responder_args = deepcopy(responder_args)
+    signaller_args = deepcopy(signaller_args)
     if game is None:
         game = Game()
     if mw_priors is not None:
