@@ -115,7 +115,7 @@ def arguments():
     #    help="Take individual outcome measures instead of group level.", default=False)
     parser.add_argument('--abstract-measures', dest='abstract', action="store_true",
         help="Take measures intended for the extended abstract.", default=False)
-     parser.add_argument('--space-measures', dest='space', action="store_true",
+    parser.add_argument('--space-measures', dest='space', action="store_true",
         help="Take measures for risk, value, signal space.", default=False)
     parser.add_argument('--log-level', dest='log_level', type=str, choices=['debug',
         'info', 'warniing', 'error'], default='info', nargs="?")
