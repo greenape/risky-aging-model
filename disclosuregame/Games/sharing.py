@@ -445,6 +445,51 @@ class SubgroupSharingGame(CarryingInformationGame):
                 #women_memories.remove(memory)
             map(lambda x: x.update_beliefs(), women)
 
+
+class CombinedSharingGame(CarryingInformationGame):
+    """
+    In this game, rather than share to everybody with some probability,
+    everybody shares but people are selected to receive with some 
+    probability.
+    """
+
+    def __str__(self):
+        return "combined_%s" % super(CombinedSharingGame, self).__unicode__()
+
+        #@profile
+    def share_midwives(self, midwives):
+        """
+        Share the recent experiences of each midwife with some probability,
+        or erase them if not shared.
+        """
+        #Worst outcome for a responder
+        worst = self.payoffs["no_baby_payoff"] * self.num_appointments
+        best = self.payoffs["baby_payoff"] * self.num_appointments
+        for midwife in midwives:
+            memory = midwife.shareable
+            midwife.shareable = None
+            if memory is not None and self.random.random() < self.mw_share_prob:
+                LOG.debug("Sharing %s" % str(memory))
+                possibles = filter(lambda x: hash(x) != hash(midwife), midwives)
+                possibles = filter(lambda x: self.random.random() < self.mw_share_prob, possibles)
+                LOG.debug("Selected %d to share to with probability %f" % (len(possibles),  self.mw_share_prob))
+                self.disseminate_midwives(memory[1][1], possibles)
+
+
+    def share_women(self, women, women_memories):
+            """
+            Go through all the experiences of those who were referred this round,
+            and for each one share with probability self.women_share_prob.
+            """
+            while len(women_memories) > 0:
+                memory = women_memories.pop()
+                if self.random.random() < self.women_share_prob:
+                    possibles = filter(lambda x: self.random.random() < self.women_share_prob, women)
+                    self.disseminate_women(memory[1], possibles)
+                #And null it
+                #women_memories.remove(memory)
+            map(lambda x: x.update_beliefs(), women)
+
 class ShuffledSubgroupSharingGame(SubgroupSharingGame, ShuffledSharingGame):
     """
     In this game, rather than share to everybody with some probability,

@@ -12,6 +12,7 @@ from disclosuregame.Agents.rl import *
 
 from disclosuregame.Measures import *
 from disclosuregame.Measures.abstract import *
+from disclosuregame.Measures.space_measures import *
 
 from disclosuregame.experiments import *
 
@@ -72,7 +73,7 @@ def arguments():
                    choices=['Game', 'CaseloadGame', 'RecognitionGame', 'ReferralGame',
                    'CaseloadRecognitionGame', 'CaseloadReferralGame', 'CarryingGame',
                    'CarryingReferralGame', 'CarryingCaseloadReferralGame', 'CaseloadSharingGame',
-                   'CarryingInformationGame', 'ShuffledSharingGame', 'SubgroupSharingGame'],
+                   'CarryingInformationGame', 'ShuffledSharingGame', 'SubgroupSharingGame', 'CombinedSharingGame'],
                    dest="games")
     parser.add_argument('-s','--signallers', type=str, nargs='*',
         help='A signaller type.', default=["SharingSignaller"],
@@ -114,6 +115,8 @@ def arguments():
     #    help="Take individual outcome measures instead of group level.", default=False)
     parser.add_argument('--abstract-measures', dest='abstract', action="store_true",
         help="Take measures intended for the extended abstract.", default=False)
+     parser.add_argument('--space-measures', dest='space', action="store_true",
+        help="Take measures for risk, value, signal space.", default=False)
     parser.add_argument('--log-level', dest='log_level', type=str, choices=['debug',
         'info', 'warniing', 'error'], default='info', nargs="?")
     parser.add_argument('--log-file', dest='log_file', type=str, default='')
@@ -154,6 +157,10 @@ def arguments():
         logger.debug("Using abstract measures.")
         kwargs['measures_midwives'] = abstract_measures_mw()
         kwargs['measures_women'] = abstract_measures_women()
+    if args.space:
+        logger.debug("Using space measures.")
+        kwargs['measures_midwives'] = space_measures_mw(kwargs['measures_midwives'])
+        kwargs['measures_women'] = space_measures_women(kwargs['measures_women'])
     kwargs = [kwargs]
     if args.kwargs is not None:
         try:

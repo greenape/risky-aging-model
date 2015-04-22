@@ -836,46 +836,6 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 
-class RiskSpace(Measure):
-    """
-    Return a signaller's position in 'risk space'. i.e.
-    a tuple of values corresponding to the risk associated
-    with each signal.
-    Returns valuespace for cpt players, and signal space for heuristic
-    players.
-    """
-    def measure_one(self, woman):
-        player_type = str(woman)
-        if "prospect" in player_type:
-            LOG.debug("Measuring valuespace for player %d, type %d, rule %s" % (hash(woman), woman.player_type, str(woman)))
-            res = map(lambda signal: woman.cpt_value(woman.collect_prospects(signal)), woman.signals)
-        elif "lexic" in player_type:
-            LOG.debug("Measuring signalspace for player %d, type %d, rule %s" % (hash(woman), woman.player_type, str(woman)))
-            res = woman.signal_search()
-        else:
-            LOG.debug("Measuring riskspace for player %d, type %d, rule %s" % (hash(woman), woman.player_type, str(woman)))
-            res = map(lambda signal: woman.risk(signal), woman.signals)
-        return res
-
-    def measure(self, roundnum, women, game):
-        res = map(lambda x: (self.measure_one(x), hash(x), x.player_type), women)
-        return res
-
-class SignalSpace(RiskSpace):
-    """
-    Return a signaller's preferred signal at this time.
-    """
-    def measure_one(self, woman):
-        return woman.signal_search()
-
-class ReferralEvents(Measure):
-    """
-    Log the id number and type of all players referred this round.
-    """
-    def measure(self, roundnum, women, game):
-        res = map(lambda x: (hash(x), x.player_type), filter(lambda x: 1 in x.get_response_log(), women))
-        return res
-
 def measures_women(signals=[0, 1]):
     n_signals = len(signals)
     measures = OrderedDict()
@@ -884,12 +844,6 @@ def measures_women(signals=[0, 1]):
     #measures['finished'] = TypeFinished()
     #measures["honesty"] = GroupHonesty()
     #measures["nom_sq_honesty"] = NormalisedSquaredGroupHonesty()
-    measures["group_signal"] = GroupSignal()
-    measures["median_signal"] = GroupSignalMedian()
-    measures["signal_iqr"] = GroupSignalIQR()
-    measures["riskspace"] = RiskSpace()
-    measures["referralevents"] = ReferralEvents()
-    measures["signalspace"] = SignalSpace()
     #measures["type_entropy"] = TypeEntropy()
     #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
