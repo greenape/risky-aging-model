@@ -382,7 +382,7 @@ def do_work(queueIn, queueOut, kill_queue):
             number, config = queueIn.get()
             logger.info("Running game %d." % number)
             res = (number, play_game(config))
-            queueOut.put(res)
+            queueOut.put(res, timeout=120) #Wait at most a minute for writes
             del config
         except MemoryError as e:
             logger.error(e)
