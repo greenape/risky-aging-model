@@ -356,6 +356,12 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
             logger.info("Enqueing experiment %d" %  i)
             queue.put((i, exp))
             i += 1
+            #Wait for queue to empty before adding
+            while queue.full():
+                #And check for poison
+                if not kill_queue.empty():
+                    logger.info("Poison pill in the kill queue. Not making more jobs.")
+                    break
     for i in range(num_consumers):
         logger.info("Sending finished signal to queue.")
         queue.put(None)
