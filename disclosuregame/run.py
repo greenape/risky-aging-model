@@ -347,11 +347,13 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
     while len(kwargs) > 0:
         if not kill_queue.empty():
             logger.info("Poison pill in the kill queue. Not making more jobs.")
+            queue.put(None)
             break
         exps = decision_fn_compare(**kwargs.pop())
         for exp in exps:
             if not kill_queue.empty():
                 logger.info("Poison pill in the kill queue. Not making more jobs.")
+                queue.put(None)
                 break
             logger.info("Enqueing experiment %d" %  i)
             queue.put((i, exp))
@@ -361,6 +363,7 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
                 #And check for poison
                 if not kill_queue.empty():
                     logger.info("Poison pill in the kill queue. Not making more jobs.")
+                    queue.put(None)
                     break
     for i in range(num_consumers):
         logger.info("Sending finished signal to queue.")
@@ -473,16 +476,20 @@ def kw_experiment(kwargs, file_name, procs):
             p.join()
         except KeyboardInterrupt:
             for p in calcProc:
+                logger.info("Terminating %s" % str(p))
                 p.terminate()
+            logger.info("Terminating producer")
             producer.terminate()
+            logger.info("Poison pill")
             kill_queue.put(None)
+    logger.info("Closing results.")
     results.put(None)
+    logger.info("Joining writer.")
     writProc.join()
-    while True:
-        if jobs.get() is None:
-            break
-        logger.info("Flushing jobs queue..")
+    logger.info("Joined.")
+    logger.info("Joining producer.")
     producer.join()
+    logger.info("Done.")
 
 
 def main():
