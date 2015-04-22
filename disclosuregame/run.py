@@ -37,6 +37,8 @@ import logging
 from random import Random
 import time
 import os.path
+import os
+import gc
 
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s/%(processName)s] %(message)s')
 logger = multiprocessing.log_to_stderr()
@@ -376,6 +378,7 @@ def do_work(queueIn, queueOut, kill_queue):
     """
     Consume games, play them, then put their results in the output queue.
     """
+    os.environ['PYPY_GC_MAX'] = '500MB'
     logger.info("Starting do work process.")
     while True:
         try:
@@ -401,6 +404,7 @@ def do_work(queueIn, queueOut, kill_queue):
         except:
             raise
             break
+        gc.collect()
     logger.info("Ending do work process.")
 
 def write(queue, db_name, kill_queue):
@@ -415,6 +419,7 @@ def write(queue, db_name, kill_queue):
             mw_res.write_db("%s_mw" % db_name)
             del women_res
             del mw_res
+            gc.collect()
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)

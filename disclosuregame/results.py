@@ -115,11 +115,9 @@ class Result(object):
         LOG.debug("Results table query: %s" % res_query)
         LOG.debug("Parameters table query: %s" % params_query)
 
-        conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        with conn:
+        with sqlite3.connect("%s.db" % db_name, timeout=timeout) as conn:
             conn.execute(res_query)
             conn.execute(params_query)
-        conn.close()
 
     def do_write(self, db_name, timeout):
 
@@ -138,12 +136,9 @@ class Result(object):
         insert_results = "INSERT INTO results (id, %s) VALUES(NULL, %s)" % (res_fields, placeholders)
         LOG.debug("Results insert query: %s", insert_results)
         #print insert
-        conn = sqlite3.connect("%s.db" % db_name, timeout=timeout)
-        with conn:
+        with sqlite3.connect("%s.db" % db_name, timeout=timeout) as conn:
             conn.executemany(insert_params, params)
             conn.executemany(insert_results, results)
-            
-        conn.close()
 
 
     def type_safety(self, x):
