@@ -369,9 +369,8 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
                     logger.info("Poison pill in the kill queue. Not making more jobs.")
                     queue.put(None, block=False)
                     break
-    for i in range(num_consumers):
-        logger.info("Sending finished signal to queue.")
-        queue.put(None, block=False)
+
+    queue.close()
     logger.info("Ending make work process.")
 
 
@@ -388,11 +387,12 @@ def do_work(queueIn, queueOut, kill_queue):
             number, config = queueIn.get(timeout=10) #Shouldn't ever need to wait
             logger.info("Running game %d." % number)
             res = (number, play_game(config))
-            queueOut.put(res, timeout=120) #Wait at most a minute for writes
+            queueOut.put(res, timeout=120) #Wait at most 2 mins for writes
             del config
         except MemoryError as e:
             logger.error(e)
             kill_queue.put_nowait(None)
+            queueIn.cancel_join_thread()
             raise
             break
         except AssertionError as e:
@@ -493,6 +493,11 @@ def kw_experiment(kwargs, file_name, procs):
         results.put(None, block=False)
     except:
         pass
+    while not jobs.empty():
+        try:
+            jobs.get_nowait()
+        except:
+            break
     if writProc.is_alive():
         logger.info("Joining writer.")
         writProc.join(60)
