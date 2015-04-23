@@ -349,13 +349,13 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
     while len(kwargs) > 0:
         if not kill_queue.empty():
             logger.info("Poison pill in the kill queue. Not making more jobs.")
-            queue.put(None)
+            queue.put(None, block=False)
             break
         exps = decision_fn_compare(**kwargs.pop())
         for exp in exps:
             if not kill_queue.empty():
                 logger.info("Poison pill in the kill queue. Not making more jobs.")
-                queue.put(None)
+                queue.put(None, block=False)
                 break
             logger.info("Enqueing experiment %d" %  i)
             queue.put((i, exp))
@@ -367,11 +367,11 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
                 logger.debug("Watching for a queue space, or poison.")
                 if not kill_queue.empty():
                     logger.info("Poison pill in the kill queue. Not making more jobs.")
-                    queue.put(None)
+                    queue.put(None, block=False)
                     break
     for i in range(num_consumers):
         logger.info("Sending finished signal to queue.")
-        queue.put(None)
+        queue.put(None, block=False)
     logger.info("Ending make work process.")
 
 
@@ -385,19 +385,19 @@ def do_work(queueIn, queueOut, kill_queue):
             if not kill_queue.empty():
                 logger.info("Poison pill in the kill queue. Stopping.")
                 break
-            number, config = queueIn.get()
+            number, config = queueIn.get(timeout=10) #Shouldn't ever need to wait
             logger.info("Running game %d." % number)
             res = (number, play_game(config))
             queueOut.put(res, timeout=120) #Wait at most a minute for writes
             del config
         except MemoryError as e:
             logger.error(e)
-            kill_queue.put(None)
+            kill_queue.put_nowait(None)
             raise
             break
         except AssertionError as e:
             logger.error(e)
-            kill_queue.put(None)
+            kill_queue.put_nowait(None)
             raise
             break
         except TypeError:
@@ -424,12 +424,12 @@ def write(queue, db_name, kill_queue):
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)
-            kill_queue.put(None)
+            kill_queue.put_nowait(None)
             raise
             break
         except Exception as e:
             logger.error(e)
-            kill_queue.put(None)
+            kill_queue.put_nowait(None)
             raise
             break
     logger.info("Ending write process.")
@@ -461,7 +461,6 @@ def kw_experiment(kwargs, file_name, procs):
     Run a bunch of experiments in parallel. Experiments are
     defined by a list of keyword argument dictionaries.
     """
-    os.environ['PYPY_GC_MAX'] = '200MB'
     num_consumers = procs
     #Make tasks
     jobs = multiprocessing.Queue(num_consumers)
@@ -488,14 +487,19 @@ def kw_experiment(kwargs, file_name, procs):
             logger.info("Terminating producer")
             producer.terminate()
             logger.info("Poison pill")
-            kill_queue.put(None)
+            kill_queue.put_nowait(None)
     logger.info("Closing results.")
-    results.put(None)
-    logger.info("Joining writer.")
-    writProc.join()
-    logger.info("Joined.")
-    logger.info("Joining producer.")
-    producer.join()
+    try:
+        results.put(None, block=False)
+    except:
+        pass
+    if writProc.is_alive():
+        logger.info("Joining writer.")
+        writProc.join(60)
+        logger.info("Joined.")
+    if producer.is_alive():
+        logger.info("Joining producer.")
+        producer.join(60)
     logger.info("Done.")
 
 
