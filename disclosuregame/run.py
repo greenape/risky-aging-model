@@ -39,6 +39,7 @@ import time
 import os.path
 import os
 import gc
+from Queue import Full, Empty
 
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s/%(processName)s] %(message)s')
 logger = multiprocessing.log_to_stderr()
@@ -351,23 +352,30 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
             assert kill_queue.empty()
             exps = decision_fn_compare(**kwargs.pop())
             for exp in exps:
-                assert kill_queue.empty()
                 logger.info("Enqueing experiment %d" %  i)
-                queue.put((i, exp))
+                while True:
+                    try:
+                        assert kill_queue.empty()
+                        queue.put((i, exp), timeout=10)
+                        break
+                    except Full:
+                        logger.debug("Waiting for space in the jobs queue.")
+                        pass
                 logger.info("Enqueued experiment %d" %  i)
                 i += 1
-                #Wait for queue to empty before adding
-                while queue.full():
-                    #And check for poison
-                    logger.debug("Watching for a queue space, or poison.")
-                    assert kill_queue.empty()
-    except AssertionError:
+    except:
         logger.info("Poison pill in the kill queue. Not making more jobs.")
-        queue.put(None, block=False)
+        try:
+            queue.put(None, block=False)
+        except Full:
+            pass
         queue.close()
+        queue.cancel_join_thread()
         raise
-    queue.close()
-    logger.info("Ending make work process.")
+    finally:
+        logger.info("Closing the jobs queue.")
+        queue.close()
+        logger.info("Ending make work process.")
 
 
 def do_work(queueIn, queueOut, kill_queue):
@@ -385,8 +393,8 @@ def do_work(queueIn, queueOut, kill_queue):
             del config
         except MemoryError as e:
             logger.error(e)
-            kill_queue.put_nowait(None)
             queueIn.cancel_join_thread()
+            kill_queue.put_nowait(None)
             raise
             break
         except AssertionError as e:
@@ -394,7 +402,8 @@ def do_work(queueIn, queueOut, kill_queue):
             kill_queue.put_nowait(None)
             raise
             break
-        except TypeError:
+        except Empty:
+            logger.info("No more work.")
             break
         except:
             raise
@@ -420,6 +429,8 @@ def write(queue, db_name, kill_queue):
             logger.error(e)
             kill_queue.put_nowait(None)
             raise
+            break
+        except TypeError:
             break
         except Exception as e:
             logger.error(e)
@@ -460,42 +471,46 @@ def kw_experiment(kwargs, file_name, procs):
     jobs = multiprocessing.Queue(num_consumers)
     kill_queue = multiprocessing.Queue(1)
     results = multiprocessing.Queue()
-    producer = multiprocessing.Process(target = make_work, args = (jobs, kwargs, num_consumers, kill_queue))
+    producer = multiprocessing.Process(target = make_work, name="Producer", args = (jobs, kwargs, num_consumers, kill_queue))
     producer.start()
-    calcProc = [multiprocessing.Process(target = do_work , args = (jobs, results, kill_queue)) for i in range(num_consumers)]
-    writProc = multiprocessing.Process(target = write, args = (results, file_name, kill_queue))
+    calcProc = [multiprocessing.Process(target = do_work, name="Simulation process %d" % i, args = (jobs, results, kill_queue)) for i in range(num_consumers)]
+    writProc = multiprocessing.Process(target = write, name="Writer", args = (results, file_name, kill_queue))
     writProc.start()
 
     for p in calcProc:
         p.start()
     for p in calcProc:
         try:
-            if not kill_queue.empty():
-                logger.info("Poison pill in the kill queue. Terminating.")
-                p.terminate()
+            assert kill_queue.empty()
             p.join()
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, AssertionError, MemoryError):
             for p in calcProc:
                 logger.info("Terminating %s" % str(p))
                 p.terminate()
-            logger.info("Terminating producer")
-            producer.terminate()
             logger.info("Poison pill")
-            kill_queue.put_nowait(None)
+            try:
+                kill_queue.put_nowait(None)
+            except Full:
+                logger.info("Poison already in place.")
+            break
+    try:
+        kill_queue.put_nowait(None)
+    except Full:
+        logger.info("Poison already in place.")
     logger.info("Closing results.")
     try:
         results.put(None, block=False)
-    except:
+    except Full:
         pass
     while not jobs.empty():
+        logger.info("Flushing jobs.")
         try:
             jobs.get_nowait()
-        except:
+        except Empty:
             break
     if writProc.is_alive():
         logger.info("Joining writer.")
         writProc.join(60)
-        logger.info("Joined.")
     if producer.is_alive():
         logger.info("Joining producer.")
         producer.join(60)
