@@ -359,10 +359,12 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
                 break
             logger.info("Enqueing experiment %d" %  i)
             queue.put((i, exp))
+            logger.info("Enqueued experiment %d" %  i)
             i += 1
             #Wait for queue to empty before adding
             while queue.full():
                 #And check for poison
+                logger.debug("Watching for a queue space, or poison.")
                 if not kill_queue.empty():
                     logger.info("Poison pill in the kill queue. Not making more jobs.")
                     queue.put(None)
@@ -370,7 +372,6 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
     for i in range(num_consumers):
         logger.info("Sending finished signal to queue.")
         queue.put(None)
-    queue.put(None)
     logger.info("Ending make work process.")
 
 
@@ -378,7 +379,6 @@ def do_work(queueIn, queueOut, kill_queue):
     """
     Consume games, play them, then put their results in the output queue.
     """
-    os.environ['PYPY_GC_MAX'] = '500MB'
     logger.info("Starting do work process.")
     while True:
         try:
@@ -392,6 +392,7 @@ def do_work(queueIn, queueOut, kill_queue):
             del config
         except MemoryError as e:
             logger.error(e)
+            kill_queue.put(None)
             raise
             break
         except AssertionError as e:
@@ -460,6 +461,7 @@ def kw_experiment(kwargs, file_name, procs):
     Run a bunch of experiments in parallel. Experiments are
     defined by a list of keyword argument dictionaries.
     """
+    os.environ['PYPY_GC_MAX'] = '200MB'
     num_consumers = procs
     #Make tasks
     jobs = multiprocessing.Queue(num_consumers)
