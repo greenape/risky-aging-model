@@ -346,30 +346,26 @@ def play_game(config):
 def make_work(queue, kwargs, num_consumers, kill_queue):
     logger.info("Starting make work process.")
     i = 1
-    while len(kwargs) > 0:
-        if not kill_queue.empty():
-            logger.info("Poison pill in the kill queue. Not making more jobs.")
-            queue.put(None, block=False)
-            break
-        exps = decision_fn_compare(**kwargs.pop())
-        for exp in exps:
-            if not kill_queue.empty():
-                logger.info("Poison pill in the kill queue. Not making more jobs.")
-                queue.put(None, block=False)
-                break
-            logger.info("Enqueing experiment %d" %  i)
-            queue.put((i, exp))
-            logger.info("Enqueued experiment %d" %  i)
-            i += 1
-            #Wait for queue to empty before adding
-            while queue.full():
-                #And check for poison
-                logger.debug("Watching for a queue space, or poison.")
-                if not kill_queue.empty():
-                    logger.info("Poison pill in the kill queue. Not making more jobs.")
-                    queue.put(None, block=False)
-                    break
-
+    try:
+        while len(kwargs) > 0:
+            assert kill_queue.empty()
+            exps = decision_fn_compare(**kwargs.pop())
+            for exp in exps:
+                assert kill_queue.empty()
+                logger.info("Enqueing experiment %d" %  i)
+                queue.put((i, exp))
+                logger.info("Enqueued experiment %d" %  i)
+                i += 1
+                #Wait for queue to empty before adding
+                while queue.full():
+                    #And check for poison
+                    logger.debug("Watching for a queue space, or poison.")
+                    assert kill_queue.empty()
+    except AssertionError:
+        logger.info("Poison pill in the kill queue. Not making more jobs.")
+        queue.put(None, block=False)
+        queue.close()
+        raise
     queue.close()
     logger.info("Ending make work process.")
 
@@ -381,9 +377,7 @@ def do_work(queueIn, queueOut, kill_queue):
     logger.info("Starting do work process.")
     while True:
         try:
-            if not kill_queue.empty():
-                logger.info("Poison pill in the kill queue. Stopping.")
-                break
+            assert kill_queue.empty()
             number, config = queueIn.get(timeout=10) #Shouldn't ever need to wait
             logger.info("Running game %d." % number)
             res = (number, play_game(config))
