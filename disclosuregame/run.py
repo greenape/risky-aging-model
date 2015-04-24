@@ -367,7 +367,6 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
                 logger.info("Enqueued experiment %d" %  i)
                 i += 1
     except Exception as e:
-        queue.cancel_join_thread()
         logger.info("Poison pill in the kill queue. Not making more jobs.")
         try:
             queue.put_nowait(None)
@@ -377,6 +376,7 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
     finally:
         logger.info("Closing the jobs queue.")
         queue.close()
+        queue.cancel_join_thread()
         logger.info("Ending make work process.")
 
 
@@ -418,6 +418,9 @@ def do_work(queueIn, queueOut, kill_queue):
         except:
             raise
             break
+        finally:
+            queueOut.cancel_join_thread()
+            queueIn.cancel_join_thread()
         gc.collect()
     logger.info("Ending do work process.")
 
@@ -457,6 +460,8 @@ def write(queue, db_name, kill_queue):
             kill_queue.put_nowait(None)
             raise
             break
+        finally:
+            queue.cancel_join_thread()
     logger.info("Ending write process.")
 
 
@@ -522,13 +527,6 @@ def kw_experiment(kwargs, file_name, procs):
         results.put(None, block=False)
     except Full:
         pass
-    while not jobs.empty():
-        logger.info("Flushing jobs.")
-        try:
-            jobs.get_nowait()
-        except Exception as e:
-            logger.error(e)
-            break
     if writProc.is_alive():
         logger.info("Joining writer.")
         writProc.join(60)
