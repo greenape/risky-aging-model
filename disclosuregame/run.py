@@ -372,11 +372,11 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
             queue.put_nowait(None)
         except Full:
             pass
+        queue.cancel_join_thread()
         raise e
     finally:
         logger.info("Closing the jobs queue.")
         queue.close()
-        queue.cancel_join_thread()
         logger.info("Ending make work process.")
 
 
@@ -415,12 +415,10 @@ def do_work(queueIn, queueOut, kill_queue):
         except Empty:
             logger.info("No more work.")
             break
-        except:
+        except Exception as e:
+            logger.error(e)
             raise
             break
-        finally:
-            queueOut.cancel_join_thread()
-            queueIn.cancel_join_thread()
         gc.collect()
     logger.info("Ending do work process.")
 
@@ -448,7 +446,8 @@ def write(queue, db_name, kill_queue):
                 pass
             raise
             break
-        except TypeError:
+        except TypeError as e:
+            raise e
             break
         except Empty:
             pass
@@ -460,9 +459,8 @@ def write(queue, db_name, kill_queue):
             kill_queue.put_nowait(None)
             raise
             break
-        finally:
-            queue.cancel_join_thread()
     logger.info("Ending write process.")
+    logger.info("Results queue empty: %s" % str(queue.empty()))
 
 
 def experiment(file_name, game_fns=[Game, CaseloadGame], 
@@ -527,12 +525,21 @@ def kw_experiment(kwargs, file_name, procs):
         results.put(None, block=False)
     except Full:
         pass
+    logger.info("Flushing jobs.")
+    try:
+        while not jobs.empty():
+            logger.info("Flushing a job.")
+            jobs.get_nowait()
+            logger.info("Flushed.")
+    except Empty:
+        logger.info("Jobs flushed.")
     if writProc.is_alive():
         logger.info("Joining writer.")
         writProc.join(60)
     if producer.is_alive():
         logger.info("Joining producer.")
         producer.join(60)
+        producer.terminate()
     logger.info("Done.")
 
 
