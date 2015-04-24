@@ -160,6 +160,9 @@ def arguments():
         logger.debug("Using abstract measures.")
         kwargs['measures_midwives'] = abstract_measures_mw()
         kwargs['measures_women'] = abstract_measures_women()
+    else:
+        kwargs['measures_midwives'] = measures_midwives()
+        kwargs['measures_women'] = measures_women()
     if args.space:
         logger.debug("Using space measures.")
         kwargs['measures_midwives'] = space_measures_mw(kwargs['measures_midwives'])
@@ -356,22 +359,21 @@ def make_work(queue, kwargs, num_consumers, kill_queue):
                 while True:
                     try:
                         assert kill_queue.empty()
-                        queue.put((i, exp), timeout=10)
+                        queue.put_nowait((i, exp))
                         break
                     except Full:
                         logger.debug("Waiting for space in the jobs queue.")
                         pass
                 logger.info("Enqueued experiment %d" %  i)
                 i += 1
-    except:
+    except Exception as e:
+        queue.cancel_join_thread()
         logger.info("Poison pill in the kill queue. Not making more jobs.")
         try:
-            queue.put(None, block=False)
+            queue.put_nowait(None)
         except Full:
             pass
-        queue.close()
-        queue.cancel_join_thread()
-        raise
+        raise e
     finally:
         logger.info("Closing the jobs queue.")
         queue.close()
@@ -394,12 +396,20 @@ def do_work(queueIn, queueOut, kill_queue):
         except MemoryError as e:
             logger.error(e)
             queueIn.cancel_join_thread()
-            kill_queue.put_nowait(None)
+            try:
+                logger.info("Dropping poison.")
+                kill_queue.put_nowait(None)
+            except Full:
+                pass
             raise
             break
         except AssertionError as e:
             logger.error(e)
-            kill_queue.put_nowait(None)
+            try:
+                logger.info("Dropping poison.")
+                kill_queue.put_nowait(None)
+            except Full:
+                pass
             raise
             break
         except Empty:
@@ -415,7 +425,8 @@ def write(queue, db_name, kill_queue):
     logger.info("Starting write process.")
     while True:
         try:
-            number, res = queue.get()
+            assert kill_queue.empty()
+            number, res = queue.get_nowait()
             #print res
             women_res, mw_res = res
             logger.info("Writing game %d." % number)
@@ -427,10 +438,19 @@ def write(queue, db_name, kill_queue):
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)
-            kill_queue.put_nowait(None)
+            try:
+                logger.info("Dropping poison.")
+                kill_queue.put_nowait(None)
+            except Full:
+                pass
             raise
             break
         except TypeError:
+            break
+        except Empty:
+            pass
+        except AssertionError as e:
+            logger.error(e)
             break
         except Exception as e:
             logger.error(e)
@@ -506,7 +526,8 @@ def kw_experiment(kwargs, file_name, procs):
         logger.info("Flushing jobs.")
         try:
             jobs.get_nowait()
-        except Empty:
+        except Exception as e:
+            logger.error(e)
             break
     if writProc.is_alive():
         logger.info("Joining writer.")
