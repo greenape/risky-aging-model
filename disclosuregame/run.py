@@ -39,6 +39,7 @@ import time
 import os.path
 import os
 import gc
+import platform
 from Queue import Full, Empty
 
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s/%(processName)s] %(message)s')
@@ -121,7 +122,7 @@ def arguments():
     parser.add_argument('--space-measures', dest='space', action="store_true",
         help="Take measures for risk, value, signal space.", default=False)
     parser.add_argument('--log-level', dest='log_level', type=str, choices=['debug',
-        'info', 'warniing', 'error'], default='info', nargs="?")
+        'info', 'warning', 'error'], default='info', nargs="?")
     parser.add_argument('--log-file', dest='log_file', type=str, default='')
     parser.add_argument('--tag', dest='tag', type=str, default='')
     parser.add_argument('--measure-every', dest='measure_freq', type=int,
@@ -494,10 +495,10 @@ def kw_experiment(kwargs, file_name, procs):
     jobs = multiprocessing.Queue(num_consumers)
     kill_queue = multiprocessing.Queue(1)
     results = multiprocessing.Queue()
-    producer = multiprocessing.Process(target = make_work, name="Producer", args = (jobs, kwargs, num_consumers, kill_queue))
+    producer = multiprocessing.Process(target = make_work, name="%s: Producer" % host, args = (jobs, kwargs, num_consumers, kill_queue))
     producer.start()
-    calcProc = [multiprocessing.Process(target = do_work, name="Simulation process %d" % i, args = (jobs, results, kill_queue)) for i in range(num_consumers)]
-    writProc = multiprocessing.Process(target = write, name="Writer", args = (results, file_name, kill_queue))
+    calcProc = [multiprocessing.Process(target = do_work, name="%s: Simulation process %d" % (host, i), args = (jobs, results, kill_queue)) for i in range(num_consumers)]
+    writProc = multiprocessing.Process(target = write, name="%s Writer" % host, args = (results, file_name, kill_queue))
     writProc.start()
 
     for p in calcProc:
