@@ -490,6 +490,7 @@ def kw_experiment(kwargs, file_name, procs):
     Run a bunch of experiments in parallel. Experiments are
     defined by a list of keyword argument dictionaries.
     """
+    host = platform.uname()[1]
     num_consumers = procs
     #Make tasks
     jobs = multiprocessing.Queue(num_consumers)
