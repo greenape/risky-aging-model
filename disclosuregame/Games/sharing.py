@@ -73,13 +73,12 @@ class CarryingInformationGame(CarryingReferralGame):
         self.signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         LOG.debug("Made player generator.")
-        birthed = []
         self.random.shuffle(women)
         self.num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self)
         mw_res = self.measures_midwives.dump(None, self.rounds, self)
-        women_memories = []
-        return women_res, mw_res, women_memories
+        self.women_memories = []
+        return women_res, mw_res
 
     def run_round(self, women, midwives, women_res, mw_res):
         """
@@ -115,7 +114,7 @@ class CarryingInformationGame(CarryingReferralGame):
                 signallers.insert(0, new_woman)
                 LOG.debug("Generated a new player.")
                 if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
-                    women_memories.append(woman.get_memory())
+                    self.women_memories.append(woman.get_memory())
                 for midwife in responders:
                     midwife.signal_memory.pop(hash(woman), None)
                 del woman
@@ -133,7 +132,7 @@ class CarryingInformationGame(CarryingReferralGame):
 
         #Women
         try:
-            self.share_women(signallers, women_memories)
+            self.share_women(signallers)
         except Exception as e:
             LOG.debug("Sharing to women failed.")
             LOG.debug(e)
@@ -168,13 +167,13 @@ class CarryingInformationGame(CarryingReferralGame):
                 self.disseminate_midwives(memory[1][1], possibles)
 
 
-    def share_women(self, women, women_memories):
+    def share_women(self, women):
             """
             Go through all the experiences of those who were referred this round,
             and for each one share with probability self.women_share_prob.
             """
-            while len(women_memories) > 0:
-                memory = women_memories.pop()
+            while len(self.women_memories) > 0:
+                memory = self.women_memories.pop()
                 if self.random.random() < self.women_share_prob:
                     self.disseminate_women(memory[1], women)
             map(lambda x: x.update_beliefs(), women)

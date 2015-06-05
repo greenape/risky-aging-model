@@ -669,7 +669,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
             pass
         return 1. if r == signal else 0."""
         sigs = self.sample_one(signaller)
-        return 1./len(sigs) if r in sigs else 0.
+        return 1./len(sigs) if signal in sigs else 0.
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))

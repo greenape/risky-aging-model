@@ -1,24 +1,28 @@
 import gzip
 import sqlite3
+
 try:
     import scoop
+
     scoop.worker
     single_db = False
     LOG = scoop.logger
 except:
     single_db = True
     import multiprocessing
+
     LOG = multiprocessing.get_logger()
     pass
 
+
 class Result(object):
     def __init__(self, fields, parameters, results):
-        self.fields = map(lambda x: x+"__numeric", fields)
+        self.fields = map(lambda x: x + "__numeric", fields)
         self.fields.append("hash")
         self.param_fields = parameters.keys()
         self.param_fields.append("hash")
         param_hash = "h%d" % hash(tuple(map(str, parameters.values())))
-        self.parameters = {param_hash:parameters.values() + [param_hash]}
+        self.parameters = {param_hash: parameters.values() + [param_hash]}
         for result in results:
             result.append(param_hash)
         self.results = results
@@ -39,7 +43,7 @@ class Result(object):
         fout = gzip.open(file_name, "w")
         fout.write("\n".join(result))
         fout.close()
-    
+
     def write_params(self, file_name, sep=","):
         if not single_db:
             file_name = "%s_%s" % (scoop.worker[0], file_name)
@@ -72,7 +76,6 @@ class Result(object):
 
         self.do_write(db_name, timeout)
 
-
     @staticmethod
     def check_columns(db_name, table, fields, timeout):
         """
@@ -103,11 +106,11 @@ class Result(object):
     def make_tables(self, db_name, timeout):
         """
         Create or ignore the required fields.
-        """        
+        """
         res_fields = ",".join(self.fields)
-        #print fields
+        # print fields
         res_query = "CREATE TABLE IF NOT EXISTS results (id INTEGER PRIMARY KEY, %s)" % res_fields
-        
+
         param_fields = list(self.param_fields)
         param_fields.append("%s PRIMARY KEY" % param_fields.pop())
         param_fields = ",".join(param_fields)
@@ -124,24 +127,23 @@ class Result(object):
     def do_write(self, db_name, timeout):
 
         params = map(lambda x: tuple(map(self.type_safety, x)), self.parameters.values())
-        #params = map(tuple, self.parameters.values())
+        # params = map(tuple, self.parameters.values())
         param_fields = ", ".join(self.param_fields)
-        placeholders = ",".join(['?']*len(self.param_fields))
+        placeholders = ",".join(['?'] * len(self.param_fields))
         insert_params = "INSERT OR IGNORE INTO parameters (%s) VALUES(%s)" % (param_fields, placeholders)
         LOG.debug("Params insert query: %s", insert_params)
-        #print insert
+        # print insert
 
         res_fields = ", ".join(self.fields)
         results = map(lambda x: tuple(map(self.type_safety, x)), self.results)
-        #results = map(tuple, self.results)
-        placeholders = ",".join(['?']*len(self.fields))
+        # results = map(tuple, self.results)
+        placeholders = ",".join(['?'] * len(self.fields))
         insert_results = "INSERT INTO results (id, %s) VALUES(NULL, %s)" % (res_fields, placeholders)
         LOG.debug("Results insert query: %s", insert_results)
-        #print insert
+        # print insert
         with sqlite3.connect("%s.db" % db_name, timeout=timeout) as conn:
             conn.executemany(insert_params, params)
             conn.executemany(insert_results, results)
-
 
     def type_safety(self, x):
         """
@@ -160,7 +162,3 @@ class Result(object):
             pass
 
         return x
-
-
-
-

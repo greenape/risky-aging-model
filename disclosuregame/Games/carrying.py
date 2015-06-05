@@ -3,13 +3,16 @@ from disclosuregame.Util import random_expectations
 from referral import *
 import collections
 from random import Random
+
 try:
     import scoop
+
     scoop.worker
     scoop_on = True
 except:
     scoop_on = False
     pass
+
 
 class CarryingGame(game.SimpleGame):
     def __unicode__(self):
@@ -24,15 +27,17 @@ class CarryingGame(game.SimpleGame):
         self.signaller_fn = None
         self.player_random = Random(self.random.random())
 
-
     """
     A game type that maintains the size of the population of
     women, by adding in a new one of the same type as any that finish.
     """
+
     def play_game(self, players, file_name=""):
         women, midwives = players
-        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
-            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
+        signaller_generator = self.signaller_fn.generator(random=self.player_random,
+                                                          type_distribution=self.women_weights,
+                                                          agent_args=self.signaller_args, initor=self.signaller_initor,
+                                                          init_args=self.signaller_init_args)
         rounds = self.rounds
         self.random.shuffle(women)
         num_midwives = len(midwives)
@@ -59,8 +64,8 @@ class CarryingGame(game.SimpleGame):
                 else:
                     women.insert(0, woman)
                     woman.finished += 1
-            #if scoop_on:
-            #    scoop.logger.info("Worker %s played %d rounds." % (scoop.worker[0], i))
+                    # if scoop_on:
+                    #    scoop.logger.info("Worker %s played %d rounds." % (scoop.worker[0], i))
 
         del women
         del midwives
@@ -69,14 +74,17 @@ class CarryingGame(game.SimpleGame):
             scoop.logger.info("Worker %s completed a game." % (scoop.worker[0]))
         return women_res, mw_res
 
+
 class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
     def __unicode__(self):
         return "caseload_carrying_%s" % super(CarryingGame, self).__unicode__()
 
     def play_game(self, players, file_name=""):
         women, midwives = players
-        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
-            agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
+        signaller_generator = self.signaller_fn.generator(random=self.player_random,
+                                                          type_distribution=self.women_weights,
+                                                          agent_args=self.signaller_args, initor=self.signaller_initor,
+                                                          init_args=self.signaller_init_args)
         rounds = self.rounds
         self.random.shuffle(women)
         women_res = self.measures_women.dump(None, self.rounds, self)
@@ -122,16 +130,17 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
                 scoop.logger.info("Worker %s played %d rounds." % (scoop.worker[0], i))
         del women
         del midwives
-        
+
         if scoop_on:
             scoop.logger.info("Worker %s completed a game." % (scoop.worker[0]))
         return women_res, mw_res
 
 
 class CarryingReferralGame(CarryingGame, ReferralGame):
-        """
+    """
         Just like the referral game, but maintains a carrying capacity.
         """
+
 
 class CarryingCaseloadReferralGame(CaseloadCarryingGame, ReferralGame):
     """

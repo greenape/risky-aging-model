@@ -175,23 +175,11 @@ def make_players(constructor, num=100, weights=None, nested=False, signaller=Tru
     for weight in weights:
         for i in range(int(round(weight*num))):
             if len(women) == num: break
-            if nested:
-                if signaller:
-                    women.append(DollSignaller(player_type=player_type, child_fn=constructor))
-                else:
-                    women.append(constructor(player_type=player_type, **player_args))    
-            else:
-                women.append(constructor(player_type=player_type, **player_args))
+            women.append(constructor(player_type=player_type, **player_args))
         player_type += 1
     while len(women) < num:
         player_type = 0
-        if nested:
-            if signaller:
-                women.append(DollSignaller(player_type=player_type, child_fn=constructor))
-            else:
-                women.append(constructor(player_type=player_type, **player_args))    
-        else:
-            women.append(constructor(player_type=player_type, **player_args))
+        women.append(constructor(player_type=player_type, **player_args))
     return women
 
 def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game, rounds,

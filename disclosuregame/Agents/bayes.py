@@ -283,10 +283,10 @@ class Signaller(Agent):
             # alpha_dot + n
             n = float(sum(responses.values()))
             # Count is alpha_k + n_k
-            for response, count in responses.iteritems():
+            for response, response_count in responses.iteritems():
                 self.response_belief[signal][response] = 0.
                 if n > 0:
-                    self.response_belief[signal][response] = count / n#prob
+                    self.response_belief[signal][response] = response_count / n#prob
 
 
     def log_signal(self, signal, opponent=None, weight=1.):
@@ -315,6 +315,8 @@ class Signaller(Agent):
 
     def get_payoff_log(self):
         return self.payoff_log
+
+
 
 
 class BayesianSignaller(Signaller):
