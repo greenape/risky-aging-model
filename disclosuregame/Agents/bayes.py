@@ -102,10 +102,12 @@ class Signaller(Agent):
         #self.risk_log_general = dict([(signal, []) for signal in signals])
         super(Signaller, self).__init__(player_type, signals, responses, seed)
 
-    def response_signal_dict(self, signals, responses):
+    @staticmethod
+    def response_signal_dict(signals, responses):
         return {s:dict.fromkeys(responses, 0.) for s in signals}
 
-    def response_belief_dict(self, signals, responses):
+    @staticmethod
+    def response_belief_dict(signals, responses):
         return {s:{k:[] for k in responses} for s in signals}#dict([(signal, dict([(response, []) for response in responses])) for signal in signals])
 
     def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None):

@@ -3,6 +3,7 @@ import collections
 from disclosuregame.results import Result
 import itertools
 import math
+import abc
 
 try:
     import scoop
@@ -100,6 +101,13 @@ class Measure(object):
         women = filter(lambda x: x.started < roundnum, women)
         women = filter(lambda x: x.finished > roundnum, women)
         return women
+
+    @abc.abstractmethod
+    def measure(self, roundnum, women, game):
+        """
+        Take a measurement and return a result.
+        """
+        return None
 
 
 class NumRounds(Measure):

@@ -79,11 +79,9 @@ def make_pbs_script(kwargs, hours=60, mins=0, ppn=16, script_name=None):
     if kwargs.file_name == "":
         args += " -f ${PBS_ARRAYID}"
     interpreter = sys.executable
-    run_script = ["#!/bin/bash -vx"]
-    run_script.append("#PBS -l walltime=%d:%d:00" % (hours, mins))
+    run_script = ["#!/bin/bash -vx", "#PBS -l walltime=%d:%d:00" % (hours, mins), "#PBS -l nodes=1:ppn=%d" % ppn,
+                  "module load python"]
     #Doesn't work on multiple nodes, sadly
-    run_script.append("#PBS -l nodes=1:ppn=%d" % ppn)
-    run_script.append("module load python")
 
     #Set up the call
     run_call = "%s -m disclosuregame.run %s" % (interpreter, args)
