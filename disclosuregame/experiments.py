@@ -74,7 +74,7 @@ def make_random_patients(signaller, num=1000, weights=None):
     women = []
     player_type = 0
     for weight in weights:
-        for i in range(weight*100):
+        for i in range(weight*num):
             women.append(signaller(player_type=player_type))
         player_type += 1
     return women
@@ -146,7 +146,6 @@ def naive_partition(resolution=0.1):
     Generator that yields combinations of three numbers that sum to
     one.
     """
-    parts = []
     for x in itertools.product(xrange(0, 101, int(100 * resolution)), repeat=3):
         if sum(x) == 100:
             yield map(lambda y: y / 100., x)

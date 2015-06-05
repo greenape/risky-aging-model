@@ -101,7 +101,6 @@ class AppointmentTypeSignalCount(TypeSignalCount):
             return "NA"
         # Probabilty of this signal and this type
         map(lambda x: self.measure_one(x), women)
-        total = sum(x for counter in self.counts.values() for x in counter.values())
         result = self.counts[self.player_type][self.signal]
         return result
 

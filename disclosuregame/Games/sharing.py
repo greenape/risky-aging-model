@@ -58,7 +58,7 @@ class CarryingInformationGame(CarryingReferralGame):
         rounds, birthed, num_midwives, women_res, mw_res, women_memories = self.pre_game(women, midwives)
         LOG.debug("Starting play.")
         for i in range(rounds):
-            self.run_round(women, midwives, num_midwives, women_res, mw_res)
+            women_res, mw_res = self.run_round(women, midwives, num_midwives, women_res, mw_res)
             self.post_round(players, women, women_memories, midwives)
         del women
         del midwives
@@ -93,6 +93,7 @@ class CarryingInformationGame(CarryingReferralGame):
             x.finished += 1
         women_res = self.measures_women.dump(women + players, i, self, women_res)
         mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+        return women_res, mw_res
         
 
     def post_round(self, players, women, women_memories, midwives):
@@ -151,8 +152,6 @@ class CarryingInformationGame(CarryingReferralGame):
         or erase them if not shared.
         """
         #Worst outcome for a responder
-        worst = self.payoffs["no_baby_payoff"] * self.num_appointments
-        best = self.payoffs["baby_payoff"] * self.num_appointments
         for midwife in midwives:
             memory = midwife.shareable
             midwife.shareable = None
@@ -169,8 +168,6 @@ class CarryingInformationGame(CarryingReferralGame):
             Go through all the experiences of those who were referred this round,
             and for each one share with probability self.women_share_prob.
             """
-            worst = (self.payoffs["harsh_high"] + self.payoffs["no_baby_payoff"]) * self.num_appointments
-            best = (self.payoffs["baby_payoff"] + self.payoffs["low_low"]) * self.num_appointments
             while len(women_memories) > 0:
                 memory = women_memories.pop()
                 if self.random.random() < self.women_share_prob:
@@ -243,12 +240,10 @@ class ShuffledSharingGame(CarryingInformationGame):
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         LOG.debug("Made player generator.")
         rounds = self.rounds
-        birthed = []
         num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self, None)
         mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
         women_memories = []
-        mw_memories = []
         LOG.debug("Starting play.")
         for i in range(rounds):
             self.random.shuffle(women)
@@ -319,9 +314,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
-        birthed = []
         self.random.shuffle(women)
-        num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self, None)
         mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
         women_memories = []
@@ -423,8 +416,6 @@ class SubgroupSharingGame(CarryingInformationGame):
         or erase them if not shared.
         """
         #Worst outcome for a responder
-        worst = self.payoffs["no_baby_payoff"] * self.num_appointments
-        best = self.payoffs["baby_payoff"] * self.num_appointments
         for midwife in midwives:
             memory = midwife.shareable
             midwife.shareable = None
@@ -467,8 +458,6 @@ class CombinedSharingGame(CarryingInformationGame):
         or erase them if not shared.
         """
         #Worst outcome for a responder
-        worst = self.payoffs["no_baby_payoff"] * self.num_appointments
-        best = self.payoffs["baby_payoff"] * self.num_appointments
         for midwife in midwives:
             memory = midwife.shareable
             midwife.shareable = None

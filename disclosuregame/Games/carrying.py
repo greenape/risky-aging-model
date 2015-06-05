@@ -34,7 +34,6 @@ class CarryingGame(game.SimpleGame):
         signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
-        birthed = []
         self.random.shuffle(women)
         num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self, None)
@@ -79,9 +78,7 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
         signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
-        birthed = []
         self.random.shuffle(women)
-        num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self, None)
         mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
 

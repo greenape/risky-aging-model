@@ -162,7 +162,6 @@ class Signaller(Agent):
             # A weighted choice of type
             player_type = weighted_random_choice(self.signals, type_weights, self.random)
             # Payoffs
-            payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
             self.response_signal_matches[signal][response] += 1
             self.type_weights[player_type] += 1
         
@@ -400,7 +399,6 @@ class Responder(Agent):
 
     ##@profile
     def update_beliefs(self, payoff, signaller, signal, signaller_type=None, weight=1.):
-        rounds = self.rounds
         if signaller is not None:
             signaller_type = signaller.player_type
             #self.type_matches[signaller_type] += 1

@@ -117,8 +117,7 @@ class RWSignaller(BayesianSignaller):
         return risk
 
     def do_signal(self, opponent=None):
-        best = (self.random.randint(0, 2), -9999999)
-       #print "Type %d woman evaluating signals." % self.player_type
+        #print "Type %d woman evaluating signals." % self.player_type
         weights = map(lambda signal: self.risk(signal, opponent), self.signals)
         best = weighted_choice(self.signals, weights, self.random)
         #best = (best, weights[best])
@@ -214,8 +213,7 @@ class RWResponder(BayesianResponder):
         Make a judgement about somebody based on
         the signal they sent based on expe
         """
-        best = (self.random.randint(0, 2), -9999999)
-       #print "Type %d woman evaluating signals." % self.player_type
+        #print "Type %d woman evaluating signals." % self.player_type
         weights = map(lambda response: self.risk(response, signal, opponent), self.responses)
         best = weighted_choice(self.responses, weights, self.random)
         #best = (best, weights[best])

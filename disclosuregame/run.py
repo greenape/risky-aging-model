@@ -226,9 +226,8 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
 
 def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=100,
                         num_women=1000, runs=1, game=None, rounds=100, mw_weights=None, women_weights=None,
-                        women_priors=None, seeds=None, women_modifier=None, measures_women=measures_women(),
-                        measures_midwives=measures_midwives(), nested=False, mw_priors=None, file_name="",
-                        responder_args=None, signaller_args=None, tag="", measure_freq=1,
+                        seeds=None, women_modifier=None, measures_women=measures_women(),
+                        measures_midwives=measures_midwives(), mw_priors=None, responder_args=None, signaller_args=None, tag="", measure_freq=1,
                         responder_initor=initors.responder, signaller_initor=initors.signaller,
                         signaller_init_args=None, responder_init_args=None):
     
@@ -279,18 +278,15 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
     logger.debug("----------")
     logger.debug(game.parameters)
     game.rounds = rounds
-    random = Random()
     if seeds is None:
         #seeds = [random.random() for x in range(runs)]
         seeds = range(runs)
-    player_pairs = []
     #for i in range(runs):
     i =  0
     while i < runs:
         logger.debug("Generated run %d of %d" % (i, runs))
         #game.parameters['seed'] = i
         # Parity across different conditions but random between runs.
-        random = Random(seeds[i])
         game.seed = seeds[i]
         game.random = Random(seeds[i])
         try:
@@ -330,7 +326,7 @@ def play_game(config):
     return game.play_game((women, midwives))
 
 
-def make_work(queue, kwargs, num_consumers, kill_queue):
+def make_work(queue, kwargs, kill_queue):
     logger.info("Starting make work process.")
     i = 1
     try:
