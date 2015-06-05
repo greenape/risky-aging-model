@@ -57,7 +57,7 @@ class CarryingInformationGame(CarryingReferralGame):
 
         rounds, birthed, num_midwives, women_res, mw_res, women_memories = self.pre_game(women, midwives)
         LOG.debug("Starting play.")
-        for i in range(rounds):
+        for self.current_round in range(rounds):
             women_res, mw_res = self.run_round(women, midwives, num_midwives, women_res, mw_res)
             self.post_round(players, women, women_memories=women_memories)
         del women
@@ -91,8 +91,8 @@ class CarryingInformationGame(CarryingReferralGame):
         map(self.play_round, players, midwives)
         for x in midwives:
             x.finished += 1
-        women_res = self.measures_women.dump(women + players, i, self)
-        mw_res = self.measures_midwives.dump(midwives, i, self)
+        women_res = self.measures_women.dump(women + players, self.current_round, self, results=women_res)
+        mw_res = self.measures_midwives.dump(midwives, self.current_round, self, results=mw_res)
         return women_res, mw_res
         
 
@@ -111,8 +111,8 @@ class CarryingInformationGame(CarryingReferralGame):
                 woman.is_finished = True
                 # Add a new naive women back into the mix
                 new_woman = self.signaller_generator.next()
-                new_woman.started = i
-                new_woman.finished = i
+                new_woman.started = self.current_round
+                new_woman.finished = self.current_round
                 signallers.insert(0, new_woman)
                 LOG.debug("Generated a new player.")
                 if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
@@ -233,8 +233,6 @@ class ShuffledSharingGame(CarryingInformationGame):
         """
         Minor variant, where women are chosen at random rather than in a rotating queue.
         """
-        #self.random.seed(1)
-        #self.random.seed(1)
         try:
             worker = scoop.worker[0]
         except:

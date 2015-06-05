@@ -133,7 +133,7 @@ class SimpleGame(Game):
 
     def random_payoffs(self):
 
-        self.payoffs["baby_payoff"] = self.self.random.randint(0, 100)
+        self.payoffs["baby_payoff"] = self.random.randint(0, 100)
         self.payoffs["no_baby_payoff"] = self.random.randint(-100, 0)
         self.payoffs["mid_baby_payoff"] = self.random.randint(self.payoffs["no_baby_payoff"], 0)
         self.payoffs["referral_cost"] = self.random.randint(self.payoffs["no_baby_payoff"], 0)
