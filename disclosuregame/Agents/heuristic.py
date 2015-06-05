@@ -18,9 +18,12 @@ class LexicographicSignaller(BayesianSignaller):
         return "lexicographic"
 
     #@profile
-    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.],
-                     response_weights=[[1., 1.], [1., 1.], [1., 2.]]):
+    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None):
         #Payoff counter
+        if not response_weights:
+            response_weights = [[1., 1.], [1., 1.], [1., 2.]]
+        if not type_weights:
+            type_weights = [1., 1., 1.]
         self.payoff_count = dict([(signal, {}) for signal in self.signals])
         self.payoff_belief = dict([(signal, {}) for signal in self.signals])
         for signal in self.signals:
@@ -46,12 +49,15 @@ class LexicographicSignaller(BayesianSignaller):
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
             response_weights)
 
-    def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.],
-                     response_weights=[[1., 1.], [1., 1.], [1., 1.]], num=10):
+    def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None, num=10):
         """
         An alternative way of generating priors by using the provided weights
         as weightings for random encounters.
         """
+        if not response_weights:
+            response_weights = [[1., 1.], [1., 1.], [1., 1.]]
+        if not type_weights:
+            type_weights = [1., 1., 1.]
         #Payoff counter
         self.payoff_count = dict([(signal, {}) for signal in self.signals])
         self.payoff_belief = dict([(signal, {}) for signal in self.signals])
@@ -137,7 +143,9 @@ class LexicographicResponder(BayesianResponder):
         return "lexicographic"
 
     #@profile
-    def init_payoffs(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]):
+    def init_payoffs(self, payoffs, type_weights=None):
+        if not type_weights:
+            type_weights = [[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]
         self.payoff_count = dict([(y, dict([(x, {}) for x in self.responses])) for y in self.signals])
         self.payoff_belief = dict([(y, dict([(x, {}) for x in self.responses])) for y in self.signals])
         #This is a bit more fiddly. Psuedo counts are for meanings..
@@ -159,7 +167,9 @@ class LexicographicResponder(BayesianResponder):
                 self.depth = max(len(payoff), self.depth)
         super(LexicographicResponder, self).init_payoffs(payoffs, type_weights)
 
-    def init_payoffs_(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]], num=10):
+    def init_payoffs_(self, payoffs, type_weights=None, num=10):
+        if not type_weights:
+            type_weights = [[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]
         self.payoff_count = dict([(y, dict([(x, {}) for x in self.responses])) for y in self.signals])
         self.payoff_belief = dict([(y, dict([(x, {}) for x in self.responses])) for y in self.signals])
         #This is a bit more fiddly. Psuedo counts are for meanings..

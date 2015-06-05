@@ -67,7 +67,9 @@ def scale_weights(weights, top):
     return weights
 
 
-def make_random_patients(signaller, num=1000, weights=[1/3., 1/3., 1/3.]):
+def make_random_patients(signaller, num=1000, weights=None):
+    if not weights:
+        weights = [1 / 3., 1 / 3., 1 / 3.]
     women = []
     player_type = 0
     for weight in weights:
@@ -100,7 +102,9 @@ def inject_type_belief(weights, num):
     return f
 
 
-def make_random_midwives(responder, num=100, weights=[80/100., 15/100., 5/100.]):
+def make_random_midwives(responder, num=100, weights=None):
+    if not weights:
+        weights = [80 / 100., 15 / 100., 5 / 100.]
     midwives = []
     for i in range(num):
         midwives.append(responder(player_type=weighted_choice(zip([0, 1, 2], weights))))
@@ -115,7 +119,7 @@ def proportions(num):
     for i in range(num):
         initial = 100
         result = []
-        for i in range(2):
+        for j in range(2):
             n = random.randint(0, initial)
             initial -= n
             result.append(n)

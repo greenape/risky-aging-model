@@ -25,7 +25,11 @@ class CarryingInformationGame(CarryingReferralGame):
     are the probability that any given memory is shared.
     """
     def __init__(self, mw_share_prob=0, mw_share_bias=-.99, women_share_prob=0, women_share_bias=0.99,
-     signaller_args={}, responder_args={}, **kwargs):
+                 signaller_args=None, responder_args=None, **kwargs):
+        if not responder_args:
+            responder_args = {}
+        if not signaller_args:
+            signaller_args = {}
         super(CarryingInformationGame, self).__init__(**kwargs)
         self.parameters['mw_share_prob'] = mw_share_prob
         self.parameters['mw_share_bias'] = mw_share_bias

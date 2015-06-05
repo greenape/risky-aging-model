@@ -10,9 +10,10 @@ class SharingResponder(RecognitionResponder):
     In addition, this agent can also make use of information obtained from others
     which is weighted according to the share_weight parameter.
     """
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1],
-        share_weight=0., seed=None):
+    def __init__(self, player_type=1, signals=None, responses=[0, 1], share_weight=0., seed=None):
         # Memory available for sharing
+        if not signals:
+            signals = [0, 1, 2]
         self.shareable = None
         #Weight given to other's info
         self.share_weight = share_weight
@@ -44,9 +45,10 @@ class SharingSignaller(BayesianSignaller):
     Class of signaller that maintains a meory of its experiences which can be
     shared with others, and can use the memories of others to update beliefs.
     """
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1],
-        share_weight=0., seed=None):
+    def __init__(self, player_type=1, signals=None, responses=[0, 1], share_weight=0., seed=None):
         # Exogenous memories
+        if not signals:
+            signals = [0, 1, 2]
         self.exogenous = []
         #Weight given to other's info
         self.share_weight = share_weight

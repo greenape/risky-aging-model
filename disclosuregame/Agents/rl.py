@@ -21,8 +21,10 @@ def weighted_choice(choices, weights, random=Random()):
     assert False, "Shouldn't get here"
 
 class RWSignaller(BayesianSignaller):
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1], 
-        signal_alpha=.25, mw_alpha=.3, type_alpha=.3, configural_alpha=.03, beta=.75, seed=None):
+    def __init__(self, player_type=1, signals=None, responses=[0, 1], signal_alpha=.25, mw_alpha=.3, type_alpha=.3,
+                 configural_alpha=.03, beta=.75, seed=None):
+        if not signals:
+            signals = [0, 1, 2]
         self.signal_alpha = signal_alpha
         self.mw_alpha = mw_alpha
         self.type_alpha = type_alpha
@@ -37,12 +39,15 @@ class RWSignaller(BayesianSignaller):
         self.diff = 0.
         super(RWSignaller, self).__init__(player_type, signals, responses, seed=seed)
 
-    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.],
-                     response_weights=[[1., 1.], [1., 1.], [1., 1.]], num=10):
+    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None, num=10):
         """
         An alternative way of generating priors by using the provided weights
         as weightings for random encounters.
         """
+        if not response_weights:
+            response_weights = [[1., 1.], [1., 1.], [1., 1.]]
+        if not type_weights:
+            type_weights = [1., 1., 1.]
         self.low = min(min(l) for l in baby_payoffs) + min(min(l) for l in social_payoffs)
         self.diff = float(max(max(l) for l in baby_payoffs) + max(max(l) for l in social_payoffs) - self.low)
         tmp = type(self)()
@@ -122,8 +127,10 @@ class RWSignaller(BayesianSignaller):
 
 
 class RWResponder(BayesianResponder):
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1], 
-        signal_alpha=.3, w_alpha=.3, response_alpha=.3, configural_alpha=.03, beta=.75, seed=None):
+    def __init__(self, player_type=1, signals=None, responses=[0, 1], signal_alpha=.3, w_alpha=.3, response_alpha=.3,
+                 configural_alpha=.03, beta=.75, seed=None):
+        if not signals:
+            signals = [0, 1, 2]
         self.signal_alpha = signal_alpha
         self.w_alpha = w_alpha
         self.response_alpha = response_alpha
@@ -138,7 +145,9 @@ class RWResponder(BayesianResponder):
         self.diff = 0.
         super(RWResponder, self).__init__(player_type, signals, responses, seed=seed)
 
-    def init_payoffs(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]], num=1000):
+    def init_payoffs(self, payoffs, type_weights=None, num=1000):
+        if not type_weights:
+            type_weights = [[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]
         self.type_weights = [[0.]*3]*3
         self.low = min(min(l) for l in payoffs)
         self.diff = float(max(max(l) for l in payoffs) - self.low)

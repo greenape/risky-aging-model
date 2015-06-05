@@ -1,46 +1,22 @@
-from disclosuregame.Games.game import *
-from disclosuregame.Games.referral import *
-from disclosuregame.Games.recognition import *
-from disclosuregame.Games.carrying import *
-from disclosuregame.Games.sharing import *
-
-from disclosuregame.Agents.cpt import *
-from disclosuregame.Agents.recognition import *
-from disclosuregame.Agents.heuristic import *
-from disclosuregame.Agents.payoff import *
-from disclosuregame.Agents.rl import *
-
-from disclosuregame.Measures import *
-from disclosuregame.Measures.abstract import *
-from disclosuregame.Measures.space_measures import *
-
-from disclosuregame.experiments import *
-
-from disclosuregame.Util import *
-
-import disclosuregame.Agents.initors
-
-import disclosuregame
-
 import multiprocessing
 import itertools
 from collections import OrderedDict
 import argparse
 from os.path import expanduser
 import cPickle
-import pickle
-import gzip
 from copy import deepcopy
 import sqlite3
-import sys
 import logging
 from random import Random
 import time
-import os.path
 import os
 import gc
 import platform
 from Queue import Full, Empty
+
+from disclosuregame.Measures.space_measures import *
+from disclosuregame.experiments import *
+import disclosuregame
 
 formatter = logging.Formatter('%(asctime)s - [%(levelname)s/%(processName)s] %(message)s')
 logger = multiprocessing.log_to_stderr()
@@ -187,8 +163,11 @@ def arguments():
     return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs, args.procs
 
 
-def make_players(constructor, num=100, weights=[1/3., 1/3., 1/3.], nested=False,
-    signaller=True, player_args={}, random=Random()):
+def make_players(constructor, num=100, weights=None, nested=False, signaller=True, player_args=None, random=Random()):
+    if not player_args:
+        player_args = {}
+    if not weights:
+        weights = [1 / 3., 1 / 3., 1 / 3.]
     women = []
     player_type = 0
     player_args = deepcopy(player_args)
@@ -245,15 +224,16 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
             params['weight_%d_%d' % (i, j)] = game.type_weights[i][j]
     return params
 
-def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder,
-    num_midwives=100, num_women=1000, 
-    runs=1, game=None, rounds=100,
-    mw_weights=[80/100., 15/100., 5/100.], women_weights=[1/3., 1/3., 1/3.], women_priors=None, seeds=None,
-    women_modifier=None, measures_women=measures_women(), measures_midwives=measures_midwives(),
-    nested=False, mw_priors=None, file_name="", responder_args=None, signaller_args=None, tag="", measure_freq=1,
-    responder_initor=initors.responder, signaller_initor=initors.signaller, signaller_init_args=None,
-    responder_init_args=None):
+def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=100,
+                        num_women=1000, runs=1, game=None, rounds=100, mw_weights=None,
+                        women_weights=[1 / 3., 1 / 3., 1 / 3.], women_priors=None, seeds=None, women_modifier=None,
+                        measures_women=measures_women(), measures_midwives=measures_midwives(), nested=False,
+                        mw_priors=None, file_name="", responder_args=None, signaller_args=None, tag="", measure_freq=1,
+                        responder_initor=initors.responder, signaller_initor=initors.signaller,
+                        signaller_init_args=None, responder_init_args=None):
     
+    if not mw_weights:
+        mw_weights = [80 / 100., 15 / 100., 5 / 100.]
     if responder_args is None:
         responder_args = {}
     else:
@@ -464,9 +444,13 @@ def write(queue, db_name, kill_queue):
     logger.info("Results queue empty: %s" % str(queue.empty()))
 
 
-def experiment(file_name, game_fns=[SimpleGame, CaseloadGame],
-    agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
-    kwargs=[{}], procs=1):
+def experiment(file_name, game_fns=None,
+               agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
+               kwargs=None, procs=1):
+    if not game_fns:
+        game_fns = [SimpleGame, CaseloadGame]
+    if not kwargs:
+        kwargs = [{}]
     run_params = []
     for pair in agents:
         for game_fn in game_fns:
@@ -509,9 +493,9 @@ def kw_experiment(kwargs, file_name, procs):
             assert kill_queue.empty()
             p.join()
         except (KeyboardInterrupt, AssertionError, MemoryError):
-            for p in calcProc:
-                logger.info("Terminating %s" % str(p))
-                p.terminate()
+            for proc in calcProc:
+                logger.info("Terminating %s" % str(proc))
+                proc.terminate()
             logger.info("Poison pill")
             try:
                 kill_queue.put_nowait(None)

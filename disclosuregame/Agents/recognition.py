@@ -5,8 +5,12 @@ class RecognitionResponder(BayesianResponder):
     Class of responder which remembers the actions of opponents and then retrospectively
     updates beliefs based on that when true information is available.
     """
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1], seed=None):
+    def __init__(self, player_type=1, signals=None, responses=None, seed=None):
         # Memory of a particular agent's signals.
+        if not responses:
+            responses = [0, 1]
+        if not signals:
+            signals = [0, 1, 2]
         self.signal_memory = {}
         super(RecognitionResponder, self).__init__(player_type, signals, responses, seed=seed)
 

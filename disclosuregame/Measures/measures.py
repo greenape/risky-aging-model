@@ -573,7 +573,9 @@ class GroupSignalIQR(GroupSignal):
 
 
 class ExpectedPointMutualInformation(Measure):
-    def __init__(self, signals=[0, 1, 2], **kwargs):
+    def __init__(self, signals=None, **kwargs):
+        if not signals:
+            signals = [0, 1, 2]
         super(ExpectedPointMutualInformation, self).__init__(**kwargs)
         self.signals = signals
 
@@ -670,7 +672,9 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         return p_type_signal
 
 class BayesTypeSignalProbability(TypeSignalProbability):
-    def __init__(self, signals=[0, 1, 2], **kwargs):
+    def __init__(self, signals=None, **kwargs):
+        if not signals:
+            signals = [0, 1, 2]
         super(BayesTypeSignalProbability, self).__init__(signals=signals,**kwargs)
         #Uninformed prior
         self.counts = {s:dict.fromkeys(signals, 1.) for s in signals}
@@ -717,7 +721,9 @@ class TypeSignalCount(BayesTypeSignalProbability):
     """
     Return a cumulative count of type-signal pairs.
     """
-    def __init__(self, signals=[0, 1, 2], **kwargs):
+    def __init__(self, signals=None, **kwargs):
+        if not signals:
+            signals = [0, 1, 2]
         super(TypeSignalCount, self).__init__(signals=signals,**kwargs)
         #Uninformed prior
         self.counts = {s:dict.fromkeys(signals, 0.) for s in signals}
@@ -836,7 +842,9 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 
-def measures_women(signals=[0, 1]):
+def measures_women(signals=None):
+    if not signals:
+        signals = [0, 1]
     n_signals = len(signals)
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
@@ -874,7 +882,9 @@ def measures_women(signals=[0, 1]):
 
 
 ##@profile
-def measures_midwives(signals=[0, 1]):
+def measures_midwives(signals=None):
+    if not signals:
+        signals = [0, 1]
     n_signals = len(signals)
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()

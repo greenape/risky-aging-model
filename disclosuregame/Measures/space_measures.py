@@ -40,7 +40,9 @@ class ReferralEvents(Measure):
         res = map(lambda x: (hash(x), x.player_type), filter(lambda x: 1 in x.get_response_log(), women))
         return res
 
-def space_measures_women(signals=[0, 1], base=None):
+def space_measures_women(signals=None, base=None):
+    if not signals:
+        signals = [0, 1]
     measures = OrderedDict()
     measures["riskspace"] = RiskSpace()
     measures["referralevents"] = ReferralEvents()

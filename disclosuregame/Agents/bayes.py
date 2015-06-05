@@ -29,7 +29,11 @@ class Agent(object):
     0 = do nothing
     1 = refer
     """
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1], seed=None):
+    def __init__(self, player_type=1, signals=None, responses=None, seed=None):
+        if not responses:
+            responses = [0, 1]
+        if not signals:
+            signals = [0, 1, 2]
         self.player_type = player_type
         self.signals = signals
         self.responses = responses
@@ -62,7 +66,11 @@ class Agent(object):
         return result
 
     @classmethod
-    def generator(cls, random=None, type_distribution=[1/3., 1/3., 1/3.], agent_args={}, initor=initors.signaller,init_args={}):
+    def generator(cls, random=None, type_distribution=None, agent_args={}, initor=initors.signaller, init_args=None):
+        if not init_args:
+            init_args = {}
+        if not type_distribution:
+            type_distribution = [1 / 3., 1 / 3., 1 / 3.]
         if random is None:
             random = Random()
         while True:
@@ -79,9 +87,13 @@ class Agent(object):
 
 class Signaller(Agent):
 
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1], seed=None):
+    def __init__(self, player_type=1, signals=None, responses=None, seed=None):
         # Given own type, there are always 6 possible payoffs for a given signal.
         # 2 for each of the three midwife types, per signal.
+        if not responses:
+            responses = [0, 1]
+        if not signals:
+            signals = [0, 1, 2]
         self.response_belief = self.response_signal_dict(signals, responses)
         self.type_distribution = {s:[] for s in signals}#dict([(signal, []) for signal in signals])
         self.type_matches = dict.fromkeys(signals, 0.)#dict([(signal, 0.) for signal in signals])
@@ -96,9 +108,12 @@ class Signaller(Agent):
     def response_belief_dict(self, signals, responses):
         return {s:{k:[] for k in responses} for s in signals}#dict([(signal, dict([(response, []) for response in responses])) for signal in signals])
 
-    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.], 
-                     response_weights=[[1., 1.], [1., 1.], [1., 2.]]):
+    def init_payoffs(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None):
         # Don't set up twice.
+        if not response_weights:
+            response_weights = [[1., 1.], [1., 1.], [1., 2.]]
+        if not type_weights:
+            type_weights = [1., 1., 1.]
         if self.baby_payoffs is not None:
             return
         #Only interested in payoffs for own type
@@ -116,12 +131,15 @@ class Signaller(Agent):
         self.update_counts(None, None, None)
         self.update_beliefs()
 
-    def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=[1., 1., 1.], 
-                     response_weights=[[1., 1.], [1., 1.], [1., 2.]], num=10):
+    def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None, num=10):
         """
         An alternative way of generating priors by using the provided weights
         as weightings for random encounters.
         """
+        if not response_weights:
+            response_weights = [[1., 1.], [1., 1.], [1., 2.]]
+        if not type_weights:
+            type_weights = [1., 1., 1.]
         # Don't set up twice.
         if self.baby_payoffs is not None:
             return
@@ -345,20 +363,28 @@ class BayesianSignaller(Signaller):
 
 class Responder(Agent):
 
-    def __init__(self, player_type=1, signals=[0, 1, 2], responses=[0, 1], seed=None):
+    def __init__(self, player_type=1, signals=None, responses=None, seed=None):
         # Belief that a particular signal means a state
+        if not responses:
+            responses = [0, 1]
+        if not signals:
+            signals = [0, 1, 2]
         self.signal_belief = {s:dict.fromkeys(signals, 0.) for s in signals} #dict([(y, dict([(x, []) for x in signals])) for y in signals])
         self.signal_type_matches = {s:dict.fromkeys(signals, 0.) for s in signals} #dict([(y, dict([(x, 0.) for x in signals])) for y in signals])
 
         super(Responder, self).__init__(player_type, signals, responses, seed)
 
-    def init_payoffs(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]):
+    def init_payoffs(self, payoffs, type_weights=None):
+        if not type_weights:
+            type_weights = [[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]
         self.type_weights = type_weights
         #Only interested in payoffs for own type
         self.payoffs = payoffs
         self.update_beliefs(None, None, None)
 
-    def init_payoffs_(self, payoffs, type_weights=[[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]], num=25):
+    def init_payoffs_(self, payoffs, type_weights=None, num=25):
+        if not type_weights:
+            type_weights = [[10., 2., 1.], [1., 10., 1.], [1., 1., 10.]]
         self.type_weights = [[0.]*3]*3
         for i in xrange(num):
             signal = self.random.choice(self.signals)

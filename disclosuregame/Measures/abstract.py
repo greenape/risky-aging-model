@@ -105,7 +105,9 @@ class AppointmentTypeSignalCount(TypeSignalCount):
         result = self.counts[self.player_type][self.signal]
         return result
 
-def abstract_measures_women(signals=[0, 1]):
+def abstract_measures_women(signals=None):
+    if not signals:
+        signals = [0, 1]
     n_signals = len(signals)
     measures = OrderedDict()
     measures['round'] = Appointment()
