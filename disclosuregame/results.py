@@ -73,7 +73,8 @@ class Result(object):
         self.do_write(db_name, timeout)
 
 
-    def check_columns(self, db_name, table, fields, timeout):
+    @staticmethod
+    def check_columns(db_name, table, fields, timeout):
         """
         Return a list of columns missing from the target database table.
         """
@@ -86,7 +87,8 @@ class Result(object):
         missing = filter(lambda x: x not in result, fields)
         return missing
 
-    def add_columns(self, db_name, table, columns, timeout):
+    @staticmethod
+    def add_columns(db_name, table, columns, timeout):
         """
         Add columns to the database table.
         """

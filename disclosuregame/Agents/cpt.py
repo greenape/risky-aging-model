@@ -8,8 +8,10 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
     """
     A responder which makes decision using cumulative prospect theory.
     """
-    def __init__(self, player_type=1, signals=None, responses=[0, 1], alpha=.88, beta=.88, l=2.25, gamma=.61, delta=.69,
+    def __init__(self, player_type=1, signals=None, responses=None, alpha=.88, beta=.88, l=2.25, gamma=.61, delta=.69,
                  seed=None):
+        if not responses:
+            responses = [0, 1]
         if not signals:
             signals = [0, 1, 2]
         self.alpha = alpha
@@ -19,7 +21,8 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         self.beta = beta
         super(ProspectTheorySignaller, self).__init__(player_type, signals, responses, seed=seed)
 
-    def weighting(self, probability, power):
+    @staticmethod
+    def weighting(probability, power):
         try:
             weight = pow(probability, power) / pow(pow(probability, power) + pow(1. - probability, power), 1. / power)
         except ValueError:
@@ -138,8 +141,10 @@ class ProspectTheoryResponder(bayes.BayesianResponder):
     (worst case losses this round)
     Weighting is some function that takes the probability p and returns a weighted version of it.
     """
-    def __init__(self, player_type=1, signals=None, responses=[0, 1], alpha=.88, beta=.88, l=2.25, gamma=.61, delta=.69,
+    def __init__(self, player_type=1, signals=None, responses=None, alpha=.88, beta=.88, l=2.25, gamma=.61, delta=.69,
                  seed=None):
+        if not responses:
+            responses = [0, 1]
         if not signals:
             signals = [0, 1, 2]
         self.alpha = alpha
