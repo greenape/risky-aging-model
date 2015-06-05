@@ -34,29 +34,30 @@ import gzip, csv
 def test():
     game_args = {"baby_payoff":7900, "mid_baby_payoff":5000,"referral_cost":7800,
      "mid_mid":500, "mid_low":0, "low_mid":0,"low_low":0, "mw_share_prob":0.25}
-    args = [{'game_args': game_args, 
-            'signaller_args':{'share_weight':0., "signals":[0, 1]},
-            'responder_args':{'share_weight':0.25, "signals":[0, 1]},
-            'mw_weights':[1., 0.], 
-            'women_weights':[.75, .25],
-            'signaller_initor':initors.ebreferral_logisticstigma,
-            'responder_initor':initors.normalresponder}]
-    args.append({'game_args': {"baby_payoff":7900, "mid_baby_payoff":5000,"referral_cost":7800,
-     "mid_mid":500, "mid_low":0, "low_mid":0,"low_low":0, "women_share_prob":0.25}, 
-            'signaller_args':{'share_weight':0.25, "signals":[0, 1]},
-            'responder_args':{'share_weight':0., "signals":[0, 1]},
-            'mw_weights':[1., 0.], 
-            'women_weights':[.75, .25],
-            'signaller_initor':initors.ebreferral_logisticstigma,
-            'responder_initor':initors.normalresponder})
-    args.append({'game_args': {"baby_payoff":7900, "mid_baby_payoff":5000,"referral_cost":7800,
-     "mid_mid":500, "mid_low":0, "low_mid":0,"low_low":0, "women_share_prob":0.25,  "mw_share_prob":0.25}, 
-            'signaller_args':{'share_weight':0.25, "signals":[0, 1]},
-            'responder_args':{'share_weight':0.25, "signals":[0, 1]},
-            'mw_weights':[1., 0.], 
-            'women_weights':[.75, .25],
-            'signaller_initor':initors.ebreferral_logisticstigma,
-            'responder_initor':initors.normalresponder})
+    args = [{'game_args': game_args,
+             'signaller_args': {'share_weight': 0., "signals": [0, 1]},
+             'responder_args': {'share_weight': 0.25, "signals": [0, 1]},
+             'mw_weights': [1., 0.],
+             'women_weights': [.75, .25],
+             'signaller_initor': initors.ebreferral_logisticstigma,
+             'responder_initor': initors.normalresponder},
+            {'game_args': {"baby_payoff": 7900, "mid_baby_payoff": 5000, "referral_cost": 7800,
+                           "mid_mid": 500, "mid_low": 0, "low_mid": 0, "low_low": 0, "women_share_prob": 0.25},
+             'signaller_args': {'share_weight': 0.25, "signals": [0, 1]},
+             'responder_args': {'share_weight': 0., "signals": [0, 1]},
+             'mw_weights': [1., 0.],
+             'women_weights': [.75, .25],
+             'signaller_initor': initors.ebreferral_logisticstigma,
+             'responder_initor': initors.normalresponder},
+            {'game_args': {"baby_payoff": 7900, "mid_baby_payoff": 5000, "referral_cost": 7800,
+                           "mid_mid": 500, "mid_low": 0, "low_mid": 0, "low_low": 0, "women_share_prob": 0.25,
+                           "mw_share_prob": 0.25},
+             'signaller_args': {'share_weight': 0.25, "signals": [0, 1]},
+             'responder_args': {'share_weight': 0.25, "signals": [0, 1]},
+             'mw_weights': [1., 0.],
+             'women_weights': [.75, .25],
+             'signaller_initor': initors.ebreferral_logisticstigma,
+             'responder_initor': initors.normalresponder}]
 
     return args
 

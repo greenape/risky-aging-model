@@ -58,7 +58,7 @@ class CarryingInformationGame(CarryingReferralGame):
         rounds, birthed, num_midwives, women_res, mw_res, women_memories = self.pre_game(women, midwives)
         LOG.debug("Starting play.")
         for i in range(rounds):
-            self.run_round(women, midwives, num_midwives, women_res, mw_res, women_memories)
+            self.run_round(women, midwives, num_midwives, women_res, mw_res)
             self.post_round(players, women, women_memories, midwives)
         del women
         del midwives

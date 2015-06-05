@@ -193,7 +193,8 @@ class SimpleGame(Game):
                 priors["prior_%d_%d" % (i, j)] = self.type_weights[i][j]
         return priors
 
-    def all_played(self, women, rounds=12):
+    @staticmethod
+    def all_played(women, rounds=12):
         for woman in women:
             if(woman.rounds < rounds) and not woman.is_finished:
                 return False

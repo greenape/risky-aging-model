@@ -89,12 +89,15 @@ class Measures(object):
 # Measures
 
 class Measure(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, player_type=None, midwife_type=None, signal=None):
         self.player_type = player_type
         self.midwife_type = midwife_type
         self.signal = signal
 
-    def filter_present(self, women, roundnum):
+    @staticmethod
+    def filter_present(women, roundnum):
         """
         Filter out any women not present on this round.
         """
