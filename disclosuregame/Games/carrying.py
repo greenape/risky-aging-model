@@ -17,6 +17,11 @@ class CarryingGame(game.SimpleGame):
 
     def __init__(self, **kwargs):
         super(CarryingGame, self).__init__(**kwargs)
+        self.signaller_init_args = None
+        self.signaller_initor = None
+        self.signaller_args = None
+        self.women_weights = None
+        self.signaller_fn = None
         self.player_random = Random(self.random.random())
 
 

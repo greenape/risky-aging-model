@@ -62,7 +62,7 @@ class LastSignal(Measure):
 class RoundSignal(Measure):
     def measure(self, roundnum, women, game):
         try:
-            signal = woman[0].signal_log[self.player_type]
+            signal = women[0].signal_log[self.player_type]
         except:
             signal = "NA"
         return signal

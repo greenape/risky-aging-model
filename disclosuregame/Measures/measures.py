@@ -517,20 +517,20 @@ class GroupHonesty(Measure):
     Return the average absolute distance of everybody's choice of signal
     if they were to signal right now, from their own type.
     """
-    def measure_one(self, woman):
+    def measure_one(self, signaller):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        state = woman.random.getstate()
-        r = woman.do_signal()
-        woman.random.setstate(state)
-        woman.signal_log.pop()
-        woman.rounds -= 1
-        woman.signal_matches[r] -= 1
+        state = signaller.random.getstate()
+        r = signaller.do_signal()
+        signaller.random.setstate(state)
+        signaller.signal_log.pop()
+        signaller.rounds -= 1
+        signaller.signal_matches[r] -= 1
         try:
-            woman.signal_memory.pop(hash(signaller), None)
-            woman.shareable = None
+            signaller.signal_memory.pop(hash(signaller), None)
+            signaller.shareable = None
         except:
             pass
-        return abs(r - woman.player_type)
+        return abs(r - signaller.player_type)
 
     def measure(self, roundnum, women, game):
         if self.player_type is not None:
@@ -544,17 +544,17 @@ class GroupSignal(GroupHonesty):
     Return the average of everybody's choice of signal
     if they were to signal right now.
     """
-    def measure_one(self, woman):
+    def measure_one(self, signaller):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        state = woman.random.getstate()
-        r = woman.do_signal()
-        woman.random.setstate(state)
-        woman.signal_log.pop()
-        woman.rounds -= 1
-        woman.signal_matches[r] -= 1
+        state = signaller.random.getstate()
+        r = signaller.do_signal()
+        signaller.random.setstate(state)
+        signaller.signal_log.pop()
+        signaller.rounds -= 1
+        signaller.signal_matches[r] -= 1
         try:
-            woman.signal_memory.pop(hash(signaller), None)
-            woman.shareable = None
+            signaller.signal_memory.pop(hash(signaller), None)
+            signaller.shareable = None
         except:
             pass
         return r
@@ -594,21 +594,21 @@ class ExpectedPointMutualInformation(Measure):
     """
     Return the expected pointwise mutual information of this group-signal combination.
     """
-    def measure_one(self, woman, signal):
+    def measure_one(self, signaller, signal):
         """
         Return a 1 if this agent would signal to match the signal parameter.
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        state = woman.random.getstate()
-        r = woman.do_signal()
-        woman.random.setstate(state)
-        woman.signal_log.pop()
-        woman.rounds -= 1
-        woman.signal_matches[r] -= 1
+        state = signaller.random.getstate()
+        r = signaller.do_signal()
+        signaller.random.setstate(state)
+        signaller.signal_log.pop()
+        signaller.rounds -= 1
+        signaller.signal_matches[r] -= 1
         try:
-            woman.signal_memory.pop(hash(signaller), None)
-            woman.shareable = None
+            signaller.signal_memory.pop(hash(signaller), None)
+            signaller.shareable = None
         except:
             pass
         return 1. if r == signal else 0.
@@ -650,7 +650,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         #state = woman.random.getstate()
         return set(map(lambda combo: woman.signal_search(combo)[0], itertools.permutations(self.signals)))
 
-    def measure_one(self, woman, signal):
+    def measure_one(self, signaller, signal):
         """
         Return the probability of this agent signalling this signal.
         """
@@ -668,7 +668,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         except:
             pass
         return 1. if r == signal else 0."""
-        sigs = self.sample_one(woman)
+        sigs = self.sample_one(signaller)
         return 1./len(sigs) if r in sigs else 0.
 
     def measure(self, roundnum, women, game):
@@ -696,7 +696,7 @@ class BayesTypeSignalProbability(TypeSignalProbability):
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
     """
 
-    def measure_one(self, woman):
+    def measure_one(self, signaller):
         """
         Update the distribution with this agent's signal.
         """
@@ -714,9 +714,9 @@ class BayesTypeSignalProbability(TypeSignalProbability):
         #except:
         #    pass
         #self.counts[woman.player_type][r] += 1.
-        sigs = self.sample_one(woman)
+        sigs = self.sample_one(signaller)
         for s in sigs:
-            self.counts[woman.player_type][s] += 1.
+            self.counts[signaller.player_type][s] += 1.
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
@@ -815,18 +815,18 @@ class SquaredGroupHonesty(GroupHonesty):
     Return the average squared distance of everybody's choice of signal
     if they were to signal right now, from their own type.
     """
-    def measure_one(self, woman):
+    def measure_one(self, signaller):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
-        woman.signal_log.pop()
-        woman.rounds -= 1
-        woman.signal_matches[r] -= 1
+        r = signaller.do_signal(self.signal)
+        signaller.signal_log.pop()
+        signaller.rounds -= 1
+        signaller.signal_matches[r] -= 1
         try:
-            woman.signal_memory.pop(hash(signaller), None)
-            woman.shareable = None
+            signaller.signal_memory.pop(hash(signaller), None)
+            signaller.shareable = None
         except:
             pass
-        return (r - woman.player_type)**2
+        return (r - signaller.player_type)**2
 
 class NormalisedSquaredGroupHonesty(GroupHonesty):
     def scale(self, n, low, high, a=-1., b=1.):
@@ -837,21 +837,21 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
     if they were to signal right now, from their own type.
     Distances are normalised to between +-1, type 1s are left as is.
     """
-    def measure_one(self, woman):
+    def measure_one(self, signaller):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        r = woman.do_signal(self.signal)
-        woman.signal_log.pop()
-        woman.rounds -= 1
-        woman.signal_matches[r] -= 1
+        r = signaller.do_signal(self.signal)
+        signaller.signal_log.pop()
+        signaller.rounds -= 1
+        signaller.signal_matches[r] -= 1
         try:
-            woman.signal_memory.pop(hash(signaller), None)
-            woman.shareable = None
+            signaller.signal_memory.pop(hash(signaller), None)
+            signaller.shareable = None
         except:
             pass
-        diff = (r - woman.player_type)
-        if woman.player_type == 0:
+        diff = (r - signaller.player_type)
+        if signaller.player_type == 0:
             diff = self.scale(diff, 0., 2.)
-        elif woman.player_type == 2:
+        elif signaller.player_type == 2:
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from ..Util import shuffled
 
 from random import Random
