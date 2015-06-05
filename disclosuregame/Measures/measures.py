@@ -617,9 +617,10 @@ class ExpectedPointMutualInformation(Measure):
         total_women = float(len(women))
         if total_women == 0:
             return "NA"
+        total_type = total_women
         if self.player_type is not None:
             typed_women = filter(lambda x: x.player_type == self.player_type, women)
-        total_type = float(len(typed_women))
+            total_type = float(len(typed_women))
         # Probability of being this player type
         p_type = total_type / total_women
         if p_type == 0:
@@ -674,6 +675,7 @@ class TypeSignalProbability(ExpectedPointMutualInformation):
         total_women = float(len(women))
         if total_women == 0:
             return "NA"
+        typed_women = women
         if self.player_type is not None:
             typed_women = filter(lambda x: x.player_type == self.player_type, women)
         # Probabilty of this signal and this type

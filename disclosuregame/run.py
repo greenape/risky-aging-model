@@ -385,7 +385,6 @@ def do_work(queueIn, queueOut, kill_queue):
             except Full:
                 pass
             raise
-            break
         except AssertionError as e:
             logger.error(e)
             try:
@@ -394,14 +393,12 @@ def do_work(queueIn, queueOut, kill_queue):
             except Full:
                 pass
             raise
-            break
         except Empty:
             logger.info("No more work.")
             break
         except Exception as e:
             logger.error(e)
             raise
-            break
         gc.collect()
     logger.info("Ending do work process.")
 
