@@ -21,8 +21,10 @@ def weighted_choice(choices, weights, random=Random()):
     assert False, "Shouldn't get here"
 
 class RWSignaller(BayesianSignaller):
-    def __init__(self, player_type=1, signals=None, responses=[0, 1], signal_alpha=.25, mw_alpha=.3, type_alpha=.3,
+    def __init__(self, player_type=1, signals=None, responses=None, signal_alpha=.25, mw_alpha=.3, type_alpha=.3,
                  configural_alpha=.03, beta=.75, seed=None):
+        if not responses:
+            responses = [0, 1]
         if not signals:
             signals = [0, 1, 2]
         self.signal_alpha = signal_alpha
@@ -127,8 +129,10 @@ class RWSignaller(BayesianSignaller):
 
 
 class RWResponder(BayesianResponder):
-    def __init__(self, player_type=1, signals=None, responses=[0, 1], signal_alpha=.3, w_alpha=.3, response_alpha=.3,
+    def __init__(self, player_type=1, signals=None, responses=None, signal_alpha=.3, w_alpha=.3, response_alpha=.3,
                  configural_alpha=.03, beta=.75, seed=None):
+        if not responses:
+            responses = [0, 1]
         if not signals:
             signals = [0, 1, 2]
         self.signal_alpha = signal_alpha

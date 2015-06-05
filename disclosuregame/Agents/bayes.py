@@ -66,7 +66,9 @@ class Agent(object):
         return result
 
     @classmethod
-    def generator(cls, random=None, type_distribution=None, agent_args={}, initor=initors.signaller, init_args=None):
+    def generator(cls, random=None, type_distribution=None, agent_args=None, initor=initors.signaller, init_args=None):
+        if not agent_args:
+            agent_args = {}
         if not init_args:
             init_args = {}
         if not type_distribution:
@@ -300,7 +302,7 @@ class Signaller(Agent):
         """
         memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
         payoff_sum = sum(map(lambda x: x[3], memories))
-        return (payoff_sum, memories)
+        return payoff_sum, memories
 
     def get_type_log(self):
         return self.type_log

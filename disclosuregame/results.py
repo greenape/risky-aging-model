@@ -36,18 +36,18 @@ class Result(object):
             file_name = "%s_%s" % (scoop.worker[0], file_name)
         result = [sep.join(self.fields)]
         result += map(lambda l: sep.join(map(str, l)), self.results)
-        file = gzip.open(file_name, "w")
-        file.write("\n".join(result))
-        file.close()
+        fout = gzip.open(file_name, "w")
+        fout.write("\n".join(result))
+        fout.close()
     
     def write_params(self, file_name, sep=","):
         if not single_db:
             file_name = "%s_%s" % (scoop.worker[0], file_name)
         result = [sep.join(self.param_fields)]
         result += map(lambda l: sep.join(map(str, l)), self.parameters.values())
-        file = gzip.open(file_name, "w")
-        file.write("\n".join(result))
-        file.close()
+        fout = gzip.open(file_name, "w")
+        fout.write("\n".join(result))
+        fout.close()
 
     def write_db(self, db_name, timeout=10):
         """

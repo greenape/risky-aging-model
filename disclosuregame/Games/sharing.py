@@ -52,7 +52,7 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = scoop.worker[0]
         except:
             worker = multiprocessing.current_process()
-        LOG.debug("Worker %s playing a game." % (worker))
+        LOG.debug("Worker %s playing a game." % worker)
         women, midwives = players
 
         rounds, birthed, num_midwives, women_res, mw_res, women_memories = self.pre_game(women, midwives)
@@ -63,7 +63,7 @@ class CarryingInformationGame(CarryingReferralGame):
         del women
         del midwives
         del women_memories
-        LOG.debug("Worker %s completed a game." % (worker))
+        LOG.debug("Worker %s completed a game." % worker)
         return women_res, mw_res
 
     def pre_game(self, women, midwives):
@@ -117,7 +117,7 @@ class CarryingInformationGame(CarryingReferralGame):
                 women.insert(0, woman)
                 woman.finished += 1
         # Share information
-        LOG.debug("Worker %s prepping share." % (worker))
+        LOG.debug("Worker %s prepping share." % worker)
         #Midwives
         try:
             self.share_midwives(midwives)
@@ -236,7 +236,7 @@ class ShuffledSharingGame(CarryingInformationGame):
             worker = scoop.worker[0]
         except:
             worker = multiprocessing.current_process()
-        LOG.debug("Worker %s playing a game." % (worker))
+        LOG.debug("Worker %s playing a game." % worker)
         women, midwives = players
 
         signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
@@ -278,7 +278,7 @@ class ShuffledSharingGame(CarryingInformationGame):
                     women.insert(0, woman)
                     woman.finished += 1
             # Share information
-            LOG.debug("Worker %s prepping share." % (worker))
+            LOG.debug("Worker %s prepping share." % worker)
             #Midwives
             try:
                 self.share_midwives(midwives)
@@ -298,7 +298,7 @@ class ShuffledSharingGame(CarryingInformationGame):
         del women
         del midwives
         del women_memories
-        LOG.debug("Worker %s completed a game." % (worker))
+        LOG.debug("Worker %s completed a game." % worker)
         return women_res, mw_res
 
 class CaseloadSharingGame(CarryingInformationGame):
@@ -312,7 +312,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         except:
             worker = multiprocessing.current_process()
         if scoop_on:
-            scoop.logger.debug("Worker %s playing a game." % (worker))
+            scoop.logger.debug("Worker %s playing a game." % worker)
         else:
             LOG.debug("Playing a game.")
         women, midwives = players
@@ -379,7 +379,7 @@ class CaseloadSharingGame(CarryingInformationGame):
                     woman.finished += 1
             # Share information
             if scoop_on:
-                LOG.debug("Worker %s prepping share." % (worker))
+                LOG.debug("Worker %s prepping share." % worker)
             #Midwives
             try:
                 self.share_midwives(midwives)
@@ -401,7 +401,7 @@ class CaseloadSharingGame(CarryingInformationGame):
         del midwives
         del women_memories
         if scoop_on:
-            scoop.logger.debug("Worker %s completed a game." % (worker))
+            scoop.logger.debug("Worker %s completed a game." % worker)
         else:
             LOG.debug("Completed a game.")
         return women_res, mw_res

@@ -22,7 +22,7 @@ def logistic_stigma(location, scale, prior_weight, random):
 		type_weights[1] += -x*prior_weight
 	return type_weights
 
-def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff=[],
+def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff=None,
 							  referral_beliefs=[0.26, 0.491, 0.171, 0.074], location=0.5025573, scale=0.0630946,
 							  prior_weight=1):
 	"""
@@ -32,6 +32,8 @@ def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff
 
 	Agent may have a 3:1, or 2:1 bias in favour of or against their being referred.
 	"""
+	if not woman_social_payoff:
+		woman_social_payoff = []
 	if not woman_baby_payoff:
 		woman_baby_payoff = []
 	type_weights = logistic_stigma(location, scale, prior_weight, agent.random)
@@ -54,7 +56,7 @@ def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff
 
 	agent.init_payoffs(woman_baby_payoff, woman_social_payoff, type_weights, referral_weights)
 
-def onsreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff=[],
+def onsreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff=None,
 							   referral_beliefs=[0.26357, 0.14288, 0.59355], location=0.5025573, scale=0.0630946,
 							   prior_weight=1):
 	"""
@@ -62,6 +64,8 @@ def onsreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payof
 	and logistic distribution beliefs on type distribution drawn from ESS. Both priors are multiplied by a
 	constant with a lower bound of of that constant, representing the weight of the prior.
 	"""
+	if not woman_social_payoff:
+		woman_social_payoff = []
 	if not woman_baby_payoff:
 		woman_baby_payoff = []
 	type_weights = logistic_stigma(location, scale, prior_weight, agent.random)

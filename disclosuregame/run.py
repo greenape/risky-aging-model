@@ -225,13 +225,15 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
     return params
 
 def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=100,
-                        num_women=1000, runs=1, game=None, rounds=100, mw_weights=None,
-                        women_weights=[1 / 3., 1 / 3., 1 / 3.], women_priors=None, seeds=None, women_modifier=None,
-                        measures_women=measures_women(), measures_midwives=measures_midwives(), nested=False,
-                        mw_priors=None, file_name="", responder_args=None, signaller_args=None, tag="", measure_freq=1,
+                        num_women=1000, runs=1, game=None, rounds=100, mw_weights=None, women_weights=None,
+                        women_priors=None, seeds=None, women_modifier=None, measures_women=measures_women(),
+                        measures_midwives=measures_midwives(), nested=False, mw_priors=None, file_name="",
+                        responder_args=None, signaller_args=None, tag="", measure_freq=1,
                         responder_initor=initors.responder, signaller_initor=initors.signaller,
                         signaller_init_args=None, responder_init_args=None):
     
+    if not women_weights:
+        women_weights = [1 / 3., 1 / 3., 1 / 3.]
     if not mw_weights:
         mw_weights = [80 / 100., 15 / 100., 5 / 100.]
     if responder_args is None:
@@ -444,9 +446,9 @@ def write(queue, db_name, kill_queue):
     logger.info("Results queue empty: %s" % str(queue.empty()))
 
 
-def experiment(file_name, game_fns=None,
-               agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
-               kwargs=None, procs=1):
+def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1):
+    if not agents:
+        agents = [(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)]
     if not game_fns:
         game_fns = [SimpleGame, CaseloadGame]
     if not kwargs:

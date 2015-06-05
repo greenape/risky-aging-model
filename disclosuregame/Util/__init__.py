@@ -96,6 +96,6 @@ def make_pbs_script(kwargs, hours=60, mins=0, ppn=16, script_name=None):
         run_script.append("\trm %s" % script_name)
         run_script.append("fi")
 
-    return('\n'.join(run_script), count)
+    return '\n'.join(run_script), count
 
     #${python} Run.py -R 100 -s ${sig} -r ${resp} --pickled-arguments ../experiment_args/sensitivity_${PBS_ARRAYID}.args -f ${PBS_ARRAYID}_sensitivity -i 1000 -d ${dir} -g ${game}
