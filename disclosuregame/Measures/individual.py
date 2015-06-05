@@ -1,7 +1,10 @@
 from measures import *
 
+
 class IndividualMeasures(Measures):
+
     take_at_end = False
+
     def dump(self, women, rounds, game, **kwargs):
         """
         A results dumper. Takes a tuple of a game and players, and two dictionaries.
@@ -21,34 +24,43 @@ class IndividualMeasures(Measures):
         results = Result(self.measures.keys(), game.parameters, results)
         return results
 
+
 class PlayerHash(Measure):
     """
     Return a unique ident for a player.
     """
+
     def measure(self, roundnum, woman, game):
         return hash(woman[0])
+
 
 class TypeWeight(Measure):
     """
     Return the starting weight for midwife type.
     """
+
     def measure(self, roundnum, woman, game):
         return woman[0].type_weights[self.midwife_type]
+
 
 class PlayerType(Measure):
     """
     Return a player type.
     """
+
     def measure(self, roundnum, woman, game):
         woman = woman[0]
         return woman.player_type
+
 
 class Started(Measure):
     """
     Return the
     """
+
     def measure(self, roundnum, women, game):
         return women[0].started
+
 
 class LastSignal(Measure):
     def measure(self, roundnum, women, game):
@@ -60,6 +72,7 @@ class LastSignal(Measure):
             pass
         return signal
 
+
 class RoundSignal(Measure):
     def measure(self, roundnum, women, game):
         try:
@@ -68,11 +81,12 @@ class RoundSignal(Measure):
             signal = "NA"
         return signal
 
+
 class Response(Measure):
     def measure(self, roundnum, women, game):
         woman = women[0]
         signaller = type(woman)()
-        #print "Hashing by", hash(woman), "hashing", hash(signaller)
+        # print "Hashing by", hash(woman), "hashing", hash(signaller)
         r = woman.respond(self.signal, signaller)
         woman.signal_log.pop()
         woman.response_log.pop()
@@ -84,6 +98,7 @@ class Response(Measure):
         except:
             raise
         return r
+
 
 def indiv_measures_women(n_signals=2):
     measures = OrderedDict()
@@ -99,8 +114,9 @@ def indiv_measures_women(n_signals=2):
         measures['type_%d_frequency' % i] = TypeExperience(player_type=i)
         measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
     for i in range(12):
-        measures['round_%d_signal' % i] = RoundSignal(player_type = i)
+        measures['round_%d_signal' % i] = RoundSignal(player_type=i)
     return IndividualMeasures(measures)
+
 
 def indiv_measures_mw(n_signals=2):
     measures = OrderedDict()

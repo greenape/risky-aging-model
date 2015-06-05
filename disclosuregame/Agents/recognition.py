@@ -1,10 +1,12 @@
 from bayes import *
 
+
 class RecognitionResponder(BayesianResponder):
     """
     Class of responder which remembers the actions of opponents and then retrospectively
     updates beliefs based on that when true information is available.
     """
+
     def __init__(self, player_type=1, signals=None, responses=None, seed=None):
         # Memory of a particular agent's signals.
         if not responses:
@@ -40,11 +42,11 @@ class RecognitionResponder(BayesianResponder):
         Update beliefs, and do so retrospectively for as many signal-response
         pairs as we have for this signaller.
         """
-        #print "Updating"
-        #print payoff, signaller, signal, signaller_type, weight
+        # print "Updating"
+        # print payoff, signaller, signal, signaller_type, weight
         if signaller is None:
             return super(RecognitionResponder, self).update_beliefs(payoff, signaller, signal, weight=weight)
-        #Need to work with an artificial response log while bulk updating
+        # Need to work with an artificial response log while bulk updating
         tmp_response_log = self.response_log
         mem = self.signal_memory.pop(hash(signaller), [])
         while len(mem) > 0:

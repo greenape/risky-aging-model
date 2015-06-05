@@ -2,6 +2,7 @@ from recognition import RecognitionResponder
 from bayes import BayesianSignaller
 from copy import deepcopy
 
+
 class SharingResponder(RecognitionResponder):
     """
     Class of responder which remembers the actions of opponents and then retrospectively
@@ -10,6 +11,7 @@ class SharingResponder(RecognitionResponder):
     In addition, this agent can also make use of information obtained from others
     which is weighted according to the share_weight parameter.
     """
+
     def __init__(self, player_type=1, signals=None, responses=None, share_weight=0., seed=None):
         # Memory available for sharing
         if not responses:
@@ -17,7 +19,7 @@ class SharingResponder(RecognitionResponder):
         if not signals:
             signals = [0, 1, 2]
         self.shareable = None
-        #Weight given to other's info
+        # Weight given to other's info
         self.share_weight = share_weight
         super(SharingResponder, self).__init__(player_type, signals, responses, seed=seed)
 
@@ -38,8 +40,10 @@ class SharingResponder(RecognitionResponder):
         """
         super(SharingResponder, self).remember(signaller, signal, response)
         if shareable and response == 1:
-            payoff_sum = sum(map(lambda x: self.payoffs[signaller.player_type][x[1]], self.signal_memory[hash(signaller)]))
-            self.shareable = (payoff_sum, (hash(signaller), (signaller.player_type, list(self.signal_memory[hash(signaller)]))))
+            payoff_sum = sum(
+                map(lambda x: self.payoffs[signaller.player_type][x[1]], self.signal_memory[hash(signaller)]))
+            self.shareable = (
+                payoff_sum, (hash(signaller), (signaller.player_type, list(self.signal_memory[hash(signaller)]))))
 
 
 class SharingSignaller(BayesianSignaller):
@@ -47,6 +51,7 @@ class SharingSignaller(BayesianSignaller):
     Class of signaller that maintains a meory of its experiences which can be
     shared with others, and can use the memories of others to update beliefs.
     """
+
     def __init__(self, player_type=1, signals=None, responses=None, share_weight=0., seed=None):
         # Exogenous memories
         if not responses:
@@ -54,7 +59,7 @@ class SharingSignaller(BayesianSignaller):
         if not signals:
             signals = [0, 1, 2]
         self.exogenous = []
-        #Weight given to other's info
+        # Weight given to other's info
         self.share_weight = share_weight
         super(SharingSignaller, self).__init__(player_type, signals, responses, seed=seed)
 
@@ -69,18 +74,19 @@ class SharingSignaller(BayesianSignaller):
         self.log_signal(signal, tmp_signaller, self.share_weight)
         self.exogenous.append((tmp_signaller.player_type, signal, response, payoff))
         self.update_counts(response, tmp_signaller, payoff, midwife_type, self.share_weight)
-        #Remove from memory, but keep the count
+        # Remove from memory, but keep the count
         self.type_log.pop()
         self.signal_log.pop()
         self.response_log.pop()
         self.payoff_log.pop()
 
-    #def get_memory(self):
-    #    """
-    #    return the memory of this agent with the experiences of others stripped out.
-    #    """
-    #    memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
-    #    for memory in self.exogenous:
-    #        memories.remove(memory) 
-    #    payoff_sum = sum(map(lambda x: x[3], memories))
-    #    return (payoff_sum, memories)
+        # def get_memory(self):
+        #    """
+        #    return the memory of this agent with the experiences of others stripped out.
+        #    """
+        #    memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
+        #    for memory in self.exogenous:
+        #        memories.remove(memory)
+        #    payoff_sum = sum(map(lambda x: x[3], memories))
+        #    return (payoff_sum, memor
+es)
