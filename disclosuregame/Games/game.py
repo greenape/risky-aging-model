@@ -1,6 +1,7 @@
 from random import Random
 from disclosuregame.Measures import measures_midwives, measures_women
 from collections import OrderedDict
+import abc
 from itertools import count
 from copy import deepcopy
 
@@ -15,9 +16,74 @@ except:
     LOG = multiprocessing.get_logger()
     pass
 
-
-
 class Game(object):
+    """
+    An abstract game class.
+    """
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def play_round(self, signaller, receiver):
+        """
+        Play a round of the game between a signaller and a receiver.
+        :param signaller:
+        :param receiver:
+        :return: None
+        """
+        return None
+
+    @abc.abstractmethod
+    def play_game(self, players):
+        """
+        Play a full game.
+        :param players: expects a tuple of lists of agents.
+        :return: a tuple of result objects.
+        """
+        return None,
+
+    @abc.abstractmethod
+    def pre_game(self, women, midwives):
+        """
+        Perform pregame setup.
+        :param women: a list of signaller agents
+        :param midwives: a list of responder agents
+        :return: None
+        """
+        return None
+
+    @abc.abstractmethod
+    def post_game(self):
+        """
+        Perform any post game actions.
+        :return: None
+        """
+
+        return None
+
+    @abc.abstractmethod
+    def post_round(self, players, signallers, responders):
+        """
+        Perform any post round actions.
+
+        :param players: list of signaller agents who have just played
+        :param signallers: list of all other signaller agents
+        :param responders: list of all responders
+        :return: None
+        """
+
+        return None
+
+class SimpleGame(Game):
+    def pre_game(self, women, midwives):
+        return
+
+    def post_round(self, players, signallers, responders):
+        return
+
+    def post_game(self):
+        return
+
     # b > m > n
     def __init__(self, baby_payoff=2, no_baby_payoff=2, mid_baby_payoff=1,referral_cost=1, harsh_high=2,
      harsh_mid=1, harsh_low=0, mid_high=1, mid_mid=0, mid_low=0, low_high=0,low_mid=0,low_low=0, randomise_payoffs=False,
@@ -192,7 +258,7 @@ class Game(object):
         return rep
 
 
-class CaseloadGame(Game):
+class CaseloadGame(SimpleGame):
     """
     Just like the standard game, but operates a caseloading system. Women
     are assigned a midwife who they then have all appointments with.

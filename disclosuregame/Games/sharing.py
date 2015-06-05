@@ -51,7 +51,22 @@ class CarryingInformationGame(CarryingReferralGame):
         LOG.debug("Worker %s playing a game." % (worker))
         women, midwives = players
 
-        signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
+        rounds, birthed, num_midwives, women_res, mw_res, women_memories = self.pre_game(women, midwives)
+        LOG.debug("Starting play.")
+        for i in range(rounds):
+            self.run_round(women, midwives, num_midwives, women_res, mw_res, signaller_generator, women_memories)
+            self.post_round(players, women, women_memories, midwives, signaller_generator)
+        del women
+        del midwives
+        del women_memories
+        LOG.debug("Worker %s completed a game." % (worker))
+        return women_res, mw_res
+
+    def pre_game(self, women, midwives):
+        """
+        Setup function for running a game.
+        """
+        self.signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         LOG.debug("Made player generator.")
         rounds = self.rounds
@@ -61,57 +76,57 @@ class CarryingInformationGame(CarryingReferralGame):
         women_res = self.measures_women.dump(None, self.rounds, self, None)
         mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
         women_memories = []
-        mw_memories = []
-        LOG.debug("Starting play.")
-        for i in range(rounds):
-            players = [women.pop() for j in range(num_midwives)]
-            self.random.shuffle(midwives)
-            map(self.play_round, players, midwives)
-            for x in midwives:
-                x.finished += 1
-            women_res = self.measures_women.dump(women + players, i, self, women_res)
-            mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
-            for woman in players:
-                if self.all_played([woman], self.num_appointments):
-                    woman.is_finished = True
-                    # Add a new naive women back into the mix
-                    new_woman = signaller_generator.next()
-                    new_woman.started = i
-                    new_woman.finished = i
-                    women.insert(0, new_woman)
-                    LOG.debug("Generated a new player.")
-                    if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
-                        women_memories.append(woman.get_memory())
-                    for midwife in midwives:
-                        midwife.signal_memory.pop(hash(woman), None)
-                    del woman
-                else:
-                    women.insert(0, woman)
-                    woman.finished += 1
-            # Share information
-            LOG.debug("Worker %s prepping share." % (worker))
-            #Midwives
-            try:
-                self.share_midwives(midwives)
-            except Exception as e:
-                LOG.debug("Sharing to midwives failed.")
-                LOG.debug(e)
+        return rounds, birthed, num_midwives, women_res, mw_res, women_memories
 
-            #Women
-            try:
-                self.share_women(women, women_memories)
-            except Exception as e:
-                LOG.debug("Sharing to women failed.")
-                LOG.debug(e)
+    def run_round(self, women, midwives, num_midwives, women_res, mw_res):
+        """
+        Run one round of simulation.
+        """
+        players = [women.pop() for j in range(num_midwives)]
+        self.random.shuffle(midwives)
+        map(self.play_round, players, midwives)
+        for x in midwives:
+            x.finished += 1
+        women_res = self.measures_women.dump(women + players, i, self, women_res)
+        mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+        
 
-            #if scoop_on:
-            #    scoop.logger.debug("Worker %s played %d rounds." % (worker, i))
-        del women
-        del midwives
-        del women_memories
-        LOG.debug("Worker %s completed a game." % (worker))
-        return women_res, mw_res
+    def post_round(self, players, women, women_memories, midwives):
+        """
+        Actions to perform after playing a round.
+        """
+        for woman in players:
+            if self.all_played([woman], self.num_appointments):
+                woman.is_finished = True
+                # Add a new naive women back into the mix
+                new_woman = self.signaller_generator.next()
+                new_woman.started = i
+                new_woman.finished = i
+                women.insert(0, new_woman)
+                LOG.debug("Generated a new player.")
+                if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
+                    women_memories.append(woman.get_memory())
+                for midwife in midwives:
+                    midwife.signal_memory.pop(hash(woman), None)
+                del woman
+            else:
+                women.insert(0, woman)
+                woman.finished += 1
+        # Share information
+        LOG.debug("Worker %s prepping share." % (worker))
+        #Midwives
+        try:
+            self.share_midwives(midwives)
+        except Exception as e:
+            LOG.debug("Sharing to midwives failed.")
+            LOG.debug(e)
 
+        #Women
+        try:
+            self.share_women(women, women_memories)
+        except Exception as e:
+            LOG.debug("Sharing to women failed.")
+            LOG.debug(e)
 
     def weighted_prob(self, high, low, weight, bias):
         if bias > 0:
@@ -156,8 +171,6 @@ class CarryingInformationGame(CarryingReferralGame):
                 memory = women_memories.pop()
                 if self.random.random() < self.women_share_prob:
                     self.disseminate_women(memory[1], women)
-                #And null it
-                #women_memories.remove(memory)
             map(lambda x: x.update_beliefs(), women)
 
     ##@profile
@@ -172,22 +185,10 @@ class CarryingInformationGame(CarryingReferralGame):
         tmp_signaller = type(recepients[0])(player_type=player_type)
         
         for recepient in recepients:
-            #tmp_mem = deepcopy(recepient.signal_belief)
-            #assert hash(tmp_signaller) not in recepient.signal_memory
-            #print "Exogenous update."
-            #tmp_1 = deepcopy(recepient)
 
             for signal, response in signals:
-                #foo = 1
                 recepient.remember(tmp_signaller, signal, response, False)
                 recepient.exogenous_update(None, tmp_signaller, signal, signaller_type=player_type)
-            #assert hash(tmp_signaller) not in recepient.signal_memory
-            #assert tmp_mem == recepient.signal_belief
-            #print "Are now.."
-            #assert tmp_1.signal_type_matches == recepient.signal_type_matches
-            #assert tmp_1.signal_belief == recepient.signal_belief
-            #assert tmp_1.signal_memory == recepient.signal_memory
-            #assert tmp_1.random.random() == recepient.random.random()
 
    #@profile
     def disseminate_women(self, memory, recepients):
@@ -196,7 +197,6 @@ class CarryingInformationGame(CarryingReferralGame):
         recepients.
         """
         LOG.debug("Sharing %s to %d women." % (str(memory), len(recepients)))
-        #print "Sharing to women.", memory
         if memory is None:
             return
         for mem in memory:

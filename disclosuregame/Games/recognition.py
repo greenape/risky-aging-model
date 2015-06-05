@@ -1,7 +1,7 @@
 from game import *
 
 
-class RecognitionGame(Game):
+class RecognitionGame(SimpleGame):
         """
         Similar to the standard disclosure game, but the true drinking type
         is only revealed after a referral, which ends the game.

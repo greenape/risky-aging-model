@@ -11,7 +11,7 @@ except:
     scoop_on = False
     pass
 
-class CarryingGame(game.Game):
+class CarryingGame(game.SimpleGame):
     def __unicode__(self):
         return "carrying_%s" % super(CarryingGame, self).__unicode__()
 

@@ -272,7 +272,7 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         signaller_init_args = deepcopy(signaller_init_args)
 
     if game is None:
-        game = Game()
+        game = SimpleGame()
     if mw_priors is not None:
         game.type_weights = mw_priors
     measures_midwives.dump_every = measure_freq
@@ -464,7 +464,7 @@ def write(queue, db_name, kill_queue):
     logger.info("Results queue empty: %s" % str(queue.empty()))
 
 
-def experiment(file_name, game_fns=[Game, CaseloadGame], 
+def experiment(file_name, game_fns=[SimpleGame, CaseloadGame],
     agents=[(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)],
     kwargs=[{}], procs=1):
     run_params = []
