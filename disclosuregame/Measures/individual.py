@@ -96,7 +96,7 @@ def indiv_measures_women(n_signals=2):
     for i in range(n_signals):
         # Midwife types seen, signals sent
         measures['type_%d_frequency' % i] = TypeExperience(player_type=i, present=False)
-        measures['signal_%d_frequency' % i] = SignalExperience(signal=i, present=False)
+        measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
     for i in range(12):
         measures['round_%d_signal' % i] = RoundSignal(player_type = i)
     return IndividualMeasures(measures)
@@ -112,8 +112,8 @@ def indiv_measures_mw(n_signals=2):
     measures['accrued_payoffs'] = AccruedPayoffs()
     for i in range(n_signals):
         # Women types seen, signals sent
-        measures['type_%d_frequency' % i] = TypeExperience(player_type=i, present=False)
-        measures['signal_%d_frequency' % i] = SignalExperience(signal=i, present=False)
+        measures['type_%d_frequency' % i] = TypeExperience(player_type=i)
+        measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
         measures['response_to_signal_%d' % i] = Response(signal=i)
         measures['type_%d_misses' % i] = TypedFalseNegativeUpto(player_type=i)
     return IndividualMeasures(measures)
