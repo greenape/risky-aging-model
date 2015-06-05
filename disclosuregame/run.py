@@ -425,10 +425,8 @@ def write(queue, db_name, kill_queue):
             except Full:
                 pass
             raise
-            break
         except TypeError as e:
             raise e
-            break
         except Empty:
             pass
         except AssertionError as e:
@@ -438,7 +436,6 @@ def write(queue, db_name, kill_queue):
             logger.error(e)
             kill_queue.put_nowait(None)
             raise
-            break
     logger.info("Ending write process.")
     logger.info("Results queue empty: %s" % str(queue.empty()))
 
