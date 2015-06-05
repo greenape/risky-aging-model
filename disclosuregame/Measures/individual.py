@@ -2,7 +2,7 @@ from measures import *
 
 class IndividualMeasures(Measures):
     take_at_end = False
-    def dump(self, women, rounds, game):
+    def dump(self, women, rounds, game, **kwargs):
         """
         A results dumper. Takes a tuple of a game and players, and two dictionaries.
         Measures should contain a mapping from a field name to method for getting a result
@@ -10,6 +10,7 @@ class IndividualMeasures(Measures):
         from parameter names to values.
         Writes rows as individuals, and takes the measure of the last round.
         Returns a results object for writing to csv.
+        :param **kwargs:
         """
         results = []
         if women is None:

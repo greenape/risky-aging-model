@@ -696,9 +696,10 @@ class BayesTypeSignalProbability(TypeSignalProbability):
     Calculate p(signal, type) using Bayesian updates on a dirichlet distrbution.
     """
 
-    def measure_one(self, signaller):
+    def measure_one(self, signaller, **kwargs):
         """
         Update the distribution with this agent's signal.
+        :param **kwargs:
         """
         #
         #print "Hashing by", hash(woman), "hashing", hash(signaller)

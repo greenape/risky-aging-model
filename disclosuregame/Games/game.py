@@ -62,7 +62,7 @@ class Game(object):
         return None
 
     @abc.abstractmethod
-    def post_round(self, players, signallers, responders):
+    def post_round(self, players, signallers, responders, **kwargs):
         """
         Perform any post round actions.
 
@@ -78,7 +78,7 @@ class SimpleGame(Game):
     def pre_game(self, women, midwives):
         return
 
-    def post_round(self, players, signallers, responders):
+    def post_round(self, players, signallers, responders, **kwargs):
         return
 
     def post_game(self):

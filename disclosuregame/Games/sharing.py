@@ -1,6 +1,6 @@
 from carrying import CarryingReferralGame
 from disclosuregame.Measures import measures_midwives, measures_women
-from disclosuregame.Util import random_expectations 
+from disclosuregame.Util import random_expectations
 from disclosuregame.Agents.bayes import Agent
 from random import Random
 from math import copysign
@@ -59,7 +59,7 @@ class CarryingInformationGame(CarryingReferralGame):
         LOG.debug("Starting play.")
         for i in range(rounds):
             women_res, mw_res = self.run_round(women, midwives, num_midwives, women_res, mw_res)
-            self.post_round(players, women, women_memories, midwives)
+            self.post_round(players, women, women_memories=women_memories)
         del women
         del midwives
         del women_memories
@@ -77,8 +77,8 @@ class CarryingInformationGame(CarryingReferralGame):
         birthed = []
         self.random.shuffle(women)
         num_midwives = len(midwives)
-        women_res = self.measures_women.dump(None, self.rounds, self, None)
-        mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
+        women_res = self.measures_women.dump(None, self.rounds, self)
+        mw_res = self.measures_midwives.dump(None, self.rounds, self)
         women_memories = []
         return rounds, birthed, num_midwives, women_res, mw_res, women_memories
 
@@ -91,15 +91,21 @@ class CarryingInformationGame(CarryingReferralGame):
         map(self.play_round, players, midwives)
         for x in midwives:
             x.finished += 1
-        women_res = self.measures_women.dump(women + players, i, self, women_res)
-        mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+        women_res = self.measures_women.dump(women + players, i, self)
+        mw_res = self.measures_midwives.dump(midwives, i, self)
         return women_res, mw_res
         
 
-    def post_round(self, players, women, women_memories, midwives):
+    def post_round(self, players, signallers, responders, **kwargs):
         """
         Actions to perform after playing a round.
+        :param **kwargs:
         """
+        try:
+            worker = scoop.worker[0]
+        except:
+            worker = multiprocessing.current_process()
+
         for woman in players:
             if self.all_played([woman], self.num_appointments):
                 woman.is_finished = True
@@ -107,28 +113,28 @@ class CarryingInformationGame(CarryingReferralGame):
                 new_woman = self.signaller_generator.next()
                 new_woman.started = i
                 new_woman.finished = i
-                women.insert(0, new_woman)
+                signallers.insert(0, new_woman)
                 LOG.debug("Generated a new player.")
                 if self.women_share_prob > 0 and abs(self.women_share_bias) < 1:
                     women_memories.append(woman.get_memory())
-                for midwife in midwives:
+                for midwife in responders:
                     midwife.signal_memory.pop(hash(woman), None)
                 del woman
             else:
-                women.insert(0, woman)
+                signallers.insert(0, woman)
                 woman.finished += 1
         # Share information
         LOG.debug("Worker %s prepping share." % worker)
         #Midwives
         try:
-            self.share_midwives(midwives)
+            self.share_midwives(responders)
         except Exception as e:
             LOG.debug("Sharing to midwives failed.")
             LOG.debug(e)
 
         #Women
         try:
-            self.share_women(women, women_memories)
+            self.share_women(signallers, women_memories)
         except Exception as e:
             LOG.debug("Sharing to women failed.")
             LOG.debug(e)
@@ -241,8 +247,8 @@ class ShuffledSharingGame(CarryingInformationGame):
         LOG.debug("Made player generator.")
         rounds = self.rounds
         num_midwives = len(midwives)
-        women_res = self.measures_women.dump(None, self.rounds, self, None)
-        mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
+        women_res = self.measures_women.dump(None, self.rounds, self)
+        mw_res = self.measures_midwives.dump(None, self.rounds, self)
         women_memories = []
         LOG.debug("Starting play.")
         for i in range(rounds):
@@ -253,8 +259,8 @@ class ShuffledSharingGame(CarryingInformationGame):
             map(self.play_round, players, midwives)
             for x in midwives:
                 x.finished += 1
-            women_res = self.measures_women.dump(women + players, i, self, women_res)
-            mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+            women_res = self.measures_women.dump(women + players, i, self)
+            mw_res = self.measures_midwives.dump(midwives, i, self)
             for woman in players:
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
@@ -315,8 +321,8 @@ class CaseloadSharingGame(CarryingInformationGame):
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         self.random.shuffle(women)
-        women_res = self.measures_women.dump(None, self.rounds, self, None)
-        mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
+        women_res = self.measures_women.dump(None, self.rounds, self)
+        mw_res = self.measures_midwives.dump(None, self.rounds, self)
         women_memories = []
         caseloads = {}
         num_women = len(women)
@@ -340,8 +346,8 @@ class CaseloadSharingGame(CarryingInformationGame):
                 x.finished += 1
             LOG.debug("Played.")
             women_for_measure = players + [item for sublist in caseloads.values() for item in sublist]
-            women_res = self.measures_women.dump(women_for_measure, i, self, women_res)
-            mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+            women_res = self.measures_women.dump(women_for_measure, i, self)
+            mw_res = self.measures_midwives.dump(midwives, i, self)
             #print("Wrote results.")
             for j in range(len(players)):
                 woman = players[j]

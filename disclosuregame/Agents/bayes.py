@@ -130,7 +130,7 @@ class Signaller(Agent):
         #LOG.debug(response_weights)
         # Front load alpha_dot values
         for signal, responses in self.response_signal_matches.iteritems():
-            for response, count in responses.iteritems():
+            for response, response_count in responses.iteritems():
                 self.response_signal_matches[signal][response] = response_weights[signal][response]
         #Response per signal per type
         self.update_counts(None, None, None)

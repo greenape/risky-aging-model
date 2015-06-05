@@ -36,16 +36,16 @@ class CarryingGame(game.SimpleGame):
         rounds = self.rounds
         self.random.shuffle(women)
         num_midwives = len(midwives)
-        women_res = self.measures_women.dump(None, self.rounds, self, None)
-        mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
+        women_res = self.measures_women.dump(None, self.rounds, self)
+        mw_res = self.measures_midwives.dump(None, self.rounds, self)
         for i in range(rounds):
             players = [women.pop() for j in range(num_midwives)]
             self.random.shuffle(midwives)
             map(self.play_round, players, midwives)
             for x in midwives:
                 x.finished += 1
-            women_res = self.measures_women.dump(players, i, self, women_res)
-            mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+            women_res = self.measures_women.dump(players, i, self)
+            mw_res = self.measures_midwives.dump(midwives, i, self)
             for woman in players:
                 if self.all_played([woman], self.num_appointments):
                     woman.is_finished = True
@@ -79,8 +79,8 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         rounds = self.rounds
         self.random.shuffle(women)
-        women_res = self.measures_women.dump(None, self.rounds, self, None)
-        mw_res = self.measures_midwives.dump(None, self.rounds, self, None)
+        women_res = self.measures_women.dump(None, self.rounds, self)
+        mw_res = self.measures_midwives.dump(None, self.rounds, self)
 
         caseloads = {}
         num_women = len(women)
@@ -101,8 +101,8 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
             map(self.play_round, players, midwives)
             for x in midwives:
                 x.finished += 1
-            women_res = self.measures_women.dump(players, i, self, women_res)
-            mw_res = self.measures_midwives.dump(midwives, i, self, mw_res)
+            women_res = self.measures_women.dump(players, i, self)
+            mw_res = self.measures_midwives.dump(midwives, i, self)
             for j in range(len(players)):
                 woman = players[j]
                 women = caseloads[midwives[j]]

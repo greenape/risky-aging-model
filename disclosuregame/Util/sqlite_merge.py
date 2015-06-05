@@ -3,8 +3,8 @@ import fnmatch
 import os
 import argparse
 
-def merge_db(target, source):
-    t = sqlite3.connect(target)
+def merge_db(target_db, source):
+    t = sqlite3.connect(target_db)
     c = t.cursor()
 
     c.execute("pragma synchronous = off;")
@@ -20,14 +20,14 @@ def merge_db(target, source):
     c.close()
     t.close()
 
-def merge_dbs(sources, target=None):
-    if target is None:
-        target = sources[0]
+def merge_dbs(sources, target_db=None):
+    if target_db is None:
+        target_db = sources[0]
         sources = sources[1:]
     else:
-        clone_empty(sources[0], target)
+        clone_empty(sources[0], target_db)
     for source in sources:
-        merge_db(target, source)
+        merge_db(target_db, source)
 
 def list_matching(directory, name):
     matching = []
@@ -36,8 +36,8 @@ def list_matching(directory, name):
             matching.append(os.path.join(directory, f))
     return matching
 
-def clone_empty(source, target):
-    t = sqlite3.connect(target)
+def clone_empty(source, target_db):
+    t = sqlite3.connect(target_db)
     c = t.cursor()
 
     c.execute("pragma synchronous = off;")
@@ -66,10 +66,10 @@ def arguments():
                    help='Optional target DB to merge into, will be created if necessary. If ommited, uses the first matched input db.', default=None,
                    dest="target")
     args = parser.parse_args()
-    files = []
+    file_list = []
     for f in args.files:
-        files += list_matching(args.directory, f)
-    return args.target, files
+        file_list += list_matching(args.directory, f)
+    return args.target, file_list
 
 
 if __name__ =="__main__":

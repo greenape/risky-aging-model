@@ -5,7 +5,7 @@ import argparse
 import csv
 import multiprocessing
 
-def dump_db(where, output, sources):
+def dump_db(where_clause, output, sources):
     source = sources.pop()
     try:
         t = sqlite3.connect(source)
@@ -20,10 +20,10 @@ def dump_db(where, output, sources):
     c.execute("pragma synchronous = off;")
     c.execute("pragma journal_mode=off;")
     print("Dumping from " + source + ".")
-    if where is None:
+    if where_clause is None:
         c.execute("select * from results join parameters;")
     else:    
-        c.execute("select * from results join parameters where %s;" %where)
+        c.execute("select * from results join parameters where %s;" %where_clause)
     csv_writer = csv.writer(open(output, "w"))
     csv_writer.writerow([i[0] for i in c.description]) # write headers
     print("Wrote headers.")
@@ -39,10 +39,10 @@ def dump_db(where, output, sources):
 
         c.execute("pragma synchronous = off;")
         c.execute("pragma journal_mode=off;")
-        if where is None:
+        if where_clause is None:
             c.execute("select * from results join parameters;")
         else:    
-           c.execute("select * from results join parameters where %s;" %where)
+           c.execute("select * from results join parameters where %s;" %where_clause)
         print("Writing rows.")
         csv_writer = csv.writer(open(output, "a"))
         csv_writer.writerows(c)
@@ -75,10 +75,10 @@ def arguments():
         help='Optional argument to where.', dest="where",
         default=None)
     args = parser.parse_args()
-    files = []
+    file_list = []
     for f in args.files:
-        files.append(list_matching(args.directory, f))
-    return args.target, files, args.where
+        file_list.append(list_matching(args.directory, f))
+    return args.target, file_list, args.where
 
 
 if __name__ =="__main__":

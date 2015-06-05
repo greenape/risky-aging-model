@@ -359,7 +359,7 @@ def make_work(queue, kwargs, kill_queue):
         logger.info("Ending make work process.")
 
 
-def do_work(queueIn, queueOut, kill_queue):
+def do_work(queuein, queueout, kill_queue):
     """
     Consume games, play them, then put their results in the output queue.
     """
@@ -367,14 +367,14 @@ def do_work(queueIn, queueOut, kill_queue):
     while True:
         try:
             assert kill_queue.empty()
-            number, config = queueIn.get(timeout=10) #Shouldn't ever need to wait
+            number, config = queuein.get(timeout=10) #Shouldn't ever need to wait
             logger.info("Running game %d." % number)
             res = (number, play_game(config))
-            queueOut.put(res, timeout=120) #Wait at most 2 mins for writes
+            queueout.put(res, timeout=120) #Wait at most 2 mins for writes
             del config
         except MemoryError as e:
             logger.error(e)
-            queueIn.cancel_join_thread()
+            queuein.cancel_join_thread()
             try:
                 logger.info("Dropping poison.")
                 kill_queue.put_nowait(None)
@@ -474,18 +474,18 @@ def kw_experiment(kwargs, file_name, procs):
     results = multiprocessing.Queue()
     producer = multiprocessing.Process(target = make_work, name="%s: Producer" % host, args = (jobs, kwargs, num_consumers, kill_queue))
     producer.start()
-    calcProc = [multiprocessing.Process(target = do_work, name="%s: Simulation process %d" % (host, i), args = (jobs, results, kill_queue)) for i in range(num_consumers)]
-    writProc = multiprocessing.Process(target = write, name="%s Writer" % host, args = (results, file_name, kill_queue))
-    writProc.start()
+    calcproc = [multiprocessing.Process(target = do_work, name="%s: Simulation process %d" % (host, i), args = (jobs, results, kill_queue)) for i in range(num_consumers)]
+    writproc = multiprocessing.Process(target = write, name="%s Writer" % host, args = (results, file_name, kill_queue))
+    writproc.start()
 
-    for p in calcProc:
+    for p in calcproc:
         p.start()
-    for p in calcProc:
+    for p in calcproc:
         try:
             assert kill_queue.empty()
             p.join()
         except (KeyboardInterrupt, AssertionError, MemoryError):
-            for proc in calcProc:
+            for proc in calcproc:
                 logger.info("Terminating %s" % str(proc))
                 proc.terminate()
             logger.info("Poison pill")
@@ -511,9 +511,9 @@ def kw_experiment(kwargs, file_name, procs):
             logger.info("Flushed.")
     except Empty:
         logger.info("Jobs flushed.")
-    if writProc.is_alive():
+    if writproc.is_alive():
         logger.info("Joining writer.")
-        writProc.join(60)
+        writproc.join(60)
     if producer.is_alive():
         logger.info("Joining producer.")
         producer.join(60)
@@ -522,14 +522,14 @@ def kw_experiment(kwargs, file_name, procs):
 
 
 def main():
-    games, players, kwargs, runs, test, file_name, args_path, procs = arguments()
+    games, players, kwargs, runs, test_flag, file_name, args_path, procs = arguments()
     logger.info("Version %s" % version)
     logger.info("Running %d game type%s, with %d player pair%s, and %d run%s of each." % (
         len(games), "s"[len(games)==1:], len(players), "s"[len(players)==1:], runs, "s"[runs==1:]))
     logger.info("Total simulations runs is %d" % (len(games) * len(players) * runs * len(kwargs)))
     logger.info("File is %s" % file_name)
     logger.info("Using %d processors." % procs)
-    if test:
+    if test_flag:
         logger.info("This is a test of the emergency broadcast system. This is only a test.")
     else:
         start = time.time()

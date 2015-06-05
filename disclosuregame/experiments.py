@@ -116,7 +116,7 @@ def proportions(num):
     Generate some number of combinations of 3
     random numbers that sum to 1.
     """
-    proportions = []
+    proportions_list = []
     for i in range(num):
         initial = 100
         result = []
@@ -126,8 +126,8 @@ def proportions(num):
             result.append(n)
         result.append(initial)
 
-        proportions.append([x/100. for x in result])
-    return proportions
+        proportions_list.append([x/100. for x in result])
+    return proportions_list
 
 def proportions_experiment():
     """
