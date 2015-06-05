@@ -55,10 +55,10 @@ class CarryingInformationGame(CarryingReferralGame):
         LOG.debug("Worker %s playing a game." % worker)
         women, midwives = players
 
-        rounds, birthed, num_midwives, women_res, mw_res, women_memories = self.pre_game(women, midwives)
+        women_res, mw_res, women_memories = self.pre_game(women, midwives)
         LOG.debug("Starting play.")
-        for self.current_round in range(rounds):
-            women_res, mw_res = self.run_round(women, midwives, num_midwives, women_res, mw_res)
+        for self.current_round in range(self.rounds):
+            women_res, mw_res = self.run_round(women, midwives, women_res, mw_res)
             self.post_round(players, women, women_memories=women_memories)
         del women
         del midwives
@@ -73,20 +73,19 @@ class CarryingInformationGame(CarryingReferralGame):
         self.signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         LOG.debug("Made player generator.")
-        rounds = self.rounds
         birthed = []
         self.random.shuffle(women)
-        num_midwives = len(midwives)
+        self.num_midwives = len(midwives)
         women_res = self.measures_women.dump(None, self.rounds, self)
         mw_res = self.measures_midwives.dump(None, self.rounds, self)
         women_memories = []
-        return rounds, birthed, num_midwives, women_res, mw_res, women_memories
+        return women_res, mw_res, women_memories
 
-    def run_round(self, women, midwives, num_midwives, women_res, mw_res):
+    def run_round(self, women, midwives, women_res, mw_res):
         """
         Run one round of simulation.
         """
-        players = [women.pop() for j in range(num_midwives)]
+        players = [women.pop() for j in range(self.num_midwives)]
         self.random.shuffle(midwives)
         map(self.play_round, players, midwives)
         for x in midwives:
