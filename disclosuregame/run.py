@@ -327,8 +327,8 @@ def make_work(queue, kwargs, kill_queue):
                     try:
                         assert kill_queue.empty()
                         queue.put_nowait((i, exp))
-                        with open("/Users/jg1g12/game", "w") as fout:
-                            cPickle.dump(exp, fout)
+                        #with open("/Users/jg1g12/game", "w") as fout:
+                        #    cPickle.dump(exp, fout)
                         break
                     except Full:
                         logger.debug("Waiting for space in the jobs queue.")

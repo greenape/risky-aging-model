@@ -12,3 +12,4 @@ disclosuregame/_version.py
 
 test_args_0.args
 .idea/*
+*.bts
