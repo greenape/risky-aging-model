@@ -80,13 +80,4 @@ class SharingSignaller(BayesianSignaller):
         self.response_log.pop()
         self.payoff_log.pop()
 
-        # def get_memory(self):
-        #    """
-        #    return the memory of this agent with the experiences of others stripped out.
-        #    """
-        #    memories = zip(self.type_log, self.signal_log, self.response_log, self.payoff_log)
-        #    for memory in self.exogenous:
-        #        memories.remove(memory)
-        #    payoff_sum = sum(map(lambda x: x[3], memories))
-        #    return (payoff_sum, memor
-es)
+

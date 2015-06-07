@@ -49,8 +49,8 @@ def arguments():
     parser = argparse.ArgumentParser(
         description='Run some variations of the disclosure game with all combinations of games, signallers and responders provided.')
     parser.add_argument('-g', '--games', type=str, nargs='*',
-                   help='A game type to play.', default=['Game', 'CaseloadGame'],
-                   choices=['Game', 'CaseloadGame', 'RecognitionGame', 'ReferralGame',
+                   help='A game type to play.', default=['SimpleGame', 'CaseloadGame'],
+                   choices=['SimpleGame', 'CaseloadGame', 'RecognitionGame', 'ReferralGame',
                    'CaseloadRecognitionGame', 'CaseloadReferralGame', 'CarryingGame',
                    'CarryingReferralGame', 'CarryingCaseloadReferralGame', 'CaseloadSharingGame',
                    'CarryingInformationGame', 'ShuffledSharingGame', 'SubgroupSharingGame', 'CombinedSharingGame'],
@@ -127,7 +127,7 @@ def arguments():
         players = list(itertools.product(map(eval, set(args.signallers)), map(eval, set(args.responders))))
     else:
         players = zip(map(eval, args.signallers), map(eval, args.responders))
-    kwargs = {'runs':args.runs, 'rounds':args.rounds, 'nested':False, 'file_name':file_name, 'tag':args.tag}
+    kwargs = {'runs':args.runs, 'rounds':args.rounds, 'tag':args.tag}
     if args.women is not None:
         kwargs['women_weights'] = args.women
     #if args.indiv:
@@ -327,6 +327,8 @@ def make_work(queue, kwargs, kill_queue):
                     try:
                         assert kill_queue.empty()
                         queue.put_nowait((i, exp))
+                        with open("/Users/jg1g12/game", "w") as fout:
+                            cPickle.dump(exp, fout)
                         break
                     except Full:
                         logger.debug("Waiting for space in the jobs queue.")
@@ -460,9 +462,10 @@ def kw_experiment(kwargs, file_name, procs):
     jobs = multiprocessing.Queue(num_consumers)
     kill_queue = multiprocessing.Queue(1)
     results = multiprocessing.Queue()
-    producer = multiprocessing.Process(target = make_work, name="%s: Producer" % host, args = (jobs, kwargs, num_consumers, kill_queue))
+    producer = multiprocessing.Process(target = make_work, name="%s: Producer" % host, args = (jobs, kwargs, kill_queue))
     producer.start()
-    calcproc = [multiprocessing.Process(target = do_work, name="%s: Simulation process %d" % (host, i), args = (jobs, results, kill_queue)) for i in range(num_consumers)]
+    calcproc = [multiprocessing.Process(target = do_work, name="%s: Simulation process %d" % (host, i),
+                                        args = (jobs, results, kill_queue)) for i in range(num_consumers)]
     writproc = multiprocessing.Process(target = write, name="%s Writer" % host, args = (results, file_name, kill_queue))
     writproc.start()
 

@@ -44,10 +44,11 @@ class LexicographicSignaller(BayesianSignaller):
         #    for payoff in self.payoff_count[signal].keys():
         #        self.payoff_count[signal][payoff] = weights[i]
         #        i += 1
-        for player_type in self.signals:
+        for signal in self.signals:
             for response in self.responses:
-                payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
-                self.payoff_count[signal][payoff] += type_weights[player_type] + response_weights[signal][response]
+                for player_type in self.signals:
+                    payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
+                    self.payoff_count[signal][payoff] += type_weights[player_type] + response_weights[signal][response]
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
                                                          response_weights)
 

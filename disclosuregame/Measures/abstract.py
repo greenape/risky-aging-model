@@ -31,12 +31,17 @@ class HonestyMeasure(Measure):
     """
 
     def measure(self, roundnum, women, game):
+        pairs = zip(map(lambda x: x.ident, women), women)
+        # women = filter(lambda (x, y): x not in self.counted, pairs)
+        women = [pair for pair in pairs if pair[0] not in self.counted]
         if self.player_type is not None:
-            women = filter(lambda x: x.player_type == self.player_type, women)
-        women = filter(lambda x: x.rounds == self.appointment, women)
-        women = filter(lambda x: x.player_type in x.get_signal_log(), women)
-        women = filter(lambda x: hash(x) not in self.counted, women)
-        self.counted.update(map(hash, women))
+            #women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player[1].player_type == self.player_type]
+        #women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        women = [player for player in women if player[1].rounds == self.appointment]
+        #women = filter(lambda (y, x): x.player_type in x.get_signal_log(), women)
+        women = [player[0] for player in women if player[1].player_type in player[1].get_signal_log()]
+        self.counted.update(women)
         self.count += len(women)
         return self.count
 
@@ -53,12 +58,17 @@ class RefCount(Measure):
     """
 
     def measure(self, roundnum, women, game):
+        #pairs = zip(map(lambda x: x.ident, women), women)
+        #women = filter(lambda (x, y): x not in self.counted, pairs)
+        women = [woman for woman in women if woman.ident not in self.counted]
         if self.player_type is not None:
-            women = filter(lambda x: x.player_type == self.player_type, women)
-        women = filter(lambda x: x.rounds == self.appointment, women)
-        women = filter(lambda x: 1 in x.get_response_log(), women)
-        women = filter(lambda x: hash(x) not in self.counted, women)
-        self.counted.update(map(hash, women))
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        #women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        women = [player for player in women if player.rounds == self.appointment]
+        #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
+        women = [player for player in women if 1 in player.get_response_log()]
+        self.counted.update([player.ident for player in women])
         self.count += len(women)
         return self.count
 

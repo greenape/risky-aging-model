@@ -55,14 +55,14 @@ class CarryingInformationGame(CarryingReferralGame):
         LOG.debug("Worker %s playing a game." % worker)
         women, midwives = players
 
-        women_res, mw_res, women_memories = self.pre_game(women, midwives)
+        women_res, mw_res = self.pre_game(women, midwives)
         LOG.debug("Starting play.")
         for self.current_round in range(self.rounds):
-            women_res, mw_res = self.run_round(women, midwives, women_res, mw_res)
-            self.post_round(players, women, women_memories=women_memories)
+            women_res, mw_res, players = self.run_round(women, midwives, women_res, mw_res)
+            self.post_round(players, women, midwives)
         del women
         del midwives
-        del women_memories
+        del self.women_memories
         LOG.debug("Worker %s completed a game." % worker)
         return women_res, mw_res
 
@@ -91,7 +91,7 @@ class CarryingInformationGame(CarryingReferralGame):
             x.finished += 1
         women_res = self.measures_women.dump(women + players, self.current_round, self, results=women_res)
         mw_res = self.measures_midwives.dump(midwives, self.current_round, self, results=mw_res)
-        return women_res, mw_res
+        return women_res, mw_res, players
         
 
     def post_round(self, players, signallers, responders, **kwargs):
