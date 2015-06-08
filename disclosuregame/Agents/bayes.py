@@ -264,7 +264,7 @@ class Signaller(Agent):
         Update the agent's beliefs about the distribution of midwife types, and
         responses to signals.
         """
-
+        self.risk_cache = {} # Invalidate risk cache
         #alpha_dot = sum(self.type_weights)
         n = float(sum(self.type_matches.values()) + sum(self.type_weights))
         for player_type, estimate in self.type_distribution.iteritems():
@@ -333,14 +333,18 @@ class BayesianSignaller(Signaller):
         """
         Compute the bayes risk of sending this signal.
         """
-        signal_risk = 0.
-        for player_type, type_belief in self.type_distribution.items():
-            for response, response_belief in self.response_belief[signal].items():
-                payoff = self.baby_payoffs[response] + self.social_payoffs[player_type][signal]
-                #payoff = self.loss(payoff)
-                #print "Believe payoff will be",payoff,"with confidence",payoff_belief
-                #print "Risk is",payoff,"*",payoff_belief
-                signal_risk += -payoff * response_belief * type_belief
+        try:
+            return self.risk_cache[signal] # Get from cache if possible
+        except KeyError:
+            signal_risk = 0.
+            for player_type, type_belief in self.type_distribution.items():
+                for response, response_belief in self.response_belief[signal].items():
+                    payoff = self.baby_payoffs[response] + self.social_payoffs[player_type][signal]
+                    #payoff = self.loss(payoff)
+                    #print "Believe payoff will be",payoff,"with confidence",payoff_belief
+                    #print "Risk is",payoff,"*",payoff_belief
+                    signal_risk += -payoff * response_belief * type_belief
+            self.risk_cache[signal] = signal_risk
        #print "R(%d|x)=%f" % (signal, signal_risk)
         return signal_risk
 

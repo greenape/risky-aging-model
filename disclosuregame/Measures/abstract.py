@@ -19,9 +19,46 @@ class PopCount(Measure):
         return len(self.hash_bucket)
 
 
+class RoundsPlayedSignal(Measure):
+    """
+    Calculate how many of some type of agent are on a particular appointment,
+    and (optionally) have sent a particular signal.
+    """
+    def _init__(self, appointment=0, **kwargs):
+        super(RoundsPlayedSignal, self).__init__(**kwargs)
+        self.appointment = appointment
+
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        # women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        women = [player for player in women if player.rounds == self.appointment]
+        if self.signal is not None:
+            women = [player for player in women if self.signal in player.get_signal_log()]
+        return len(women)
+
+class RoundsPlayedRef(RoundsPlayedSignal):
+    """
+    Calculate how many of some type of agent are on a particular appointment,
+    and have been referred.
+    """
+
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        # women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        women = [player for player in women if player.rounds == self.appointment]
+        if self.signal is not None:
+            women = [player for player in women if 1 in player.get_response_log()]
+        return len(women)
+
 class HonestyMeasure(Measure):
-    def __init__(self, counted=set(), appointment=0, **kwargs):
+    def __init__(self, counted=None, appointment=0, **kwargs):
         super(HonestyMeasure, self).__init__(**kwargs)
+        if counted is None:
+            counted = set()
         self.count = 0
         self.counted = counted
         self.appointment = appointment
@@ -31,16 +68,15 @@ class HonestyMeasure(Measure):
     """
 
     def measure(self, roundnum, women, game):
-        pairs = zip(map(lambda x: x.ident, women), women)
+        #pairs = zip(map(lambda x: x.ident, women), women)
         # women = filter(lambda (x, y): x not in self.counted, pairs)
-        women = [pair for pair in pairs if pair[0] not in self.counted]
+        women = [player for player in women if player.ident not in self.counted]
         if self.player_type is not None:
             #women = filter(lambda (y, x): x.player_type == self.player_type, women)
-            women = [player for player in women if player[1].player_type == self.player_type]
+            women = [player for player in women if player.player_type == self.player_type]
         #women = filter(lambda (y, x): x.rounds == self.appointment, women)
-        women = [player for player in women if player[1].rounds == self.appointment]
+        women = [player.ident for player in women if player.rounds == self.appointment]
         #women = filter(lambda (y, x): x.player_type in x.get_signal_log(), women)
-        women = [player[0] for player in women if player[1].player_type in player[1].get_signal_log()]
         self.counted.update(women)
         self.count += len(women)
         return self.count
@@ -67,8 +103,8 @@ class RefCount(Measure):
         #women = filter(lambda (y, x): x.rounds == self.appointment, women)
         women = [player for player in women if player.rounds == self.appointment]
         #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
-        women = [player for player in women if 1 in player.get_response_log()]
-        self.counted.update([player.ident for player in women])
+        women = [player.ident for player in women if 1 in player.get_response_log()]
+        self.counted.update(women)
         self.count += len(women)
         return self.count
 
@@ -102,6 +138,10 @@ class CumulativeHonestyCount(Measure):
     """
 
     def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        women = [player for player in women if player.player_type in player.get_signal_log()]
         return sum(map(lambda x: x.measure(roundnum, women, game), self.counters))
 
 
@@ -113,7 +153,6 @@ class AppointmentTypeSignalCount(TypeSignalCount):
 
     def __init__(self, appointment=0, **kwargs):
         super(AppointmentTypeSignalCount, self).__init__(**kwargs)
-        # Uninformed prior
         self.appointment = appointment
 
     def measure(self, roundnum, women, game):

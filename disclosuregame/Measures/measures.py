@@ -717,7 +717,7 @@ class BayesTypeSignalProbability(TypeSignalProbability):
         #self.counts[woman.player_type][r] += 1.
         sigs = self.sample_one(signaller)
         for s in sigs:
-            self.counts[signaller.player_type][s] += 1.
+            self.counts[signaller.player_type][s] += 1./len(sigs)
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
