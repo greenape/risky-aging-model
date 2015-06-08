@@ -168,7 +168,7 @@ class AppointmentTypeSignalCount(TypeSignalCount):
         return result
 
 
-def abstract_measures_women(signals=None):
+def abstract_measures_women(signals=None, freq=1):
     if not signals:
         signals = [0, 1]
     n_signals = len(signals)
@@ -176,22 +176,23 @@ def abstract_measures_women(signals=None):
     measures['round'] = Appointment()
     for i in range(n_signals):
         measures["type_%d_pop" % i] = PopCount(player_type=i)
-        for j in range(12):
-            measures["type_%d_round_%d_ref" % (i, j + 1)] = CumulativeRefCount(player_type=i, appointment=j)
-            measures["type_%d_round_%d_honesty" % (i, j + 1)] = CumulativeHonestyCount(player_type=i, appointment=j)
-            for k in range(n_signals):
-                measures["n_type_%d_sig_%d_round_%d" % (i, k, j + 1)] = AppointmentTypeSignalCount(player_type=i,
-                                                                                                   signal=k,
-                                                                                                   appointment=j,
-                                                                                                   signals=signals)
-    base = measures_women()
+        measures["type_%d_round_12_ref" % i] = CumulativeRefCount(player_type=i, appointment=11)
+        #for j in range(12):
+        #    measures["type_%d_round_%d_ref" % (i, j + 1)] = CumulativeRefCount(player_type=i, appointment=j)
+        #    measures["type_%d_round_%d_honesty" % (i, j + 1)] = CumulativeHonestyCount(player_type=i, appointment=j)
+        #    for k in range(n_signals):
+        #        measures["n_type_%d_sig_%d_round_%d" % (i, k, j + 1)] = AppointmentTypeSignalCount(player_type=i,
+        #                                                                                           signal=k,
+        #                                                                                           appointment=j,
+        #                                                                                           signals=signals)
+    base = measures_women(freq=freq)
     base.add(Measures(measures))
     return base
 
 
-def abstract_measures_mw():
+def abstract_measures_mw(freq=1):
     measures = OrderedDict()
     measures['appointment'] = Appointment()
-    base = measures_midwives()
+    base = measures_midwives(freq=freq)
     base.add(Measures(measures))
     return base

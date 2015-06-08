@@ -135,11 +135,11 @@ def arguments():
     #    kwargs['measures_women'] = indiv_measures_women()
     if args.abstract:
         logger.debug("Using abstract measures.")
-        kwargs['measures_midwives'] = abstract_measures_mw()
-        kwargs['measures_women'] = abstract_measures_women()
+        kwargs['measures_midwives'] = abstract_measures_mw(freq=args.measure_freq)
+        kwargs['measures_women'] = abstract_measures_women(freq=args.measure_freq)
     else:
-        kwargs['measures_midwives'] = measures_midwives()
-        kwargs['measures_women'] = measures_women()
+        kwargs['measures_midwives'] = measures_midwives(freq=args.measure_freq)
+        kwargs['measures_women'] = measures_women(freq=args.measure_freq)
     if args.space:
         logger.debug("Using space measures.")
         kwargs['measures_midwives'] = space_measures_mw(kwargs['measures_midwives'])
@@ -215,7 +215,7 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
 def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=100,
                         num_women=1000, runs=1, game=None, rounds=100, mw_weights=None, women_weights=None,
                         seeds=None, women_modifier=None, measures_women=measures_women(),
-                        measures_midwives=measures_midwives(), mw_priors=None, responder_args=None, signaller_args=None, tag="", measure_freq=1,
+                        measures_midwives=measures_midwives(), mw_priors=None, responder_args=None, signaller_args=None, tag="",
                         responder_initor=initors.responder, signaller_initor=initors.signaller,
                         signaller_init_args=None, responder_init_args=None):
     
@@ -244,8 +244,6 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         game = SimpleGame()
     if mw_priors is not None:
         game.type_weights = mw_priors
-    measures_midwives.dump_every = measure_freq
-    measures_women.dump_every = measure_freq
     game.measures_midwives = measures_midwives
     game.measures_women = measures_women
     game.signaller_args = signaller_args
@@ -327,7 +325,7 @@ def make_work(queue, kwargs, kill_queue):
                     try:
                         assert kill_queue.empty()
                         queue.put_nowait((i, exp))
-                        #with open("/Users/jg1g12/game", "w") as fout:
+                        #with open("/Users/jono/game", "w") as fout:
                         #    cPickle.dump(exp, fout)
                         break
                     except Full:

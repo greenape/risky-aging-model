@@ -854,7 +854,7 @@ class NormalisedSquaredGroupHonesty(GroupHonesty):
             diff = self.scale(diff, -2., 0., 0.)
         return diff**2
 
-def measures_women(signals=None):
+def measures_women(signals=None, freq=1):
     if not signals:
         signals = [0, 1]
     n_signals = len(signals)
@@ -884,17 +884,17 @@ def measures_women(signals=None):
         for j in range(n_signals):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalCount(player_type=j, signal=i, signals=signals)
-            measures["point_p_signal_%d_type_%d" % (i, j)] = PointTypeSignalCount(player_type=j, signal=i, signals=signals)
+            #measures["point_p_signal_%d_type_%d" % (i, j)] = PointTypeSignalCount(player_type=j, signal=i, signals=signals)
             #measures["type_%d_signal_%d" % (i, j)] = TypeSignalBreakdown(player_type=i, signal=j)
             #measures["type_%d_mw_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, midwife_type=j)
             #measures["type_%d_sig_%d_ref" % (i, j)] = TypeReferralBreakdown(player_type=i, signal=j)
             #for k in range(3):
             #    measures["type_%d_mw_%d_sig_%d" % (i, j, k)] = TypeReferralBreakdown(player_type=i, midwife_type=j, signal=k)
-    return Measures(measures, 0, 1)
+    return Measures(measures, 0, freq)
 
 
 ##@profile
-def measures_midwives(signals=None):
+def measures_midwives(signals=None, freq=1):
     if not signals:
         signals = [0, 1]
     n_signals = len(signals)
@@ -921,4 +921,4 @@ def measures_midwives(signals=None):
         #measures['type_%d_false_negatives' % i] = FalseNegative(midwife_type=i)
         #measures['type_%d_misses' % i] = TypedFalseNegativeUpto(player_type=i)
         #measures['accrued_payoffs_type_%d' % i] = AccruedPayoffs(player_type=i)
-    return Measures(measures, 0)
+    return Measures(measures, 0, freq)
