@@ -546,7 +546,7 @@ class GroupSignal(GroupHonesty):
     """
     def measure_one(self, signaller):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        return signaller.signal_search(signaller.signals)
+        return signaller.signal_search(signaller.signals)[0]
 
 class GroupSignalMedian(GroupSignal):
     """

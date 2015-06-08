@@ -13,7 +13,7 @@ class PopCount(Measure):
     def measure(self, roundnum, women, game):
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
-        women = map(lambda x: hash(x), women)
+        women = map(lambda x: x.ident, women)
 
         self.hash_bucket.update(women)
         return len(self.hash_bucket)
