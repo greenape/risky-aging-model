@@ -157,6 +157,7 @@ class AppointmentTypeSignalCount(TypeSignalCount):
 
     def measure(self, roundnum, women, game):
         women = filter(lambda x: x.rounds == self.appointment, women)
+        women = [player for player in women if player.player_type == self.player_type]
         total_women = float(len(women))
         if total_women == 0:
             return "NA"
@@ -164,8 +165,7 @@ class AppointmentTypeSignalCount(TypeSignalCount):
             return "NA"
         # Probabilty of this signal and this type
         map(lambda x: self.measure_one(x), women)
-        result = self.counts[self.player_type][self.signal]
-        return result
+        return self.count
 
 
 def abstract_measures_women(signals=None, freq=1):

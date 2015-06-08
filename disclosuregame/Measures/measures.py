@@ -701,20 +701,7 @@ class BayesTypeSignalProbability(TypeSignalProbability):
         Update the distribution with this agent's signal.
         :param **kwargs:
         """
-        #
-        #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        #state = woman.random.getstate()
-        #r = woman.do_signal()
-        #woman.random.setstate(state)
-        #woman.signal_log.pop()
-        #woman.rounds -= 1
-        #woman.signal_matches[r] -= 1
-        #try:
-        #    woman.signal_memory.pop(hash(signaller), None)
-        #    woman.shareable = None
-        #except:
-        #    pass
-        #self.counts[woman.player_type][r] += 1.
+
         sigs = self.sample_one(signaller)
         for s in sigs:
             self.counts[signaller.player_type][s] += 1./len(sigs)
@@ -740,7 +727,19 @@ class TypeSignalCount(BayesTypeSignalProbability):
             signals = [0, 1, 2]
         super(TypeSignalCount, self).__init__(signals=signals,**kwargs)
         #Uninformed prior
-        self.counts = {s:dict.fromkeys(signals, 0.) for s in signals}
+        self.count = 0
+
+    def measure_one(self, signaller, **kwargs):
+        """
+        Update the distribution with this agent's signal.
+        For agents which are equiprobably between signals, record
+        them as 1/n_signals.
+        :param **kwargs:
+        """
+
+        sigs = self.sample_one(signaller)
+        if self.signal in sigs:
+            self.count += 1./len(sigs)
 
     def measure(self, roundnum, women, game):
         total_women = float(len(women))
@@ -748,10 +747,10 @@ class TypeSignalCount(BayesTypeSignalProbability):
             return "NA"
         if self.player_type is None:
             return "NA"
+        women = [player for player in women if player.player_type == self.player_type]
         # Probabilty of this signal and this type
         map(lambda x: self.measure_one(x), women)
-        result = self.counts[self.player_type][self.signal]
-        return result
+        return self.count
 
 class PointTypeSignalCount(TypeSignalCount):
     """
@@ -878,9 +877,9 @@ def measures_women(signals=None, freq=1):
         measures['rounds_played_type_%d' % i] = NumRounds(player_type=i)
         measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
         #measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
-        measures["group_signal_%d" % i] = GroupSignal(player_type=i)
-        measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
-        measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
+        #measures["group_signal_%d" % i] = GroupSignal(player_type=i)
+        #measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
+        #measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in range(n_signals):
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalCount(player_type=j, signal=i, signals=signals)
@@ -909,7 +908,7 @@ def measures_midwives(signals=None, freq=1):
     #measures['false_negatives'] = FalseNegative()
     #measures['accrued_payoffs'] = AccruedPayoffs()
     for i in range(n_signals):
-        measures['response_signal_%d' % i] = GroupResponse(signal=i)
+        #measures['response_signal_%d' % i] = GroupResponse(signal=i)
         measures['response_signal_0_type_%d' % i] = GroupResponse(signal=0,midwife_type=i)
         #measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
         #measures['type_%d_frequency' % i] = TypeExperience(player_type=i)
