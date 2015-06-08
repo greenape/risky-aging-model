@@ -60,7 +60,7 @@ def shuffled(target, random=Random()):
     """
     Return a shuffled version of the argument
     """
-    a = list(target)
+    a = target[:]
     random.shuffle(a)
     return a
 

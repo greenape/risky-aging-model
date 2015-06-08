@@ -546,18 +546,7 @@ class GroupSignal(GroupHonesty):
     """
     def measure_one(self, signaller):
         #print "Hashing by", hash(woman), "hashing", hash(signaller)
-        state = signaller.random.getstate()
-        r = signaller.do_signal()
-        signaller.random.setstate(state)
-        signaller.signal_log.pop()
-        signaller.rounds -= 1
-        signaller.signal_matches[r] -= 1
-        try:
-            signaller.signal_memory.pop(hash(signaller), None)
-            signaller.shareable = None
-        except:
-            pass
-        return r
+        return signaller.signal_search(signaller.signals)
 
 class GroupSignalMedian(GroupSignal):
     """
