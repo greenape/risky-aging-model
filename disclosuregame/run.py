@@ -142,8 +142,8 @@ def arguments():
         kwargs['measures_women'] = measures_women(freq=args.measure_freq)
     if args.space:
         logger.debug("Using space measures.")
-        kwargs['measures_midwives'] = space_measures_mw(kwargs['measures_midwives'])
-        kwargs['measures_women'] = space_measures_women(kwargs['measures_women'])
+        kwargs['measures_midwives'] = space_measures_mw(base=kwargs['measures_midwives'])
+        kwargs['measures_women'] = space_measures_women(base=kwargs['measures_women'])
     kwargs = [kwargs]
     if args.kwargs is not None:
         try:
