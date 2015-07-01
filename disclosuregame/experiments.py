@@ -259,9 +259,11 @@ def args_write(args, directory, name):
         target = os.path.join(directory, "%s_%d.args" % (name, i))
         files.append(target)
         print "Writing %s" % target
-        f = open(target, "wb")
-        cPickle.dump(args[i], f, cPickle.HIGHEST_PROTOCOL)
-        f.close()
+        argset = args[i]
+        if type(argset) != "list":
+            argset = [argset]
+        with open(target, "wb") as f:
+            cPickle.dump(argset, f, cPickle.HIGHEST_PROTOCOL)
     return files
 
 
