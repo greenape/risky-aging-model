@@ -18,6 +18,18 @@ class PopCount(Measure):
         self.hash_bucket.update(women)
         return len(self.hash_bucket)
 
+class PopCountNow(Measure):
+
+    """
+    Return the count of this type.
+    """
+
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            women = filter(lambda x: x.player_type == self.player_type, women)
+        women = map(lambda x: x.ident, women)
+        return len(self.women)
+
 
 class RoundsPlayedSignal(Measure):
     """
@@ -251,6 +263,7 @@ def abstract_measures_women(signals=None, freq=1):
     measures['round'] = Appointment()
     for i in range(n_signals):
         measures["type_%d_pop" % i] = PopCount(player_type=i)
+        measures["type_%d_pop_now" % i] = PopCountNow(player_type=i)
         #measures["type_%d_round_12_ref" % i] = CumulativeRefCount(player_type=i, appointment=11)
         measures["ref_overall_%d" % i] = RefCountAnyRound(player_type=i)
         measures["ref_now_%d" % i] = RefCountThisRound(player_type=i)
