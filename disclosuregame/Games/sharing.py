@@ -72,6 +72,8 @@ class CarryingInformationGame(CarryingReferralGame):
         """
         self.signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
+        while self.signaller_fn.id_generator.next() != self.gen_reset:
+            LOG.debug("Spinning id generator.")
         LOG.debug("Made player generator.")
         self.random.shuffle(women)
         self.num_midwives = len(midwives)
@@ -84,11 +86,16 @@ class CarryingInformationGame(CarryingReferralGame):
         """
         Run one round of simulation.
         """
+        finished_count = 0
         players = [women.pop() for j in range(self.num_midwives)]
         self.random.shuffle(midwives)
         map(self.play_round, players, midwives)
         for x in midwives:
             x.finished += 1
+        for woman in players + women:
+            if self.all_played([woman], self.num_appointments):
+                woman.is_finished = True
+                finished_count += 1
         women_res = self.measures_women.dump(women + players, self.current_round, self, results=women_res)
         mw_res = self.measures_midwives.dump(midwives, self.current_round, self, results=mw_res)
         return women_res, mw_res, players
@@ -105,8 +112,7 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = multiprocessing.current_process()
 
         for woman in players:
-            if self.all_played([woman], self.num_appointments):
-                woman.is_finished = True
+            if woman.is_finished:
                 # Add a new naive women back into the mix
                 new_woman = self.signaller_generator.next()
                 new_woman.started = self.current_round

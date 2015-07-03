@@ -864,7 +864,7 @@ def measures_women(signals=None, freq=1):
         #measures['accrued_payoffs_type_%d' % i] = AccruedPayoffs(player_type=i)
         #measures['rounds_played_type_%d_upto' % i] = NumRoundsCumulative(player_type=i)
         measures['rounds_played_type_%d' % i] = NumRounds(player_type=i)
-        measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
+        #measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
         #measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
         #measures["group_signal_%d" % i] = GroupSignal(player_type=i)
         #measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
@@ -896,9 +896,9 @@ def measures_midwives(signals=None, freq=1):
     measures['false_negatives_upto'] = FalseNegativeUpto()
     #measures['false_negatives'] = FalseNegative()
     #measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(n_signals):
+    #for i in range(n_signals):
         #measures['response_signal_%d' % i] = GroupResponse(signal=i)
-        measures['response_signal_0_type_%d' % i] = GroupResponse(signal=0,midwife_type=i)
+        #measures['response_signal_0_type_%d' % i] = GroupResponse(signal=0,midwife_type=i)
         #measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
         #measures['type_%d_frequency' % i] = TypeExperience(player_type=i)
         #measures['type_%d_right_calls_upto' % i] = RightCallUpto(midwife_type=i)

@@ -3,6 +3,7 @@ from disclosuregame.Games.referral import *
 from disclosuregame.Games.recognition import *
 from disclosuregame.Games.carrying import *
 from disclosuregame.Games.sharing import *
+from disclosuregame.Games.death import *
 
 from disclosuregame.Agents.cpt import *
 from disclosuregame.Agents.recognition import *

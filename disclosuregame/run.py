@@ -53,7 +53,8 @@ def arguments():
                    choices=['SimpleGame', 'CaseloadGame', 'RecognitionGame', 'ReferralGame',
                    'CaseloadRecognitionGame', 'CaseloadReferralGame', 'CarryingGame',
                    'CarryingReferralGame', 'CarryingCaseloadReferralGame', 'CaseloadSharingGame',
-                   'CarryingInformationGame', 'ShuffledSharingGame', 'SubgroupSharingGame', 'CombinedSharingGame'],
+                   'CarryingInformationGame', 'ShuffledSharingGame', 'SubgroupSharingGame', 'CombinedSharingGame',
+                            'DeathGame', 'DeathAndSharingGame'],
                    dest="games")
     parser.add_argument('-s','--signallers', type=str, nargs='*',
         help='A signaller type.', default=["SharingSignaller"],
@@ -212,7 +213,7 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
             params['weight_%d_%d' % (i, j)] = game.type_weights[i][j]
     return params
 
-def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=100,
+def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=1000,
                         num_women=1000, runs=1, game=None, rounds=100, mw_weights=None, women_weights=None,
                         seeds=None, women_modifier=None, measures_women=measures_women(),
                         measures_midwives=measures_midwives(), mw_priors=None, responder_args=None, signaller_args=None, tag="",
@@ -287,7 +288,7 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
 
         women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
         women = [women_generator.next() for x in range(num_women)]
-
+        game.gen_reset = signaller_fn.id_generator.next()
         if women_modifier is not None:
             women_modifier(women)
         #logger.info("Set priors.")

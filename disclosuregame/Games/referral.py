@@ -32,9 +32,6 @@ class ReferralGame(SimpleGame):
         if act == 1:
             receiver.update_beliefs(receive_payoff, signaller, signal)
             signaller.is_finished = True
-        elif signaller.rounds == self.num_appointments:
-            signaller.is_finished = True
-            # receiver.update_beliefs(receive_payoff, signaller, signal)
 
 
 class CaseloadReferralGame(CaseloadGame, ReferralGame):

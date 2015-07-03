@@ -7,7 +7,7 @@ class PopCount(Measure):
         self.hash_bucket = set()
 
     """
-    Return the count of this type up to roundnum.
+    Return the count of this type.
     """
 
     def measure(self, roundnum, women, game):
@@ -78,6 +78,80 @@ class HonestyMeasure(Measure):
         women = [player.ident for player in women if player.rounds == self.appointment]
         #women = filter(lambda (y, x): x.player_type in x.get_signal_log(), women)
         self.counted.update(women)
+        self.count += len(women)
+        return self.count
+
+
+class RefCountAnyRound(Measure):
+    def __init__(self, **kwargs):
+        super(RefCountAnyRound, self).__init__(**kwargs)
+        self.count = 0
+
+    """
+    Return the number of women referred.
+    """
+
+    def measure(self, roundnum, women, game):
+        #pairs = zip(map(lambda x: x.ident, women), women)
+        #women = filter(lambda (x, y): x not in self.counted, pairs)
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        #women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
+        women = [player.ident for player in women if 1 in player.get_response_log()]
+        self.count += len(women)
+        return self.count
+
+
+class RefCountThisRound(Measure):
+
+    """
+    Return the number of women referred.
+    """
+
+    def measure(self, roundnum, women, game):
+        #pairs = zip(map(lambda x: x.ident, women), women)
+        #women = filter(lambda (x, y): x not in self.counted, pairs)
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        #women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
+        women = [player.ident for player in women if 1 in player.get_response_log()]
+        return len(women)
+
+class FinishedThisRound(Measure):
+
+    """
+    Return the number of women referred.
+    """
+
+    def measure(self, roundnum, women, game):
+        #pairs = zip(map(lambda x: x.ident, women), women)
+        #women = filter(lambda (x, y): x not in self.counted, pairs)
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        #women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
+        women = [player.ident for player in women if player.is_finished]
+        return len(women)
+
+class FinishedAnyRound(RefCountAnyRound):
+    """
+    Return the number of women referred.
+    """
+
+    def measure(self, roundnum, women, game):
+        #pairs = zip(map(lambda x: x.ident, women), women)
+        #women = filter(lambda (x, y): x not in self.counted, pairs)
+        if self.player_type is not None:
+            # women = filter(lambda (y, x): x.player_type == self.player_type, women)
+            women = [player for player in women if player.player_type == self.player_type]
+        #women = filter(lambda (y, x): x.rounds == self.appointment, women)
+        #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
+        women = [player.ident for player in women if player.is_finished]
         self.count += len(women)
         return self.count
 
@@ -176,7 +250,11 @@ def abstract_measures_women(signals=None, freq=1):
     measures['round'] = Appointment()
     for i in range(n_signals):
         measures["type_%d_pop" % i] = PopCount(player_type=i)
-        measures["type_%d_round_12_ref" % i] = CumulativeRefCount(player_type=i, appointment=11)
+        #measures["type_%d_round_12_ref" % i] = CumulativeRefCount(player_type=i, appointment=11)
+        measures["ref_overall_%d" % i] = RefCountAnyRound(player_type=i)
+        measures["ref_now_%d" % i] = RefCountThisRound(player_type=i)
+        measures["finished_now_%d" % i] = FinishedThisRound(player_type=i)
+        measures["finished_overall_%d" % i] = FinishedAnyRound(player_type=i)
         #for j in range(12):
         #    measures["type_%d_round_%d_ref" % (i, j + 1)] = CumulativeRefCount(player_type=i, appointment=j)
         #    measures["type_%d_round_%d_honesty" % (i, j + 1)] = CumulativeHonestyCount(player_type=i, appointment=j)

@@ -1,1 +1,1 @@
-__all__ = ["carrying", "game", "recognition", "referral", "sharing"]
+__all__ = ["carrying", "game", "recognition", "referral", "sharing", "death"]
