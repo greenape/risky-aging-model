@@ -213,7 +213,7 @@ def params_dict(signaller_rule, responder_rule, mw_weights, women_weights, game,
             params['weight_%d_%d' % (i, j)] = game.type_weights[i][j]
     return params
 
-def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=1000,
+def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianResponder, num_midwives=100,
                         num_women=1000, runs=1, game=None, rounds=100, mw_weights=None, women_weights=None,
                         seeds=None, women_modifier=None, measures_women=measures_women(),
                         measures_midwives=measures_midwives(), mw_priors=None, responder_args=None, signaller_args=None, tag="",

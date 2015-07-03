@@ -133,6 +133,7 @@ class FinishedThisRound(Measure):
         if self.player_type is not None:
             # women = filter(lambda (y, x): x.player_type == self.player_type, women)
             women = [player for player in women if player.player_type == self.player_type]
+            startcount = len(women)
         #women = filter(lambda (y, x): x.rounds == self.appointment, women)
         #women = filter(lambda (y, x): 1 in x.get_response_log(), women)
         women = [player.ident for player in women if player.is_finished]

@@ -37,18 +37,24 @@ class DeathAndSharingGame(DeathGame):
         Actions to perform after playing a round.
         :param **kwargs:
         """
+        players += signallers
+        signallers[:] = []
+        new_count = 0
+        total_count = 0
         try:
             worker = scoop.worker[0]
         except:
             worker = multiprocessing.current_process()
 
         for woman in players:
+            total_count += 1
             #Now anybody can share..
             if self.random.random() < self.women_share_prob:
                 self.women_memories.append((woman.ident, woman.get_memory()))
 
             if woman.is_finished:
                 # Add a new naive women back into the mix
+                new_count += 1
                 new_woman = self.signaller_generator.next()
                 try:
                     assert new_woman.ident not in self.measures_women.measures["type_0_pop"].hash_bucket
@@ -61,8 +67,6 @@ class DeathAndSharingGame(DeathGame):
                 new_woman.finished = self.current_round
                 signallers.insert(0, new_woman)
                 LOG.debug("Generated a new player.")
-                for midwife in responders:
-                    midwife.signal_memory.pop(hash(woman), None)
                 del woman
             else:
                 signallers.insert(0, woman)
@@ -82,6 +86,7 @@ class DeathAndSharingGame(DeathGame):
         except Exception as e:
             LOG.debug("Sharing to women failed.")
             LOG.debug(e)
+        LOG.debug("Made %d new players on round %d. Started with %d." % (new_count, self.current_round, total_count))
 
     def share_women(self, women):
             """
