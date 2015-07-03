@@ -28,7 +28,7 @@ class PopCountNow(Measure):
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
         women = map(lambda x: x.ident, women)
-        return len(self.women)
+        return len(women)
 
 
 class RoundsPlayedSignal(Measure):
