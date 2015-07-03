@@ -34,10 +34,14 @@ class CarryingGame(game.SimpleGame):
 
     def play_game(self, players, file_name=""):
         women, midwives = players
+        self.pop_count = len(women)
         signaller_generator = self.signaller_fn.generator(random=self.player_random,
                                                           type_distribution=self.women_weights,
                                                           agent_args=self.signaller_args, initor=self.signaller_initor,
                                                           init_args=self.signaller_init_args)
+        while self.signaller_fn.id_generator.next() != self.gen_reset:
+            LOG.debug("Spinning id generator.")
+        LOG.debug("Made player generator.")
         rounds = self.rounds
         self.random.shuffle(women)
         num_midwives = len(midwives)
@@ -53,6 +57,7 @@ class CarryingGame(game.SimpleGame):
             mw_res = self.measures_midwives.dump(midwives, i, self)
             for woman in players:
                 if self.all_played([woman], self.num_appointments):
+                    self.pop_count += 1
                     woman.is_finished = True
                     # Add a new naive women back into the mix
                     new_woman = signaller_generator.next()
@@ -81,10 +86,14 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
 
     def play_game(self, players, file_name=""):
         women, midwives = players
+        self.pop_count = len(women)
         signaller_generator = self.signaller_fn.generator(random=self.player_random,
                                                           type_distribution=self.women_weights,
                                                           agent_args=self.signaller_args, initor=self.signaller_initor,
                                                           init_args=self.signaller_init_args)
+        while self.signaller_fn.id_generator.next() != self.gen_reset:
+            LOG.debug("Spinning id generator.")
+        LOG.debug("Made player generator.")
         rounds = self.rounds
         self.random.shuffle(women)
         women_res = self.measures_women.dump(None, self.rounds, self)
@@ -115,6 +124,7 @@ class CaseloadCarryingGame(CarryingGame, game.CaseloadGame):
                 woman = players[j]
                 women = caseloads[midwives[j]]
                 if self.all_played([woman], self.num_appointments):
+                    self.pop_count += 1
                     woman.is_finished = True
                     # Add a new naive women back into the mix
                     new_woman = signaller_generator.next()

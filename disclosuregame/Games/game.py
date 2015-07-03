@@ -93,6 +93,7 @@ class SimpleGame(Game):
         """
         if not type_weights:
             type_weights = [[10., 1., 1.], [1., 10., 1.], [1., 1., 10.]]
+        self.pop_count = 0
         self.seed = seed
         self.random = Random(seed)
         self.signal_log = []
@@ -224,7 +225,7 @@ class SimpleGame(Game):
 
     def play_game(self, players):
         women, midwives = players
-
+        self.pop_count = len(women)
         rounds = self.num_appointments
         birthed = []
         self.random.shuffle(women)
@@ -274,6 +275,7 @@ class CaseloadGame(SimpleGame):
 
     def play_game(self, players):
         women, midwives = players
+        self.pop_count = len(women)
         rounds = self.num_appointments
         birthed = []
         #Assign women to midwives

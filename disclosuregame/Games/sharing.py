@@ -70,6 +70,7 @@ class CarryingInformationGame(CarryingReferralGame):
         """
         Setup function for running a game.
         """
+        self.pop_count = len(women)
         self.signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
         while self.signaller_fn.id_generator.next() != self.gen_reset:
@@ -115,6 +116,7 @@ class CarryingInformationGame(CarryingReferralGame):
         for woman in players:
             if woman.is_finished:
                 # Add a new naive women back into the mix
+                self.pop_count += 1
                 new_woman = self.signaller_generator.next()
                 new_woman.started = self.current_round
                 new_woman.finished = self.current_round
