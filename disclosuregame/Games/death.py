@@ -31,6 +31,9 @@ class DeathGame(CarryingInformationGame):
         signallers[:] = []
         super(DeathGame, self).post_round(players, signallers, responders, **kwargs)
 
+    def __str__(self):
+        return "death_%s" % super(DeathGame, self).__unicode__()
+
 class DeathAndSharingGame(DeathGame):
     def post_round(self, players, signallers, responders, **kwargs):
         """
@@ -98,3 +101,6 @@ class DeathAndSharingGame(DeathGame):
                 targets = filter(lambda woman: woman.ident != ident, women)
                 self.disseminate_women(memory[1], targets)
             map(lambda x: x.update_beliefs(), women)
+
+    def __str__(self):
+        return "sharinganddeath_%s" % super(DeathAndSharingGame, self).__unicode__()

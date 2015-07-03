@@ -96,7 +96,7 @@ class CarryingInformationGame(CarryingReferralGame):
             if self.all_played([woman], self.num_appointments):
                 woman.is_finished = True
                 finished_count += 1
-        LOG.debug("Counted %d finished." % finished_count)
+        LOG.debug("Counted %d finished of %d." % (finished_count, len(players + women)))
         women_res = self.measures_women.dump(women + players, self.current_round, self, results=women_res)
         mw_res = self.measures_midwives.dump(midwives, self.current_round, self, results=mw_res)
         return women_res, mw_res, players
