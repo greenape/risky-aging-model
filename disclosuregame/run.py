@@ -404,6 +404,8 @@ def write(queue, db_name, kill_queue):
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)
+            with open("crash.res", "wb") as f:
+                cPickle.dump(women_res, f)
             try:
                 logger.info("Dropping poison.")
                 kill_queue.put_nowait(None)
