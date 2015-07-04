@@ -35,6 +35,10 @@ class DeathGame(CarryingInformationGame):
         return "death_%s" % super(DeathGame, self).__unicode__()
 
 class DeathAndSharingGame(DeathGame):
+    def run_round(self, women, midwives, women_res, mw_res):
+        self.random.shuffle(women)
+        return super(DeathAndSharingGame, self).run_round(women, midwives, women_res, mw_res)
+
     def post_round(self, players, signallers, responders, **kwargs):
         """
         Actions to perform after playing a round.
