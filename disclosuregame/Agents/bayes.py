@@ -63,7 +63,7 @@ class Agent(object):
         memo[id(self)] = result
         for k, v in self.__dict__.items():
             setattr(result, k, deepcopy(v, memo))
-        result.ident = uuid.uuid4()
+        result.ident = uuid.uuid4().int
         return result
 
     @classmethod
@@ -98,8 +98,8 @@ class Signaller(Agent):
         if not signals:
             signals = [0, 1, 2]
         self.response_belief = self.response_signal_dict(signals, responses)
-        self.type_distribution = {s:[] for s in signals}#dict([(signal, []) for signal in signals])
-        self.type_matches = dict.fromkeys(signals, 0.)#dict([(signal, 0.) for signal in signals])
+        self.type_distribution = {s:[] for s in signals}
+        self.type_matches = dict.fromkeys(signals, 0.)
         self.response_signal_matches = self.response_signal_dict(signals, responses)
         #self.risk_log = dict([(signal, []) for signal in signals])
         #self.risk_log_general = dict([(signal, []) for signal in signals])
