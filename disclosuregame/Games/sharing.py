@@ -74,9 +74,7 @@ class CarryingInformationGame(CarryingReferralGame):
         self.pop_count = len(women)
         self.signaller_generator = self.signaller_fn.generator(random=self.player_random, type_distribution=self.women_weights, 
             agent_args=self.signaller_args, initor=self.signaller_initor,init_args=self.signaller_init_args)
-        
-        while self.signaller_fn.id_generator.next() != self.gen_reset:
-            LOG.debug("Spinning up idents.")
+        self.signaller_fn.id_generator = count(self.gen_reset)
         LOG.debug("Made player generator.")
         self.random.shuffle(women)
         self.num_midwives = len(midwives)
