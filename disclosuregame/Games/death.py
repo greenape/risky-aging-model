@@ -67,7 +67,7 @@ class DeathAndSharingGame(DeathGame):
                     assert new_woman.ident not in self.measures_women.measures["type_0_pop"].hash_bucket
                     assert new_woman.ident not in self.measures_women.measures["type_1_pop"].hash_bucket
                 except:
-                    print new_woman.ident
+                    LOG.debug("Failed with id %d" % new_woman.ident)
                     raise
 
                 new_woman.started = self.current_round

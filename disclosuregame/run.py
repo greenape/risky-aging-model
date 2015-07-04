@@ -288,7 +288,6 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
 
         women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
         women = [women_generator.next() for x in range(num_women)]
-        game.gen_reset = signaller_fn.id_generator.next()
         if women_modifier is not None:
             women_modifier(women)
         #logger.info("Set priors.")

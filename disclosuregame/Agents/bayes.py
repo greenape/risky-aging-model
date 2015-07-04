@@ -4,6 +4,7 @@ from ..Util import shuffled
 from random import Random
 from itertools import count
 import initors
+from uuid import uuid4
 
 try:
     import scoop
@@ -17,7 +18,6 @@ except:
     pass
 
 class Agent(object):
-    id_generator = count()
     """
     An agent who plays a game, according to their
     type, and some decision rule.
@@ -52,7 +52,7 @@ class Agent(object):
         self.is_finished = False
         self.accrued_payoffs = 0
         self.random = Random(seed)
-        self.ident = Agent.id_generator.next()
+        self.ident = uuid4().int
 
     def __hash__(self):
         return self.ident
@@ -63,7 +63,7 @@ class Agent(object):
         memo[id(self)] = result
         for k, v in self.__dict__.items():
             setattr(result, k, deepcopy(v, memo))
-        result.ident = Agent.id_generator.next()
+        result.ident = uuid.uuid4()
         return result
 
     @classmethod
