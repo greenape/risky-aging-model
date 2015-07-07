@@ -58,7 +58,7 @@ class DeathAndSharingGame(DeathGame):
             #Now anybody can share..
             if self.random.random() < self.women_share_prob:
                 self.women_memories.append((woman.ident, woman.get_memory()))
-
+            woman.just_played = False
             if woman.is_finished:
                 # Add a new naive women back into the mix
                 new_count += 1
