@@ -39,7 +39,7 @@ class PlayedJustNow(Measure):
     def measure(self, roundnum, women, game):
         if self.player_type is not None:
             women = filter(lambda x: x.player_type == self.player_type, women)
-        [player for player in women if player.just_played]
+        women = [player for player in women if player.just_played]
         women = map(lambda x: x.ident, women)
         return len(women)
 
