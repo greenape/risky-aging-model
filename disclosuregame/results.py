@@ -123,6 +123,7 @@ class Result(object):
         with sqlite3.connect("%s.db" % db_name, timeout=timeout) as conn:
             conn.execute(res_query)
             conn.execute(params_query)
+        conn.close()
 
     def do_write(self, db_name, timeout):
 
