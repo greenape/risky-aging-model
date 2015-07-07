@@ -144,6 +144,7 @@ class Result(object):
         with sqlite3.connect("%s.db" % db_name, timeout=timeout) as conn:
             conn.executemany(insert_params, params)
             conn.executemany(insert_results, results)
+        conn.close()
 
     def type_safety(self, x):
         """

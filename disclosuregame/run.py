@@ -315,6 +315,7 @@ def play_game(config):
 def make_work(queue, kwargs, kill_queue):
     logger.info("Starting make work process.")
     i = 1
+    queue.cancel_join_thread()
     try:
         while len(kwargs) > 0:
             assert kill_queue.empty()
@@ -395,12 +396,17 @@ def write(queue, db_name, kill_queue):
             #print res
             women_res, mw_res = res
             logger.info("Writing game %d." % number)
-            logger.info("Queue length is %d" % queue.qsize())
+            try:
+                logger.info("Queue length is %d" % queue.qsize())
+            except NotImplementedError:
+                #Don't bother if not implemented
+                pass
             women_res.write_db("%s_women" % db_name)
             mw_res.write_db("%s_mw" % db_name)
             del women_res
             del mw_res
             gc.collect()
+            logger.info("Wrote game %d." % number)
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)
@@ -470,20 +476,19 @@ def kw_experiment(kwargs, file_name, procs):
 
     for p in calcproc:
         p.start()
-    for p in calcproc:
-        try:
-            assert kill_queue.empty()
-            p.join()
-        except (KeyboardInterrupt, AssertionError, MemoryError):
-            for proc in calcproc:
-                logger.info("Terminating %s" % str(proc))
-                proc.terminate()
-            logger.info("Poison pill")
+    while any(map(lambda p: p.is_alive(), calcproc)):
             try:
-                kill_queue.put_nowait(None)
-            except Full:
-                logger.info("Poison already in place.")
-            break
+                assert kill_queue.empty()
+            except (KeyboardInterrupt, AssertionError, MemoryError):
+                for proc in calcproc:
+                    logger.info("Terminating %s" % str(proc))
+                    proc.terminate()
+                logger.info("Poison pill")
+                try:
+                    kill_queue.put_nowait(None)
+                except Full:
+                    logger.info("Poison already in place.")
+                break
     try:
         kill_queue.put_nowait(None)
     except Full:
