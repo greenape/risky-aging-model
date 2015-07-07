@@ -395,6 +395,7 @@ def write(queue, db_name, kill_queue):
             #print res
             women_res, mw_res = res
             logger.info("Writing game %d." % number)
+            logger.info("Queue length is %d" % queue.qsize())
             women_res.write_db("%s_women" % db_name)
             mw_res.write_db("%s_mw" % db_name)
             del women_res
@@ -403,8 +404,6 @@ def write(queue, db_name, kill_queue):
         except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
             logger.error("SQLite failure.")
             logger.error(e)
-            with open("crash.res", "wb") as f:
-                cPickle.dump(women_res, f)
             try:
                 logger.info("Dropping poison.")
                 kill_queue.put_nowait(None)
