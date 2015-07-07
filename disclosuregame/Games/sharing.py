@@ -88,6 +88,8 @@ class CarryingInformationGame(CarryingReferralGame):
         """
         finished_count = 0
         players = [women.pop() for j in range(self.num_midwives)]
+        for player in players:
+            player.just_played = True
         self.random.shuffle(midwives)
         map(self.play_round, players, midwives)
         for x in midwives:
@@ -113,6 +115,7 @@ class CarryingInformationGame(CarryingReferralGame):
             worker = multiprocessing.current_process()
 
         for woman in players:
+            woman.just_played = False
             if woman.is_finished:
                 # Add a new naive women back into the mix
                 self.pop_count += 1

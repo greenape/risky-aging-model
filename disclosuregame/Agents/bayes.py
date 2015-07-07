@@ -53,6 +53,7 @@ class Agent(object):
         self.accrued_payoffs = 0
         self.random = Random(seed)
         self.ident = uuid4().int
+        self.just_played = False
 
     def __hash__(self):
         return self.ident

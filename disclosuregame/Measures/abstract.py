@@ -30,6 +30,18 @@ class PopCountNow(Measure):
         women = map(lambda x: x.ident, women)
         return len(women)
 
+class PlayedJustNow(Measure):
+
+    """
+    Return the count of this type who just played.
+    """
+
+    def measure(self, roundnum, women, game):
+        if self.player_type is not None:
+            women = filter(lambda x: x.player_type == self.player_type, women)
+        [player for player in women if player.just_played]
+        women = map(lambda x: x.ident, women)
+        return len(women)
 
 class RoundsPlayedSignal(Measure):
     """
@@ -269,6 +281,7 @@ def abstract_measures_women(signals=None, freq=1):
         measures["ref_now_%d" % i] = RefCountThisRound(player_type=i)
         measures["finished_now_%d" % i] = FinishedThisRound(player_type=i)
         measures["finished_overall_%d" % i] = FinishedAnyRound(player_type=i)
+        measures["just_played_%d" %i] = PlayedJustNow(player_type=i)
         #for j in range(12):
         #    measures["type_%d_round_%d_ref" % (i, j + 1)] = CumulativeRefCount(player_type=i, appointment=j)
         #    measures["type_%d_round_%d_honesty" % (i, j + 1)] = CumulativeHonestyCount(player_type=i, appointment=j)
