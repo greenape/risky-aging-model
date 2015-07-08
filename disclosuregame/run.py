@@ -340,7 +340,6 @@ def make_work(queue, kwargs, kill_queue):
             queue.put_nowait(None)
         except Full:
             pass
-        queue.cancel_join_thread()
         raise e
     finally:
         logger.info("Closing the jobs queue.")
