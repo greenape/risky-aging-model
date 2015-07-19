@@ -9,7 +9,7 @@ import sqlite3
 import logging
 from random import Random
 import time
-import os
+import os, sys
 import gc
 import platform
 from Queue import Full, Empty
@@ -347,10 +347,55 @@ def make_work(queue, kwargs, kill_queue):
         logger.info("Ending make work process.")
 
 
+def workit(kwargs):
+    logger.info("Starting make work process.")
+    i = 0
+    while len(kwargs) > 0:
+        exps = decision_fn_compare(**kwargs.pop())
+        for exp in exps:
+            logger.info("Enqueing experiment %d" %  i)
+            i += 1
+            yield (i, exp)
+    logger.info("Ending make work process.")
+
+
+def doplay(config):
+    try:
+        number, config = config
+        logger.info("Playing game %d" % number)
+        res = (number, play_game(config))
+    except:
+        raise KeyboardInterruptError
+    return res
+
+
+def writer(results):
+    for number, result in results:
+        logger.info("Writing game %d." % number)
+        women_res, mw_res = results
+        women_res.write_db("%s_women" % db_name)
+        mw_res.write_db("%s_mw" % db_name)
+        del women_res
+        del mw_res
+        gc.collect()
+        logger.info("Wrote game %d." % number)
+
+class KeyboardInterruptError(Exception): pass
+
+def run(kwargs, file_name, procs):
+    pool = multiprocessing.Pool(procs)
+    try:
+        writer(pool.imap_unordered(doplay, workit(kwargs)))
+    except KeyboardInterruptError:
+        pool.terminate()
+        sys.exit(1)
+
 def do_work(queuein, queueout, kill_queue):
     """
     Consume games, play them, then put their results in the output queue.
     """
+    queuein.cancel_join_thread()
+    
     logger.info("Starting do work process.")
     while True:
         try:
@@ -453,7 +498,8 @@ def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1):
                 arg['signaller_fn'] = pair[0]
                 arg['responder_fn'] = pair[1]
                 run_params.append(arg)
-    kw_experiment(run_params, file_name, procs)
+    #kw_experiment(run_params, file_name, procs)
+    run(run_params, file_name, procs)
 
 def kw_experiment(kwargs, file_name, procs):
     """
