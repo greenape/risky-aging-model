@@ -372,7 +372,7 @@ def doplay(config):
 def writer(results):
     for number, result in results:
         logger.info("Writing game %d." % number)
-        women_res, mw_res = results
+        women_res, mw_res = result
         women_res.write_db("%s_women" % db_name)
         mw_res.write_db("%s_mw" % db_name)
         del women_res
