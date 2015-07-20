@@ -369,7 +369,7 @@ def doplay(config):
     return res
 
 
-def writer(results):
+def writer(results, db_name):
     for number, result in results:
         logger.info("Writing game %d." % number)
         women_res, mw_res = result
@@ -385,7 +385,7 @@ class KeyboardInterruptError(Exception): pass
 def run(kwargs, file_name, procs):
     pool = multiprocessing.Pool(procs)
     try:
-        writer(pool.imap_unordered(doplay, workit(kwargs)))
+        writer(pool.imap_unordered(doplay, workit(kwargs)), file_name)
     except KeyboardInterruptError:
         pool.terminate()
         sys.exit(1)
