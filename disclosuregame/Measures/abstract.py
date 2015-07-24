@@ -267,6 +267,7 @@ class AppointmentTypeSignalCount(TypeSignalCount):
         return self.count
 
 
+
 def abstract_measures_women(signals=None, freq=1):
     if not signals:
         signals = [0, 1]

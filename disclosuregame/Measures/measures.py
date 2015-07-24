@@ -510,7 +510,7 @@ class GroupResponse(Measure):
             women = filter(lambda x: x.player_type == self.midwife_type, women)
         if len(women) == 0:
             return "NA"
-        return sum(map(self.measure_one, women)) / float(len(women))
+        return sum(map(self.measure_one, women))
 
 class GroupHonesty(Measure):
     """
@@ -889,15 +889,15 @@ def measures_midwives(signals=None, freq=1):
     measures = OrderedDict()
     measures['game_seed'] = GameSeed()
     measures['appointment'] = Appointment()
-    measures['all_right_calls_upto'] = RightCallUpto()
+    #measures['all_right_calls_upto'] = RightCallUpto()
     #measures['all_right_calls'] = RightCall()
-    measures['false_positives_upto'] = FalsePositiveUpto()
+    #measures['false_positives_upto'] = FalsePositiveUpto()
     #measures['false_positives'] = FalsePositive()
-    measures['false_negatives_upto'] = FalseNegativeUpto()
+    #measures['false_negatives_upto'] = FalseNegativeUpto()
     #measures['false_negatives'] = FalseNegative()
     #measures['accrued_payoffs'] = AccruedPayoffs()
-    #for i in range(n_signals):
-        #measures['response_signal_%d' % i] = GroupResponse(signal=i)
+    for i in range(n_signals):
+        measures['response_signal_%d' % i] = GroupResponse(signal=i)
         #measures['response_signal_0_type_%d' % i] = GroupResponse(signal=0,midwife_type=i)
         #measures['signal_%d_frequency' % i] = SignalExperience(signal=i)
         #measures['type_%d_frequency' % i] = TypeExperience(player_type=i)
