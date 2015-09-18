@@ -138,15 +138,15 @@ def arguments():
     #    kwargs['measures_women'] = indiv_measures_women()
     if args.abstract:
         logger.debug("Using abstract measures.")
-        kwargs['measures_midwives'] = abstract_measures_mw(freq=args.measure_freq, sigs=args.measure_sigs)
-        kwargs['measures_women'] = abstract_measures_women(freq=args.measure_freq, sigs=args.measure_sigs)
+        kwargs['measures_midwives'] = abstract_measures_mw(freq=args.measure_freq, signals=args.measure_sigs)
+        kwargs['measures_women'] = abstract_measures_women(freq=args.measure_freq, signals=args.measure_sigs)
     else:
-        kwargs['measures_midwives'] = measures_midwives(freq=args.measure_freq, sigs=args.measure_sigs)
-        kwargs['measures_women'] = measures_women(freq=args.measure_freq, sigs=args.measure_sigs)
+        kwargs['measures_midwives'] = measures_midwives(freq=args.measure_freq, signals=args.measure_sigs)
+        kwargs['measures_women'] = measures_women(freq=args.measure_freq, signals=args.measure_sigs)
     if args.space:
         logger.debug("Using space measures.")
-        kwargs['measures_midwives'] = space_measures_mw(base=kwargs['measures_midwives'])
-        kwargs['measures_women'] = space_measures_women(base=kwargs['measures_women'])
+        kwargs['measures_midwives'] = space_measures_mw(base=kwargs['measures_midwives'], signals=args.measure_sigs)
+        kwargs['measures_women'] = space_measures_women(base=kwargs['measures_women'], signals=args.measure_sigs)
     kwargs = [kwargs]
     if args.kwargs is not None:
         try:

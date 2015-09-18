@@ -291,14 +291,16 @@ def abstract_measures_women(signals=None, freq=1):
         #                                                                                           signal=k,
         #                                                                                           appointment=j,
         #                                                                                           signals=signals)
-    base = measures_women(freq=freq)
+    base = measures_women(freq=freq, signals=signals)
     base.add(Measures(measures))
     return base
 
 
-def abstract_measures_mw(freq=1):
+def abstract_measures_mw(signals=None, freq=1):
+    if not signals:
+        signals = [0, 1]
     measures = OrderedDict()
     measures['appointment'] = Appointment()
-    base = measures_midwives(freq=freq)
+    base = measures_midwives(freq=freq, signals=signals)
     base.add(Measures(measures))
     return base

@@ -858,7 +858,7 @@ def measures_women(signals=None, freq=1):
     #measures["type_entropy"] = TypeEntropy()
     #measures["signal_entropy"] = SignalEntropy()
     #measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(n_signals):
+    for i in signals:
         #measures["type_%d_ref" % i] = TypeReferralBreakdown(player_type=i)
         #measures["type_%d_finished" % i] = TypeFinished(player_type=i)
         #measures['accrued_payoffs_type_%d' % i] = AccruedPayoffs(player_type=i)
@@ -867,9 +867,9 @@ def measures_women(signals=None, freq=1):
         #measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
         #measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
         #measures["group_signal_%d" % i] = GroupSignal(player_type=i)
-        #measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
-        #measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
-        for j in range(n_signals):
+        measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
+        measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
+        for j in signals:
             #measures["pmi_type_%d_signal_%d" % (i, j)] = ExpectedPointMutualInformation(player_type=i, signal=j)
             measures["p_signal_%d_type_%d" % (i, j)] = TypeSignalCount(player_type=j, signal=i, signals=signals)
             #measures["point_p_signal_%d_type_%d" % (i, j)] = PointTypeSignalCount(player_type=j, signal=i, signals=signals)
@@ -896,7 +896,7 @@ def measures_midwives(signals=None, freq=1):
     #measures['false_negatives_upto'] = FalseNegativeUpto()
     #measures['false_negatives'] = FalseNegative()
     #measures['accrued_payoffs'] = AccruedPayoffs()
-    for i in range(n_signals):
+    for i in signals:
         measures['response_signal_%d' % i] = GroupResponse(signal=i)
         #measures['response_signal_0_type_%d' % i] = GroupResponse(signal=0,midwife_type=i)
         #measures['signal_%d_frequency' % i] = SignalExperience(signal=i)

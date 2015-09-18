@@ -58,14 +58,16 @@ def space_measures_women(signals=None, base=None):
     measures["referralevents"] = ReferralEvents()
     measures["signalspace"] = SignalSpace()
     if base is None:
-        base = measures_women()
+        base = measures_women(signals=signals)
     base.add(Measures(measures))
     return base
 
 
-def space_measures_mw(base=None):
+def space_measures_mw(signals=None, base=None):
+    if not signals:
+        signals = [0, 1]
     measures = OrderedDict()
     if base is None:
-        base = measures_midwives()
+        base = measures_midwives(signals=signals)
     base.add(Measures(measures))
     return base
