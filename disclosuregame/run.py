@@ -31,7 +31,10 @@ def load_kwargs(file_name):
     except:    
         with open(file_name, "rb") as f:
             kwargs = cPickle.load(f)
-    assert type(kwargs) is list, "%s does not contain a pickled list." % file_name
+    try:
+        assert type(kwargs) is list, "%s does not contain a pickled list." % file_name
+    except:
+        kwargs = [kwargs]
     #Check this is a valid list of dicts
     valid_args = decision_fn_compare.func_code.co_varnames[:decision_fn_compare.func_code.co_argcount]
     line = 0
