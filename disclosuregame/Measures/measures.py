@@ -855,7 +855,7 @@ def measures_women(signals=None, freq=1):
         measures['rounds_played_type_%d' % i] = NumRounds(player_type=i)
         #measures['type_%d_frequency' % i] = TypeFrequency(player_type=i)
         #measures["honesty_type_%d" % i] = GroupHonesty(player_type=i)
-        #measures["group_signal_%d" % i] = GroupSignal(player_type=i)
+        measures["group_signal_%d" % i] = GroupSignal(player_type=i)
         measures["median_signal_type_%d" % i] = GroupSignalMedian(player_type=i)
         measures["signal_iqr_type_%d" % i] = GroupSignalIQR(player_type=i)
         for j in signals:

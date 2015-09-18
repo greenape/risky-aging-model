@@ -284,9 +284,9 @@ def abstract_measures_women(signals=None, freq=1):
         measures["finished_now_%d" % i] = FinishedThisRound(player_type=i)
         measures["finished_overall_%d" % i] = FinishedAnyRound(player_type=i)
         measures["just_played_%d" %i] = PlayedJustNow(player_type=i)
-        #for j in range(12):
-        #    measures["type_%d_round_%d_ref" % (i, j + 1)] = CumulativeRefCount(player_type=i, appointment=j)
-        #    measures["type_%d_round_%d_honesty" % (i, j + 1)] = CumulativeHonestyCount(player_type=i, appointment=j)
+        for j in range(12):
+            measures["type_%d_round_%d_ref" % (i, j + 1)] = CumulativeRefCount(player_type=i, appointment=j)
+            measures["type_%d_round_%d_honesty" % (i, j + 1)] = CumulativeHonestyCount(player_type=i, appointment=j)
         #    for k in range(n_signals):
         #        measures["n_type_%d_sig_%d_round_%d" % (i, k, j + 1)] = AppointmentTypeSignalCount(player_type=i,
         #                                                                                           signal=k,
