@@ -98,6 +98,8 @@ def arguments():
         help="Take measures intended for the extended abstract.", default=False)
     parser.add_argument('--space-measures', dest='space', action="store_true",
         help="Take measures for risk, value, signal space.", default=False)
+    parser.add_argument('--player-types', dest='measure_sigs', type=int, nargs="*",
+        help="Types of players for measurement.", default=[0, 1])
     parser.add_argument('--log-level', dest='log_level', type=str, choices=['debug',
         'info', 'warning', 'error'], default='info', nargs="?")
     parser.add_argument('--log-file', dest='log_file', type=str, default='')
@@ -113,7 +115,7 @@ def arguments():
 
     numeric_level = getattr(logging, args.log_level.upper(), None)
     if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level: %s' % log_level)
+        raise ValueError('Invalid log level: %s' % args.log_level)
 
     logger.setLevel(numeric_level)
     if args.log_file != "":
@@ -136,11 +138,11 @@ def arguments():
     #    kwargs['measures_women'] = indiv_measures_women()
     if args.abstract:
         logger.debug("Using abstract measures.")
-        kwargs['measures_midwives'] = abstract_measures_mw(freq=args.measure_freq)
-        kwargs['measures_women'] = abstract_measures_women(freq=args.measure_freq)
+        kwargs['measures_midwives'] = abstract_measures_mw(freq=args.measure_freq, sigs=args.measure_sigs)
+        kwargs['measures_women'] = abstract_measures_women(freq=args.measure_freq, sigs=args.measure_sigs)
     else:
-        kwargs['measures_midwives'] = measures_midwives(freq=args.measure_freq)
-        kwargs['measures_women'] = measures_women(freq=args.measure_freq)
+        kwargs['measures_midwives'] = measures_midwives(freq=args.measure_freq, sigs=args.measure_sigs)
+        kwargs['measures_women'] = measures_women(freq=args.measure_freq, sigs=args.measure_sigs)
     if args.space:
         logger.debug("Using space measures.")
         kwargs['measures_midwives'] = space_measures_mw(base=kwargs['measures_midwives'])
