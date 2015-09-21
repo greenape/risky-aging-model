@@ -64,7 +64,7 @@ class Agent(object):
         memo[id(self)] = result
         for k, v in self.__dict__.items():
             setattr(result, k, deepcopy(v, memo))
-        result.ident = uuid.uuid4().int
+        result.ident = uuid4().int
         return result
 
     @classmethod
