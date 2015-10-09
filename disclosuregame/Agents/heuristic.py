@@ -10,7 +10,6 @@ def weighted_random_choice(choices, weights, random=Random()):
     population = [val for val, cnt in zip(choices, weights) for i in range(int(cnt))]
     return random.choice(population)
 
-
 class LexicographicSignaller(BayesianSignaller):
     """
     A signaller that uses the Lexicographic heuristic to make decisions.
@@ -90,7 +89,7 @@ class LexicographicSignaller(BayesianSignaller):
         Return the nth most frequently experienced outcome from
         this signal.
         """
-        sorted_dict = sorted(self.payoff_count[signal].items(), key=operator.itemgetter(1), reverse=True)
+        sorted_dict = sorted(self.payoff_count[signal].items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
         return sorted_dict[min(n, len(sorted_dict) - 1)][0]
 
     def update_counts(self, response, midwife, payoff, midwife_type=None, weight=1.):
@@ -211,7 +210,7 @@ class LexicographicResponder(BayesianResponder):
         Return the nth most frequently experienced outcome from
         this response to the signal.
         """
-        sorted_dict = sorted(self.payoff_count[signal][response].items(), key=operator.itemgetter(1), reverse=True)
+        sorted_dict = sorted(self.payoff_count[signal][response].items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
         return sorted_dict[min(n, len(sorted_dict) - 1)][0]
 
     def respond(self, signal, opponent=None):

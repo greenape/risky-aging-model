@@ -88,6 +88,12 @@ class Agent(object):
             initor(agent, **init_args)
             yield agent
 
+    def compare_with_ties(self, a, b, random=None):
+        if random is None:
+            random = self.random
+        diff = cmp(a, b)
+        return diff if diff else random.choice([-1, 1])
+
 
 class Signaller(Agent):
 
