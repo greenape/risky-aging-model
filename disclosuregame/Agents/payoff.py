@@ -13,7 +13,7 @@ class BayesianPayoffSignaller(LexicographicSignaller):
     # @profile
     def update_beliefs(self):
         # super(BayesianPayoffSignaller, self).update_beliefs(response, midwife, payoff, midwife_type, weight)
-        for signal, payoffs in self.payoff_belief.iteritems():
+        for signal, payoffs in self.payoff_count.iteritems():
             n = float(sum(self.payoff_count[signal].values()))
             for payoff, belief in payoffs.iteritems():
                 n_k = self.payoff_count[signal][payoff]
@@ -57,7 +57,7 @@ class BayesianPayoffResponder(LexicographicResponder):
     def update_beliefs(self, payoff, signaller, signal, signaller_type=None, weight=1.):
         super(BayesianPayoffResponder, self).update_beliefs(
             payoff, signaller, signal, signaller_type, weight)
-        for signal, responses in self.payoff_belief.iteritems():
+        for signal, responses in self.payoff_count.iteritems():
             for response, payoffs in responses.iteritems():
                 n = float(sum(self.payoff_count[signal][response].values()))
                 for payoff, belief in payoffs.iteritems():
