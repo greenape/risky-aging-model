@@ -113,8 +113,29 @@ def arguments():
     parser.add_argument('--procs', dest='procs', type=int,
         help="Number of cpus to utilize.",
         default=multiprocessing.cpu_count())
+    parser.add_argument('--save-state-file', dest='state_file', type=str,
+        help="File to record state in if the simulation needs to be resumed.",
+        default=None)
+
+    parser.add_argument('--load-state-file', dest='load_state_file', type=str,
+        help="File to reload state from, will discard all other options except --save-state-file.", default=None)
 
     args, extras = parser.parse_known_args()
+
+    savestate = args.state_file
+
+    it = set()
+
+    if args.load_state_file:
+        with open(args.load_state_file, "rb") as state:
+            args, it = cPickle.load(state)
+
+    if savestate:
+        args.state_file = savestate
+
+    if args.state_file:
+        with open(args.state_file, "wb") as state:
+            cPickle.dump((args, it), state)
 
     numeric_level = getattr(logging, args.log_level.upper(), None)
     if not isinstance(numeric_level, int):
@@ -166,7 +187,7 @@ def arguments():
         except cPickle.UnpicklingError:
             logger.info("Not a valid pickle file.")
             raise
-    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs, args.procs
+    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs, args.procs, args.state_file, it
 
 
 def make_players(constructor, num=100, weights=None, nested=False, signaller=True, player_args=None, random=Random()):
@@ -352,15 +373,18 @@ def make_work(queue, kwargs, kill_queue):
         logger.info("Ending make work process.")
 
 
-def workit(kwargs):
+def workit(kwargs, skiplist=None):
     logger.info("Starting make work process.")
     i = 0
+    if skiplist is None:
+        skiplist = set()
     while len(kwargs) > 0:
         exps = decision_fn_compare(**kwargs.pop())
         for exp in exps:
             logger.info("Enqueing experiment %d" %  i)
             i += 1
-            yield (i, exp)
+            if i not in skiplist:
+                yield (i, exp)
     logger.info("Ending make work process.")
 
 
@@ -374,7 +398,7 @@ def doplay(config):
     return res
 
 
-def writer(results, db_name):
+def writer(results, db_name, state_file=None):
     for number, result in results:
         logger.info("Writing game %d." % number)
         women_res, mw_res = result
@@ -384,13 +408,29 @@ def writer(results, db_name):
         del mw_res
         gc.collect()
         logger.info("Wrote game %d." % number)
+        if state_file:
+            try:
+                with open(state_file, "rb") as state:
+                    savestate, skiplist = cPickle.load(state)
+                    skiplist.add(number)
+                    savestate = (savestate, skiplist)
+                with open(state_file, "wb") as state:
+                    cPickle.dump(savestate, state)
+            except Exception as e:
+                logger.error("Failed to save state!")
+                raise(e)
 
 class KeyboardInterruptError(Exception): pass
 
-def run(kwargs, file_name, procs):
+def run(kwargs, file_name, procs, state_file=None, start_point=None):
+    if start_point is None:
+        start_point = set()
     pool = multiprocessing.Pool(procs)
     try:
-        writer(pool.imap_unordered(doplay, workit(kwargs)), file_name)
+        jobqueue = workit(kwargs, start_point)
+        i = 0
+        logger.info("Wound forward by {} runs".format(i))
+        writer(pool.imap_unordered(doplay, jobqueue), file_name, state_file=state_file)
     except KeyboardInterruptError:
         pool.terminate()
         sys.exit(1)
@@ -480,7 +520,7 @@ def write(queue, db_name, kill_queue):
     logger.info("Results queue empty: %s" % str(queue.empty()))
 
 
-def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1):
+def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1, state_file=None, start_point=0):
     if not agents:
         agents = [(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)]
     if not game_fns:
@@ -504,7 +544,7 @@ def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1):
                 arg['responder_fn'] = pair[1]
                 run_params.append(arg)
     #kw_experiment(run_params, file_name, procs)
-    run(run_params, file_name, procs)
+    run(run_params, file_name, procs, state_file=state_file, start_point=start_point)
 
 def kw_experiment(kwargs, file_name, procs):
     """
@@ -567,7 +607,7 @@ def kw_experiment(kwargs, file_name, procs):
 
 
 def main():
-    games, players, kwargs, runs, test_flag, file_name, args_path, procs = arguments()
+    games, players, kwargs, runs, test_flag, file_name, args_path, procs, state_file, it = arguments()
     logger.info("Version %s" % version)
     logger.info("Running %d game type%s, with %d player pair%s, and %d run%s of each." % (
         len(games), "s"[len(games)==1:], len(players), "s"[len(players)==1:], runs, "s"[runs==1:]))
@@ -578,7 +618,7 @@ def main():
         logger.info("This is a test of the emergency broadcast system. This is only a test.")
     else:
         start = time.time()
-        experiment(file_name, games, players, kwargs=kwargs, procs=procs)
+        experiment(file_name, games, players, kwargs=kwargs, procs=procs, state_file=state_file, start_point=it)
         print "Ran in %f" % (time.time() - start)
 
 if __name__ == "__main__":
