@@ -432,7 +432,6 @@ def run(kwargs, file_name, procs, state_file=None, start_point=None):
     pool = multiprocessing.Pool(procs)
     try:
         jobqueue = workit(kwargs, start_point)
-        logger.info("Wound forward by {} runs".format(i))
         writer(pool.imap_unordered(doplay, jobqueue), file_name, state_file=state_file)
     except KeyboardInterruptError:
         pool.terminate()
