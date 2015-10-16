@@ -126,9 +126,13 @@ def arguments():
 
     it = set()
 
-    if args.load_state_file:
-        with open(args.load_state_file, "rb") as state:
-            args, it = cPickle.load(state)
+    try:
+        if args.load_state_file:
+            with open(args.load_state_file, "rb") as state:
+                args, it = cPickle.load(state)
+    except IOError as e:
+        logger.debug("Failed to load state file.")
+        logger.debug(e)
 
     if savestate:
         args.state_file = savestate
@@ -381,8 +385,8 @@ def workit(kwargs, skiplist=None):
     while len(kwargs) > 0:
         exps = decision_fn_compare(**kwargs.pop())
         for exp in exps:
-            logger.info("Enqueing experiment %d" %  i)
             i += 1
+            logger.info("Enqueing experiment %d" %  i)
             if i not in skiplist:
                 yield (i, exp)
     logger.info("Ending make work process.")
@@ -428,7 +432,6 @@ def run(kwargs, file_name, procs, state_file=None, start_point=None):
     pool = multiprocessing.Pool(procs)
     try:
         jobqueue = workit(kwargs, start_point)
-        i = 0
         logger.info("Wound forward by {} runs".format(i))
         writer(pool.imap_unordered(doplay, jobqueue), file_name, state_file=state_file)
     except KeyboardInterruptError:
