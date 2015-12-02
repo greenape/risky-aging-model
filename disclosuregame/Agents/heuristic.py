@@ -89,7 +89,8 @@ class LexicographicSignaller(BayesianSignaller):
         Return a generator over outcomes experienced, ordered by how often they've been seen.
         Sticks on the least frequent rather than ending.
         """
-        sorted_dict = sorted(self.payoff_count[signal].items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
+        shuffled_pairs = shuffled(self.payoff_count[signal].items(), self.random)
+        sorted_dict = sorted(shuffled_pairs, key=operator.itemgetter(1), reverse=True)
         n = 0
         while True:
             yield sorted_dict[min(n, len(sorted_dict) - 1)][0]
@@ -139,7 +140,7 @@ class LexicographicSignaller(BayesianSignaller):
                 mappings[signal] = payoff
             n += 1
             # Choose the highest unless there's a tie
-            sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
+            sorted_mappings = sorted(shuffled(mappings.items(), self.random), key=operator.itemgetter(1), reverse=True)
             # Is there a best option?
             best = sorted_mappings[0]
             try:
@@ -229,7 +230,8 @@ class LexicographicResponder(BayesianResponder):
         Return a generator over outcomes experienced, ordered by how often they've been seen.
         Sticks on the least frequent rather than ending.
         """
-        sorted_dict = sorted(self.payoff_count[signal][response].items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
+        shuffled_pairs = shuffled(self.payoff_count[signal][response].items())
+        sorted_dict = sorted(shuffled_pairs, key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
         n = 0
         while True:
             yield sorted_dict[min(n, len(sorted_dict) - 1)][0]
@@ -256,13 +258,13 @@ class LexicographicResponder(BayesianResponder):
         n = 0
         respits = {}
         for response in self.responses:
-                respit[response] = self.freq_it(signal, response)
+                respits[response] = self.freq_it(signal, response)
         while n < self.depth:
             mappings = {}
             for response in self.responses:
-                payoff = self.frequent(signal, response, n, opponent)
+                payoff = respits[response].next()
                 mappings[response] = payoff
-            sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
+            sorted_mappings = sorted(shuffled(mappings.items(), self.random), key=operator.itemgetter(1), reverse=True)
             # Is there a best option?
             best = sorted_mappings[0][0]
             try:
