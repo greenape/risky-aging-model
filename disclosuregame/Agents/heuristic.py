@@ -84,6 +84,17 @@ class LexicographicSignaller(BayesianSignaller):
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
                                                          response_weights)
 
+    def freq_it(self, signal):
+        """
+        Return a generator over outcomes experienced, ordered by how often they've been seen.
+        Sticks on the least frequent rather than ending.
+        """
+        sorted_dict = sorted(self.payoff_count[signal].items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
+        n = 0
+        while True:
+            yield sorted_dict[min(n, len(sorted_dict) - 1)][0]
+            n += 1
+
     def frequent(self, signal, n):
         """
         Return the nth most frequently experienced outcome from
@@ -105,6 +116,8 @@ class LexicographicSignaller(BayesianSignaller):
         if midwife is not None:
             # Log true type for bookkeeping
             self.type_log.append(midwife.player_type)
+        for signal, payoffs in self.payoff_count.items():
+            self.depth = max(len(payoffs), self.depth)
 
     # @profile
     def update_beliefs(self):
@@ -115,15 +128,18 @@ class LexicographicSignaller(BayesianSignaller):
         if signals is None:
             signals = self.signals
         n = 0
+        sigits = {}
+        for signal in signals:
+                sigits[signal] = self.freq_it(signal)
         while n < self.depth:
             mappings = {}
             # N most frequent outcome of each signal
             for signal in signals:
-                payoff = self.frequent(signal, n)
+                payoff = sigits[signal].next()
                 mappings[signal] = payoff
             n += 1
             # Choose the highest unless there's a tie
-            sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True)
+            sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
             # Is there a best option?
             best = sorted_mappings[0]
             try:
@@ -204,6 +220,20 @@ class LexicographicResponder(BayesianResponder):
             # print self.payoff_count, signal, payoff, self.response_log[len(self.response_log) - 1], weight
             self.payoff_count[signal][self.response_log[len(self.response_log) - 1]][payoff] += weight
             # super(LexicographicResponder, self).update_beliefs(payoff, signaller, signal, signaller_type)
+            for signal, responses in self.payoff_count.items():
+                for response, payoff in responses.items():
+                    self.depth = max(len(payoff), self.depth)
+
+    def freq_it(self, signal, response):
+        """
+        Return a generator over outcomes experienced, ordered by how often they've been seen.
+        Sticks on the least frequent rather than ending.
+        """
+        sorted_dict = sorted(self.payoff_count[signal][response].items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
+        n = 0
+        while True:
+            yield sorted_dict[min(n, len(sorted_dict) - 1)][0]
+            n += 1
 
     def frequent(self, signal, response, n, signaller=None):
         """
@@ -224,12 +254,15 @@ class LexicographicResponder(BayesianResponder):
         self.signal_log.append(signal)
         self.signal_matches[signal] += 1.
         n = 0
+        respits = {}
+        for response in self.responses:
+                respit[response] = self.freq_it(signal, response)
         while n < self.depth:
             mappings = {}
             for response in self.responses:
                 payoff = self.frequent(signal, response, n, opponent)
                 mappings[response] = payoff
-            sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True)
+            sorted_mappings = sorted(mappings.items(), key=operator.itemgetter(1), reverse=True, cmp=self.compare_with_ties)
             # Is there a best option?
             best = sorted_mappings[0][0]
             try:
