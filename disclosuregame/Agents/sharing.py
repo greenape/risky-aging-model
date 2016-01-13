@@ -48,7 +48,7 @@ class SharingResponder(RecognitionResponder):
 
 class SharingSignaller(BayesianSignaller):
     """
-    Class of signaller that maintains a meory of its experiences which can be
+    Class of signaller that maintains a memory of its experiences which can be
     shared with others, and can use the memories of others to update beliefs.
     """
 

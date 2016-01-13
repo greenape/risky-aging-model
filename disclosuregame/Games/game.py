@@ -201,12 +201,18 @@ class SimpleGame(Game):
             LOG.debug("Player %d finished after %d rounds." % (hash(woman), woman.rounds))
         return True
 
+    def payoffs(self, signaller, receiver):
+        sig = self.woman_social_payoff[receiver.player_type][signaller.signal_log[-1]]
+        sig += self.woman_baby_payoff[signaller.player_type][receiver.resonse_log[-1]]
+        rec = self.midwife_payoff[signaller.player_type][receiver.resonse_log[-1]]
+        return sig, rec
+
     def play_round(self, signaller, receiver):
         """ Play a round of this game between the
         two players.
         """
         #print "Playing between", signaller, "and", receiver
-        signal = signaller.do_signal()
+        signal = signaller.do_signal(opponent=receiver)
         #print "Signal is %d" % signal
         #print "Signaller played %d rounds" % signaller.rounds
         act = receiver.respond(signal, opponent=signaller)

@@ -20,7 +20,7 @@ class RecognitionGame(SimpleGame):
                 two players.
                 """
                 signaller.just_played = True
-                signal = signaller.do_signal()
+                signal = signaller.do_signal(opponent=receiver)
                 act = receiver.respond(signal, opponent=signaller)
                 signal_payoff = self.woman_baby_payoff[signaller.player_type][act] + self.woman_social_payoff[signal][receiver.player_type]
                 receive_payoff = self.midwife_payoff[signaller.player_type][act]

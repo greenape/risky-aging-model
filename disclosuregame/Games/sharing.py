@@ -101,6 +101,7 @@ class CarryingInformationGame(CarryingReferralGame):
         LOG.debug("Counted %d finished of %d." % (finished_count, len(players + women)))
         women_res = self.measures_women.dump(women + players, self.current_round, self, results=women_res)
         mw_res = self.measures_midwives.dump(midwives, self.current_round, self, results=mw_res)
+        LOG.debug("Took measurements.")
         return women_res, mw_res, players
         
 

@@ -83,7 +83,7 @@ class Measures(object):
                 results.add_results(Result(self.measures.keys(), game.parameters, [line]))
             except Exception as e:
                 LOG.debug(e)
-                raise
+                raise e
         return results
 
 # Measures

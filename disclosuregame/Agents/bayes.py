@@ -368,7 +368,7 @@ class BayesianSignaller(Signaller):
                 best = (signal, signal_risk)
         return best
 
-    def do_signal(self):
+    def do_signal(self, opponent=None):
        #print "Type %d woman evaluating signals." % self.player_type
         best = self.signal_search(shuffled(self.signals, self.random))
         self.rounds += 1

@@ -65,7 +65,7 @@ def arguments():
         'ProspectTheorySignaller', 'LexicographicSignaller', 'BayesianPayoffSignaller',
         'PayoffProspectSignaller', 'SharingBayesianPayoffSignaller', 'SharingLexicographicSignaller',
         'SharingPayoffProspectSignaller', 'SharingSignaller', 'SharingProspectSignaller',
-        'RWSignaller'],
+        'SharingRWSignaller'],
         dest="signallers")
     parser.add_argument('-r','--responders', type=str, nargs='*',
         help='A responder type.', default=["SharingResponder"],
@@ -75,7 +75,7 @@ def arguments():
         'PayoffProspectResponder', 'SharingPayoffProspectResponder',
         'RecognitionResponder', 'RecognitionBayesianPayoffResponder', 'RecognitionLexicographicResponder',
         'PayoffProspectResponder', 'RecognitionPayoffProspectResponder',
-        'SharingResponder', 'SharingProspectResponder', 'RWResponder'], dest="responders")
+        'SharingResponder', 'SharingProspectResponder', 'SharingRWResponder'], dest="responders")
     parser.add_argument('-R','--runs', dest='runs', type=int,
         help="Number of runs for each combination of players and games.",
         default=100)
@@ -116,6 +116,8 @@ def arguments():
     parser.add_argument('--save-state-file', dest='state_file', type=str,
         help="File to record state in if the simulation needs to be resumed.",
         default=None)
+    parser.add_argument('--dump-game-file', dest='game_dump', type=str,
+        help='If set, dumps games before playing.', default=None)
 
     parser.add_argument('--load-state-file', dest='load_state_file', type=str,
         help="File to reload state from, will discard all other options except --save-state-file.", default=None)
@@ -191,7 +193,7 @@ def arguments():
         except cPickle.UnpicklingError:
             logger.info("Not a valid pickle file.")
             raise
-    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs, args.procs, args.state_file, it
+    return games, players, kwargs, args.runs, args.test_only, file_name, args.kwargs, args.procs, args.state_file, it, args.game_dump
 
 
 def make_players(constructor, num=100, weights=None, nested=False, signaller=True, player_args=None, random=Random()):
@@ -377,7 +379,7 @@ def make_work(queue, kwargs, kill_queue):
         logger.info("Ending make work process.")
 
 
-def workit(kwargs, skiplist=None):
+def workit(kwargs, skiplist=None, game_dump=None):
     logger.info("Starting make work process.")
     i = 0
     if skiplist is None:
@@ -386,8 +388,13 @@ def workit(kwargs, skiplist=None):
         exps = decision_fn_compare(**kwargs.pop())
         for exp in exps:
             i += 1
-            logger.info("Enqueing experiment %d" %  i)
-            if i not in skiplist:
+            logger.info("Enqueing experiment {}".format(i))
+            if i in skiplist:
+                logger.info("Skipping game {}".format(i))
+            else:
+                if game_dump:
+                    with open("{}{}".format(game_dump, i), "wb") as state:
+                        cPickle.dump(exp, state)
                 yield (i, exp)
     logger.info("Ending make work process.")
 
@@ -426,103 +433,27 @@ def writer(results, db_name, state_file=None):
 
 class KeyboardInterruptError(Exception): pass
 
-def run(kwargs, file_name, procs, state_file=None, start_point=None):
+def run(kwargs, file_name, procs, sims, state_file=None, start_point=None, game_dump=None):
     if start_point is None:
         start_point = set()
     pool = multiprocessing.Pool(procs)
+    chunksize, extra = divmod(sims, procs * 4)
+    if extra:
+        chunksize += 1
+    chunksize = 2
+    logger.info("Using a chunksize of {}".format(chunksize))
     try:
-        jobqueue = workit(kwargs, start_point)
-        writer(pool.imap_unordered(doplay, jobqueue), file_name, state_file=state_file)
+        jobqueue = workit(kwargs, start_point, game_dump=game_dump)
+        writer(pool.imap_unordered(doplay, jobqueue, chunksize=chunksize), file_name, state_file=state_file)
     except KeyboardInterruptError:
         pool.terminate()
         sys.exit(1)
 
-def do_work(queuein, queueout, kill_queue):
-    """
-    Consume games, play them, then put their results in the output queue.
-    """
-    queuein.cancel_join_thread()
-    
-    logger.info("Starting do work process.")
-    while True:
-        try:
-            assert kill_queue.empty()
-            number, config = queuein.get(timeout=10) #Shouldn't ever need to wait
-            logger.info("Running game %d." % number)
-            res = (number, play_game(config))
-            queueout.put(res, timeout=120) #Wait at most 2 mins for writes
-            del config
-        except MemoryError as e:
-            logger.error(e)
-            queuein.cancel_join_thread()
-            try:
-                logger.info("Dropping poison.")
-                kill_queue.put_nowait(None)
-            except Full:
-                pass
-            raise
-        except AssertionError as e:
-            logger.error(e)
-            try:
-                logger.info("Dropping poison.")
-                kill_queue.put_nowait(None)
-            except Full:
-                pass
-            raise
-        except Empty:
-            logger.info("No more work.")
-            break
-        except Exception as e:
-            logger.error(e)
-            raise
-        gc.collect()
-    logger.info("Ending do work process.")
-
-def write(queue, db_name, kill_queue):
-    logger.info("Starting write process.")
-    while True:
-        try:
-            assert kill_queue.empty()
-            number, res = queue.get_nowait()
-            #print res
-            women_res, mw_res = res
-            logger.info("Writing game %d." % number)
-            try:
-                logger.info("Queue length is %d" % queue.qsize())
-            except NotImplementedError:
-                #Don't bother if not implemented
-                pass
-            women_res.write_db("%s_women" % db_name)
-            mw_res.write_db("%s_mw" % db_name)
-            del women_res
-            del mw_res
-            gc.collect()
-            logger.info("Wrote game %d." % number)
-        except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
-            logger.error("SQLite failure.")
-            logger.error(e)
-            try:
-                logger.info("Dropping poison.")
-                kill_queue.put_nowait(None)
-            except Full:
-                pass
-            raise
-        except TypeError as e:
-            raise e
-        except Empty:
-            pass
-        except AssertionError as e:
-            logger.error(e)
-            break
-        except Exception as e:
-            logger.error(e)
-            kill_queue.put_nowait(None)
-            raise
-    logger.info("Ending write process.")
-    logger.info("Results queue empty: %s" % str(queue.empty()))
 
 
-def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1, state_file=None, start_point=0):
+
+def experiment(file_name, sims, game_fns=None, agents=None, kwargs=None, procs=1, state_file=None, start_point=0,
+    game_dump=None):
     if not agents:
         agents = [(ProspectTheorySignaller, ProspectTheoryResponder), (BayesianSignaller, BayesianResponder)]
     if not game_fns:
@@ -546,81 +477,27 @@ def experiment(file_name, game_fns=None, agents=None, kwargs=None, procs=1, stat
                 arg['responder_fn'] = pair[1]
                 run_params.append(arg)
     #kw_experiment(run_params, file_name, procs)
-    run(run_params, file_name, procs, state_file=state_file, start_point=start_point)
+    logger.info("{} game configurations to run.".format(len(run_params)))
+    run(run_params, file_name, procs, sims, state_file=state_file, start_point=start_point, game_dump=game_dump)
 
-def kw_experiment(kwargs, file_name, procs):
-    """
-    Run a bunch of experiments in parallel. Experiments are
-    defined by a list of keyword argument dictionaries.
-    """
-    host = platform.uname()[1]
-    num_consumers = procs
-    #Make tasks
-    jobs = multiprocessing.Queue(num_consumers)
-    kill_queue = multiprocessing.Queue(1)
-    results = multiprocessing.Queue()
-    producer = multiprocessing.Process(target = make_work, name="%s: Producer" % host, args = (jobs, kwargs, kill_queue))
-    producer.start()
-    calcproc = [multiprocessing.Process(target = do_work, name="%s: Simulation process %d" % (host, i),
-                                        args = (jobs, results, kill_queue)) for i in range(num_consumers)]
-    writproc = multiprocessing.Process(target = write, name="%s Writer" % host, args = (results, file_name, kill_queue))
-    writproc.start()
 
-    for p in calcproc:
-        p.start()
-    while any(map(lambda p: p.is_alive(), calcproc)):
-            try:
-                assert kill_queue.empty()
-            except (KeyboardInterrupt, AssertionError, MemoryError):
-                for proc in calcproc:
-                    logger.info("Terminating %s" % str(proc))
-                    proc.terminate()
-                logger.info("Poison pill")
-                try:
-                    kill_queue.put_nowait(None)
-                except Full:
-                    logger.info("Poison already in place.")
-                break
-    try:
-        kill_queue.put_nowait(None)
-    except Full:
-        logger.info("Poison already in place.")
-    logger.info("Closing results.")
-    try:
-        results.put(None, block=False)
-    except Full:
-        pass
-    logger.info("Flushing jobs.")
-    try:
-        while not jobs.empty():
-            logger.info("Flushing a job.")
-            jobs.get_nowait()
-            logger.info("Flushed.")
-    except Empty:
-        logger.info("Jobs flushed.")
-    if writproc.is_alive():
-        logger.info("Joining writer.")
-        writproc.join(60)
-    if producer.is_alive():
-        logger.info("Joining producer.")
-        producer.join(60)
-        producer.terminate()
-    logger.info("Done.")
 
 
 def main():
-    games, players, kwargs, runs, test_flag, file_name, args_path, procs, state_file, it = arguments()
+    games, players, kwargs, runs, test_flag, file_name, args_path, procs, state_file, it, game_dump = arguments()
     logger.info("Version %s" % version)
     logger.info("Running %d game type%s, with %d player pair%s, and %d run%s of each." % (
         len(games), "s"[len(games)==1:], len(players), "s"[len(players)==1:], runs, "s"[runs==1:]))
-    logger.info("Total simulations runs is %d" % (len(games) * len(players) * runs * len(kwargs)))
+    runs = len(games) * len(players) * runs * len(kwargs)
+    logger.info("Total simulations runs is {}".format(runs))
     logger.info("File is %s" % file_name)
     logger.info("Using %d processors." % procs)
     if test_flag:
         logger.info("This is a test of the emergency broadcast system. This is only a test.")
     else:
         start = time.time()
-        experiment(file_name, games, players, kwargs=kwargs, procs=procs, state_file=state_file, start_point=it)
+        experiment(file_name, runs, games, players, kwargs=kwargs, procs=procs, state_file=state_file, start_point=it,
+                   game_dump=game_dump)
         print "Ran in %f" % (time.time() - start)
 
 if __name__ == "__main__":
