@@ -10,6 +10,11 @@ class BayesianPayoffSignaller(LexicographicSignaller):
     """
     A class of agent that reasons on a signals -> payoffs basis.
     """
+
+    def set_uninformative_prior(self):
+        super(BayesianPayoffSignaller, self).set_uninformative_prior()
+        self.update_beliefs()
+
     # @profile
     def update_beliefs(self):
         # super(BayesianPayoffSignaller, self).update_beliefs(response, midwife, payoff, midwife_type, weight)
@@ -52,6 +57,10 @@ class BayesianPayoffResponder(LexicographicResponder):
 
     def __str__(self):
         return "bayes_payoff"
+
+    def set_uninformative_prior(self):
+        super(BayesianPayoffResponder, self).set_uninformative_prior()
+        self.update_beliefs(None, None, None)
 
     # @profile
     def update_beliefs(self, payoff, signaller, signal, signaller_type=None, weight=1.):

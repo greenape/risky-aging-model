@@ -79,10 +79,14 @@ class Measures(object):
             return results
         if rounds >= self.dump_after and (rounds % self.dump_every == 0 or rounds == (game.rounds - 1)):
             try:
-                line = map(lambda x: x.measure(rounds, women, game), self.measures.values())
+                #line = map(lambda x: x.measure(rounds, women, game), self.measures.values())
+                line = []
+                for n, m in self.measures.iteritems():
+                    line.append(m.measure(rounds, women, game))
                 results.add_results(Result(self.measures.keys(), game.parameters, [line]))
             except Exception as e:
-                LOG.debug(e)
+                LOG.error(e)
+                LOG.error(n)
                 raise e
         return results
 
@@ -196,7 +200,7 @@ class TypeSignalBreakdown(Measure):
         if num_women == 0:
             return 0.
         return signalled / num_women
-    
+
 
 class TypeReferralBreakdown(Measure):
     """
@@ -235,7 +239,7 @@ class PayoffType(Measure):
         except AttributeError:
             result = sum(map(lambda x: x.payoff_log[len(x.payoff_log)], women)) / float(len(women))
         return result
-    
+
 
 class SignalChange(Measure):
     """
@@ -251,7 +255,7 @@ class SignalChange(Measure):
             return 0.
         change = map(lambda x: x.get_signal_log()[roundnum - x.started] - x.get_signal_log()[roundnum - 1 - x.started], women)
         return sum(change) / float(num_women)
-    
+
 
 class SignalRisk(Measure):
     """
@@ -275,7 +279,7 @@ class TypeFrequency(Measure):
     Return the frequency of this type in the population at this round.
     """
     def measure(self, roundnum, women, game):
-        
+
         types = map(lambda x: x.player_type, women)
         frequencies = collections.Counter(types)
         total = sum(frequencies.values())

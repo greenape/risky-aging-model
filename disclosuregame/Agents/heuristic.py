@@ -51,6 +51,15 @@ class LexicographicSignaller(BayesianSignaller):
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
                                                          response_weights)
 
+    def set_uninformative_prior(self):
+        """
+        Set uninformative prior (i.e. everything to 1).
+        :return:
+        """
+        for signal in self.signals:
+                for payoff, counts in self.payoff_count[signal].iteritems():
+                    self.payoff_count[signal][payoff] = 1
+
     def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None, num=10):
         """
         An alternative way of generating priors by using the provided weights
@@ -183,6 +192,12 @@ class LexicographicResponder(BayesianResponder):
             for response, payoff in responses.items():
                 self.depth = max(len(payoff), self.depth)
         super(LexicographicResponder, self).init_payoffs(payoffs, type_weights)
+
+    def set_uninformative_prior(self):
+        for signal, responses in self.payoff_count.items():
+            for response, payoffs in responses.iteritems():
+                for payoff in payoffs:
+                    self.payoff_count[signal][response][payoff] = 1
 
     def init_payoffs_(self, payoffs, type_weights=None, num=10):
         if not type_weights:

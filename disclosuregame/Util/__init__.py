@@ -23,6 +23,12 @@ def random_expectations(depth=0, breadth=3, low=1, high=10, random=Random()):
     return result
 
 
+def rescale(new_low, new_high, low, diff, x):
+    scaled = (new_high-new_low)*(x - low)
+    scaled /= diff
+    return scaled + new_low
+
+
 def weighted_random_choice(choices, weights, random=Random()):
     population = [val for val, cnt in zip(choices, weights) for i in range(int(cnt))]
     return random.choice(population)

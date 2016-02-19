@@ -105,6 +105,8 @@ def arguments():
         help="Types of players for measurement.", default=[0, 1])
     parser.add_argument('--log-level', dest='log_level', type=str, choices=['debug',
         'info', 'warning', 'error'], default='info', nargs="?")
+    parser.add_argument('--file-log-level', dest='file_log_level', type=str, choices=['debug',
+        'info', 'warning', 'error'], default='info', nargs="?")
     parser.add_argument('--log-file', dest='log_file', type=str, default='')
     parser.add_argument('--tag', dest='tag', type=str, default='')
     parser.add_argument('--measure-every', dest='measure_freq', type=int,
@@ -147,10 +149,18 @@ def arguments():
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.log_level)
 
-    logger.setLevel(numeric_level)
+    file_numeric_level = getattr(logging, args.file_log_level.upper(), None)
+    if not isinstance(file_numeric_level, int):
+        raise ValueError('Invalid log level: %s' % args.file_log_level)
+
+    logging.basicConfig(level=min(numeric_level, file_numeric_level))
+    logger.setLevel(min(numeric_level, file_numeric_level))
+    stream_handler = logger.handlers[0]
+    stream_handler.setLevel(numeric_level)
+    stream_handler.setFormatter(formatter)
     if args.log_file != "":
         fh = logging.FileHandler(args.log_file)
-        fh.setLevel(numeric_level)
+        fh.setLevel(file_numeric_level)
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
@@ -308,6 +318,7 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
         # Parity across different conditions but random between runs.
         game.seed = seeds[i]
         game.random = Random(seeds[i])
+        logger.debug("Set seed.")
         try:
           game.player_random = Random(game.random.random())
         except AttributeError:
@@ -318,16 +329,23 @@ def decision_fn_compare(signaller_fn=BayesianSignaller, responder_fn=BayesianRes
 
         #Make players and initialise beliefs
 
-        women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
-        women = [women_generator.next() for x in range(num_women)]
+        try:
+            women_generator = signaller_fn.generator(random=game.player_random, type_distribution=women_weights, agent_args=signaller_args, initor=signaller_initor,init_args=signaller_init_args)
+            women = [women_generator.next() for x in range(num_women)]
+        except Exception as e:
+            logger.error("Failed to generate signallers.")
+            logger.error(e)
+            raise e
         if women_modifier is not None:
             women_modifier(women)
-        #logger.info("Set priors.")
+        logger.debug("Made signallers.")
         #print responder_args
         mw_generator = responder_fn.generator(random=game.player_random, type_distribution=mw_weights, agent_args=responder_args, initor=responder_initor,init_args=responder_init_args)
         mw = [mw_generator.next() for x in range(num_midwives)]
+        logger.debug("Made responders.")
         #logger.info("Set priors.")
         #player_pairs.append((deepcopy(game), women, mw))
+        logger.debug("Yielding game config.")
         yield (deepcopy(game), women, mw)
         i += 1
 
@@ -410,6 +428,7 @@ def doplay(config):
 
 
 def writer(results, db_name, state_file=None):
+    logger.debug("Started write process.")
     for number, result in results:
         logger.info("Writing game %d." % number)
         women_res, mw_res = result
@@ -444,6 +463,7 @@ def run(kwargs, file_name, procs, sims, state_file=None, start_point=None, game_
     logger.info("Using a chunksize of {}".format(chunksize))
     try:
         jobqueue = workit(kwargs, start_point, game_dump=game_dump)
+        logger.debug("Work queue set up.")
         writer(pool.imap_unordered(doplay, jobqueue, chunksize=chunksize), file_name, state_file=state_file)
     except KeyboardInterruptError:
         pool.terminate()

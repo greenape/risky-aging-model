@@ -324,15 +324,16 @@ class CaseloadSharingGame(CarryingInformationGame):
             try:
                 self.share_midwives(midwives)
             except Exception as e:
-                LOG.debug("Sharing to midwives failed.")
-                LOG.debug(e)
-
+                LOG.error("Sharing to midwives failed.")
+                LOG.error(e)
+                raise e
             #Women
             try:
                 self.share_women(reduce(lambda x, y: x + y, caseloads.values()), women_memories)
             except Exception as e:
-                LOG.debug("Sharing to women failed.")
-                LOG.debug(e)
+                LOG.error("Sharing to women failed.")
+                LOG.error(e)
+                raise e
             LOG.debug("Played %d rounds." % i)
 
             #if scoop_on:

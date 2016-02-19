@@ -265,6 +265,19 @@ class Signaller(Agent):
             signal = self.signal_log[len(self.signal_log) - 1]
             self.response_signal_matches[signal][response] += weight
 
+    def set_uninformative_prior(self):
+        for player_type, estimate in self.type_distribution.iteritems():
+            self.type_weights[player_type] = 1.
+
+        # Update signal-response beliefs
+
+        for signal, responses in self.response_signal_matches.iteritems():
+
+            for response, response_count in responses.iteritems():
+                responses[response] = 1.
+        self.update_beliefs()
+
+
    #@profile
     def update_beliefs(self):
         """
@@ -408,6 +421,12 @@ class Responder(Agent):
             self.type_weights[signal][weighted_random_choice(self.signals, type_weights[signal])] += 1
         #Only interested in payoffs for own type
         self.payoffs = payoffs
+        self.update_beliefs(None, None, None)
+
+    def set_uninformative_prior(self):
+        for sig in self.signals:
+            for ptype in self.signals:
+                self.type_weights[sig][ptype] = 1
         self.update_beliefs(None, None, None)
 
     ##@profile
