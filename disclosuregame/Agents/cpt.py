@@ -272,25 +272,25 @@ class RecognitionPayoffProspectResponder(RecognitionResponder, PayoffProspectRes
         return "recog_cpt_payoff"
 
 
-class SharingPayoffProspectResponder(SharingResponder, PayoffProspectResponder):
+class SharingPayoffProspectResponder(PayoffProspectResponder, SharingResponder):
     """
     A payoff reasoner that shares info updates.
     """
 
 
-class SharingPayoffProspectSignaller(SharingSignaller, PayoffProspectSignaller):
+class SharingPayoffProspectSignaller(PayoffProspectSignaller, SharingSignaller):
     """
     A payoff reasoner that shares info updates.
     """
 
 
-class SharingProspectResponder(SharingResponder, ProspectTheoryResponder):
+class SharingProspectResponder(ProspectTheoryResponder, SharingResponder):
     """
     A payoff reasoner that shares info updates.
     """
 
 
-class SharingProspectSignaller(SharingSignaller, ProspectTheorySignaller):
+class SharingProspectSignaller(ProspectTheorySignaller, SharingSignaller):
     """
     A payoff reasoner that shares info updates.
     """
