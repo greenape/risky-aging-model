@@ -19,6 +19,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         self.alpha = alpha
         self.gamma = gamma
         self.l = l
+        self.cpt_cache = {}
         self.delta = delta
         self.beta = beta
         super(ProspectTheorySignaller, self).__init__(player_type, signals, responses, seed=seed)
@@ -59,6 +60,10 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         else:
             payoff = -math.log(-payoff)
         return payoff
+
+    def update_beliefs(self):
+        super(ProspectTheorySignaller, self).update_beliefs()
+        self.cpt_cache = {} #Invalidate cpt cache
 
     ##@profile
     def collect_prospects(self, signal):
@@ -108,7 +113,11 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
             signals = self.signals
         best = (-1, float('-inf'))
         for signal in signals:
-            act_risk = self.cpt_value(self.collect_prospects(signal))
+            try:
+                act_risk = self.cpt_cache[signal]
+            except:
+                act_risk = self.cpt_value(self.collect_prospects(signal))
+                self.cpt_cache[signal] = act_risk
             # self.risk_log[signal].append(act_risk)
             # self.risk_log_general[signal].append(act_risk)
             if act_risk > best[1]:

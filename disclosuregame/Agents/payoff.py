@@ -11,8 +11,8 @@ class BayesianPayoffSignaller(LexicographicSignaller):
     A class of agent that reasons on a signals -> payoffs basis.
     """
 
-    def set_uninformative_prior(self):
-        super(BayesianPayoffSignaller, self).set_uninformative_prior()
+    def set_uninformative_prior(self, weight=1):
+        super(BayesianPayoffSignaller, self).set_uninformative_prior(weight=weight)
         self.update_beliefs()
 
     # @profile

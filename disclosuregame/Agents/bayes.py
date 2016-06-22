@@ -265,16 +265,28 @@ class Signaller(Agent):
             signal = self.signal_log[len(self.signal_log) - 1]
             self.response_signal_matches[signal][response] += weight
 
-    def set_uninformative_prior(self):
+    def set_uninformative_prior(self, weight=1):
         for player_type, estimate in self.type_distribution.iteritems():
-            self.type_weights[player_type] = 1.
+            self.type_weights[player_type] = 1.*weight
 
         # Update signal-response beliefs
 
         for signal, responses in self.response_signal_matches.iteritems():
 
             for response, response_count in responses.iteritems():
-                responses[response] = 1.
+                responses[response] = 1.*weight
+        self.update_beliefs()
+
+    def set_zero_prior(self):
+        for player_type, estimate in self.type_distribution.iteritems():
+            self.type_weights[player_type] = 0.
+
+        # Update signal-response beliefs
+
+        for signal, responses in self.response_signal_matches.iteritems():
+
+            for response, response_count in responses.iteritems():
+                responses[response] = 0.
         self.update_beliefs()
 
 

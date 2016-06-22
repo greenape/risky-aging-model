@@ -51,14 +51,14 @@ class LexicographicSignaller(BayesianSignaller):
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
                                                          response_weights)
 
-    def set_uninformative_prior(self):
+    def set_uninformative_prior(self, weight=1):
         """
         Set uninformative prior (i.e. everything to 1).
         :return:
         """
         for signal in self.signals:
                 for payoff, counts in self.payoff_count[signal].iteritems():
-                    self.payoff_count[signal][payoff] = 1
+                    self.payoff_count[signal][payoff] = 1*weight
 
     def init_payoffs_(self, baby_payoffs, social_payoffs, type_weights=None, response_weights=None, num=10):
         """
