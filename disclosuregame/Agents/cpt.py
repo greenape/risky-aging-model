@@ -28,7 +28,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
     def weighting(probability, power):
         try:
             weight = pow(probability, power) / pow(pow(probability, power) + pow(1. - probability, power), 1. / power)
-        except ValueError:
+        except ValueError, OverflowError:
             LOG.debug("P = %f, pow = %f" % (probability, power))
             raise
         return weight
