@@ -75,7 +75,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         for player_type, type_belief in self.type_distribution.items():
             for response, response_belief in self.response_belief[signal].items():
                 total_belief = response_belief * type_belief
-                payoff = self.baby_payoffs[response] + self.social_payoffs[player_type][signal]
+                payoff = self.baby_payoffs[signal][response] + self.social_payoffs[player_type][signal]
                 prospects.append((payoff, total_belief))
         prospects.sort()
         prospects.reverse()

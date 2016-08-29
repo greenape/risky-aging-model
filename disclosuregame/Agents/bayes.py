@@ -130,6 +130,10 @@ class Signaller(Agent):
             return
         #Only interested in payoffs for own type
         self.baby_payoffs = baby_payoffs[self.player_type]
+        try:
+            self.baby_payoffs[0][0]
+        except:
+            self.baby_payoffs = [self.baby_payoffs for x in self.signals]
         self.social_payoffs = social_payoffs
         self.type_weights = type_weights
         self.response_weights = response_weights
@@ -157,6 +161,10 @@ class Signaller(Agent):
             return
         #Only interested in payoffs for own type
         self.baby_payoffs = baby_payoffs[self.player_type]
+        try:
+            self.baby_payoffs[0][0]
+        except:
+            self.baby_payoffs = [self.baby_payoffs for x in self.signals]
         self.social_payoffs = social_payoffs
         self.type_weights = [0., 0., 0.]
         self.response_weights = response_weights
@@ -371,7 +379,7 @@ class BayesianSignaller(Signaller):
             signal_risk = 0.
             for player_type, type_belief in self.type_distribution.items():
                 for response, response_belief in self.response_belief[signal].items():
-                    payoff = self.baby_payoffs[response] + self.social_payoffs[player_type][signal]
+                    payoff = self.baby_payoffs[signal][response] + self.social_payoffs[player_type][signal]
                     #payoff = self.loss(payoff)
                     #print "Believe payoff will be",payoff,"with confidence",payoff_belief
                     #print "Risk is",payoff,"*",payoff_belief

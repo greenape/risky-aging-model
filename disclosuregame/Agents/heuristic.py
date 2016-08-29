@@ -28,11 +28,17 @@ class LexicographicSignaller(BayesianSignaller):
         self.payoff_count = dict([(signal, {}) for signal in self.signals])
         self.payoff_belief = dict([(signal, {}) for signal in self.signals])
 
+        self.baby_payoffs = baby_payoffs[self.player_type]
+        try:
+            self.baby_payoffs[0][0]
+        except:
+            self.baby_payoffs = [self.baby_payoffs for x in self.signals]
+
         for signal in self.signals:
             self.payoff_count[signal] = {}
             for response in self.responses:
                 for player_type in self.signals:
-                    payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
+                    payoff = self.baby_payoffs[signal][response] + social_payoffs[signal][player_type]
                     self.payoff_count[signal][payoff] = 0.
 
         self.depth = 0
@@ -49,7 +55,7 @@ class LexicographicSignaller(BayesianSignaller):
         for signal in self.signals:
             for response in self.responses:
                 for player_type in self.signals:
-                    payoff = baby_payoffs[self.player_type][response] + social_payoffs[signal][player_type]
+                    payoff = self.baby_payoffs[signal][response] + social_payoffs[signal][player_type]
                     self.payoff_count[signal][payoff] += type_weights[player_type] + response_weights[signal][response]
         super(LexicographicSignaller, self).init_payoffs(baby_payoffs, social_payoffs, type_weights,
                                                          response_weights)
