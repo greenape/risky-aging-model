@@ -15,7 +15,7 @@ def signaller(agent, woman_baby_payoff=None, woman_social_payoff=None):
                        [random_expectations(breadth=2, random=agent.random) for x in range(3)])
 
 
-def logistic_stigma(location, scale, prior_weight, random):
+def logistic_stigma(location, scale, random, prior_weight=0.1):
     x = logistic_random(location, scale, random=random)
 
     type_weights = [prior_weight] * 2  # ,prior_weight+x*-prior_weight]
@@ -27,7 +27,7 @@ def logistic_stigma(location, scale, prior_weight, random):
 
 
 def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff=None, referral_beliefs=None,
-                              location=0.5025573, scale=0.0630946, prior_weight=1):
+                              location=0.5025573, scale=0.0630946, prior_weight=0.1):
     """
 	Initiate a signaller with Eurobarometer style multinomially distributed belief in referral,
 	and logistic distribution beliefs on type distribution drawn from ESS. Both priors are multiplied by a
@@ -63,7 +63,7 @@ def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff
 
 
 def onsreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff=None, referral_beliefs=None,
-                               location=0.5025573, scale=0.0630946, prior_weight=1):
+                               location=0.5025573, scale=0.0630946, prior_weight=0.1):
     """
 	Initiate a signaller with an ONS style multinomially distributed belief in referral,
 	and logistic distribution beliefs on type distribution drawn from ESS. Both priors are multiplied by a
@@ -101,7 +101,7 @@ def responder(agent, midwife_payoff=None, type_weights=None):
     agent.init_payoffs(midwife_payoff, type_weights)
 
 
-def normalresponder(agent, midwife_payoff=None, mean=0.0007080957, sd=0.9116370106, prior_weight=1):
+def normalresponder(agent, midwife_payoff=None, mean=0.0007080957, sd=0.9116370106, prior_weight=0.1):
     """
 	Set up a responder with fixed payoffs and normally distributed beliefs on types,
 	drawn from ESS.
