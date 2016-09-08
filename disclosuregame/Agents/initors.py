@@ -41,7 +41,7 @@ def ebreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payoff
         woman_social_payoff = []
     if not woman_baby_payoff:
         woman_baby_payoff = []
-    type_weights = logistic_stigma(location, scale, prior_weight, agent.random)
+    type_weights = logistic_stigma(location, scale, agent.random, prior_weight=prior_weight)
 
     referral_category = multinomial(referral_beliefs, random=agent.random)
 
@@ -75,7 +75,7 @@ def onsreferral_logisticstigma(agent, woman_baby_payoff=None, woman_social_payof
         woman_social_payoff = []
     if not woman_baby_payoff:
         woman_baby_payoff = []
-    type_weights = logistic_stigma(location, scale, prior_weight, agent.random)
+    type_weights = logistic_stigma(location, scale, agent.random, prior_weight=prior_weight)
 
     referral_category = multinomial(referral_beliefs, random=agent.random)
 
