@@ -11,7 +11,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
     """
 
     def __init__(self, player_type=1, signals=None, responses=None, alpha=.88, beta=.88, l=2.25, gamma=.61, delta=.69,
-                 seed=None):
+                 seed=None, **kwargs):
         if not responses:
             responses = [0, 1]
         if not signals:
@@ -22,7 +22,7 @@ class ProspectTheorySignaller(bayes.BayesianSignaller):
         self.cpt_cache = {}
         self.delta = delta
         self.beta = beta
-        super(ProspectTheorySignaller, self).__init__(player_type, signals, responses, seed=seed)
+        super(ProspectTheorySignaller, self).__init__(player_type, signals, responses, seed=seed, **kwargs)
 
     @staticmethod
     def weighting(probability, power):
