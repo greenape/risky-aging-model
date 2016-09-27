@@ -155,7 +155,7 @@ class ProspectTheoryResponder(bayes.BayesianResponder):
     """
 
     def __init__(self, player_type=1, signals=None, responses=None, alpha=.88, beta=.88, l=2.25, gamma=.61, delta=.69,
-                 seed=None):
+                 seed=None, **kwargs):
         if not responses:
             responses = [0, 1]
         if not signals:
@@ -165,7 +165,7 @@ class ProspectTheoryResponder(bayes.BayesianResponder):
         self.l = l
         self.delta = delta
         self.beta = beta
-        super(ProspectTheoryResponder, self).__init__(player_type, signals, responses, seed=seed)
+        super(ProspectTheoryResponder, self).__init__(player_type, signals, responses, seed=seed, **kwargs)
 
     def weighting(self, probability, power):
         return pow(probability, power) / pow(pow(probability, power) + pow(1. - probability, power), 1. / power)
